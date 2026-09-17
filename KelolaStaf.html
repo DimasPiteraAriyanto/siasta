@@ -1,0 +1,207 @@
+<!-- Kelola Staf Page -->
+<div id="kelola-staf-page">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">👥 Kelola Data Staf</span>
+      <button class="btn btn-primary btn-sm" onclick="openAddStafModal()">+ Tambah Staf</button>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama</th>
+              <th>NIP</th>
+              <th>Jabatan</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="staf-tbody">
+            <? if (typeof initialStaf !== 'undefined' && initialStaf && initialStaf.length) { ?>
+              <? for (var i = 0; i < initialStaf.length; i++) { 
+                   var s = initialStaf[i];
+                   var isAktif = (s.status === 'Aktif' || !s.status);
+                   var statusBadge = isAktif ?
+                     '<span class="badge badge-success">Aktif</span>' :
+                     '<span class="badge badge-danger">Nonaktif</span>';
+              ?>
+                <tr>
+                  <td><?= i + 1 ?></td>
+                  <td><strong><?= s.nama ?></strong></td>
+                  <td><?= s.nip || '-' ?></td>
+                  <td><?= s.jabatan || '-' ?></td>
+                  <td><?= s.email || '-' ?></td>
+                  <td><?!= statusBadge ?></td>
+                  <td><button class="btn btn-sm btn-outline" onclick="editStaf('<?= s.id ?>','<?= (s.nama || '').replace(/'/g, "\\'") ?>','<?= s.nip || '' ?>','<?= (s.jabatan || '').replace(/'/g, "\\'") ?>','<?= s.email || '' ?>','<?= isAktif ? 'Aktif' : 'Nonaktif' ?>')">✏️ Edit</button></td>
+                </tr>
+              <? } ?>
+            <? } else { ?>
+              <tr><td colspan="7" class="text-center text-muted">Memuat data...</td></tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tambah/Edit Staf -->
+  <div class="modal-overlay" id="modal-staf">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-staf-title">Tambah Staf Baru</span>
+        <button class="modal-close" onclick="closeModal('modal-staf')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="staf-edit-id">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+          <input type="text" class="form-control" id="staf-nama" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">NIP <span class="required">*</span></label>
+          <input type="text" class="form-control" id="staf-nip" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jabatan <span class="required">*</span></label>
+          <input type="text" class="form-control" id="staf-jabatan" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="staf-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="staf-status">
+            <option value="Aktif">Aktif</option>
+            <option value="Nonaktif">Nonaktif</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-staf')">Batal</button>
+        <button class="btn btn-primary" onclick="saveStafForm()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function init_kelola_staf() {
+  var tb = document.getElementById('staf-tbody');
+  if (!tb || tb.querySelectorAll('tr').length <= 1) {
+    loadStafData();
+  }
+}
+
+function loadStafData() {
+  startProgressBar();
+  google.script.run
+    .withSuccessHandler(function(response) {
+      finishProgressBar();
+      if (response.success) {
+        var html = '';
+        if (!response.data || response.data.length === 0) {
+          html = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div>' +
+            '<div class="empty-title">Belum ada staf terdaftar</div></div></td></tr>';
+        } else {
+          response.data.forEach(function(s, i) {
+            var isAktif = (s.status === 'Aktif' || !s.status);
+            var statusBadge = isAktif ?
+              '<span class="badge badge-success">Aktif</span>' :
+              '<span class="badge badge-danger">Nonaktif</span>';
+            html += '<tr>' +
+              '<td>' + (i + 1) + '</td>' +
+              '<td><strong>' + s.nama + '</strong></td>' +
+              '<td>' + (s.nip || '-') + '</td>' +
+              '<td>' + (s.jabatan || '-') + '</td>' +
+              '<td>' + (s.email || '-') + '</td>' +
+              '<td>' + statusBadge + '</td>' +
+              '<td><button class="btn btn-sm btn-outline" onclick="editStaf(\'' + s.id + '\',\'' +
+                (s.nama || '').replace(/'/g, "\\'") + '\',\'' +
+                (s.nip || '') + '\',\'' +
+                (s.jabatan || '').replace(/'/g, "\\'") + '\',\'' +
+                (s.email || '') + '\',\'' +
+                (isAktif ? 'Aktif' : 'Nonaktif') + '\')">✏️ Edit</button></td>' +
+              '</tr>';
+          });
+        }
+        document.getElementById('staf-tbody').innerHTML = html;
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      showSwalError('Error: ' + err.message, 'Gagal Memuat Staf');
+    })
+    .getAllStaf();
+}
+
+function openAddStafModal() {
+  document.getElementById('staf-edit-id').value = '';
+  document.getElementById('staf-nama').value = '';
+  document.getElementById('staf-nip').value = '';
+  document.getElementById('staf-jabatan').value = '';
+  document.getElementById('staf-email').value = '';
+  document.getElementById('staf-status').value = 'Aktif';
+  document.getElementById('modal-staf-title').textContent = 'Tambah Staf Baru';
+  openModal('modal-staf');
+}
+
+function editStaf(id, nama, nip, jabatan, email, status) {
+  document.getElementById('staf-edit-id').value = id;
+  document.getElementById('staf-nama').value = nama;
+  document.getElementById('staf-nip').value = nip;
+  document.getElementById('staf-jabatan').value = jabatan;
+  document.getElementById('staf-email').value = email;
+  document.getElementById('staf-status').value = status;
+  document.getElementById('modal-staf-title').textContent = 'Edit Data Staf';
+  openModal('modal-staf');
+}
+
+function saveStafForm() {
+  var data = {
+    id: document.getElementById('staf-edit-id').value,
+    nama: document.getElementById('staf-nama').value.trim(),
+    nip: document.getElementById('staf-nip').value.trim(),
+    jabatan: document.getElementById('staf-jabatan').value.trim(),
+    email: document.getElementById('staf-email').value.trim(),
+    status: document.getElementById('staf-status').value
+  };
+  
+  if (!data.nama || !data.nip || !data.jabatan) {
+    showSwalWarning('Kolom Nama, NIP, dan Jabatan staf wajib diisi.', 'Data Belum Lengkap');
+    return;
+  }
+  
+  showProcessLoading('Menyimpan Data Staf...', 'Menyimpan profil petugas alih media ke database...');
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      hideProcessLoading();
+      if (response.success) {
+        showSwalSuccess(response.message, 'Berhasil Disimpan');
+        closeModal('modal-staf');
+        loadStafData();
+        // Reset form
+        document.getElementById('staf-edit-id').value = '';
+        document.getElementById('staf-nama').value = '';
+        document.getElementById('staf-nip').value = '';
+        document.getElementById('staf-jabatan').value = '';
+        document.getElementById('staf-email').value = '';
+        document.getElementById('staf-status').value = 'Aktif';
+        document.getElementById('modal-staf-title').textContent = 'Tambah Staf Baru';
+      } else {
+        showSwalError(response.message, 'Gagal');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError('Error: ' + err.message, 'Kesalahan');
+    })
+    .saveStaf(data);
+}
+
+if (typeof init_kelola_staf === 'function') init_kelola_staf();
+</script>

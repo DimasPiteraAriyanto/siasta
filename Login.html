@@ -1,0 +1,829 @@
+<!-- SIASTA Auth Component (Embedded in Unified Shell) -->
+<style>
+  #auth-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    background: radial-gradient(circle at 50% 15%, #1E3A8A 0%, #0F172A 70%, #020617 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 16px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #auth-view.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+    /* Top Brand Bar (Logo Dinas Kiri Atas) */
+    .top-brand-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .top-brand-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top-brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1B2A4A 0%, #2563EB 100%);
+      color: #F59E0B;
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+      border: 1.5px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .top-brand-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .top-brand-sub {
+      font-size: 11px;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+
+    /* Ambient decorative glows */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(212, 168, 67, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -120px;
+      left: -120px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 450px;
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      padding: 36px 30px;
+      position: relative;
+      z-index: 10;
+      animation: cardAppear 0.4s ease-out;
+    }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Logo & Header */
+    .login-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo-emblem {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #1B2A4A 0%, #2563EB 100%);
+      color: #F59E0B;
+      font-size: 24px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.3);
+      border: 2px solid rgba(245, 158, 11, 0.4);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .app-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .app-subtitle {
+      font-size: 13px;
+      color: #64748B;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* Segmented Step Tabs */
+    .step-segmented {
+      display: flex;
+      background: #F1F5F9;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 22px;
+      gap: 4px;
+    }
+
+    .step-tab {
+      flex: 1;
+      padding: 9px 8px;
+      border-radius: 9px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748B;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .step-tab.active {
+      background: #FFFFFF;
+      color: #1E40AF;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .step-tab.completed {
+      color: #059669;
+    }
+
+    /* Credential Hint Callout */
+    .hint-callout {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hint-info {
+      font-size: 12px;
+      color: #166534;
+      line-height: 1.4;
+    }
+
+    .hint-code {
+      background: #DCFCE7;
+      color: #14532D;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: 700;
+      border: 1px solid #86EFAC;
+    }
+
+    .btn-quick-fill {
+      background: #16A34A;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-quick-fill:hover {
+      background: #15803D;
+      transform: translateY(-1px);
+    }
+
+    /* Form Inputs */
+    .form-item {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .form-label .required {
+      color: #EF4444;
+      margin-left: 2px;
+    }
+
+    .input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      font-size: 16px;
+      color: #94A3B8;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 48px;
+      background: #F8FAFC;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 0 44px 0 42px;
+      font-size: 14px;
+      color: #0F172A;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus {
+      background: #FFFFFF;
+      border-color: #2563EB;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-input::placeholder {
+      color: #94A3B8;
+      font-weight: 400;
+    }
+
+    .btn-eye {
+      position: absolute;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #64748B;
+      transition: background 0.15s;
+      z-index: 2;
+    }
+
+    .btn-eye:hover {
+      background: #E2E8F0;
+    }
+
+    /* Buttons */
+    .btn-submit {
+      width: 100%;
+      height: 50px;
+      background: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Step 2 Elements */
+    .verified-chip {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .link-change-user {
+      background: none;
+      border: none;
+      color: #2563EB;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .staff-card-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      border: 2px solid #E2E8F0;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #FFFFFF;
+    }
+
+    .staff-card-item:hover {
+      border-color: #3B82F6;
+      background: #F8FAFC;
+      transform: translateY(-1px);
+    }
+
+    .staff-card-item.selected {
+      border-color: #1E40AF;
+      background: #EFF6FF;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08);
+    }
+
+    .staff-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .staff-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .staff-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0F172A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .staff-role {
+      font-size: 11.5px;
+      color: #64748B;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .staff-check-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: transparent;
+      margin-left: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .staff-card-item.selected .staff-check-icon {
+      border-color: #1E40AF;
+      background: #1E40AF;
+      color: #FFFFFF;
+    }
+
+    .link-back {
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    .link-back a {
+      font-size: 12.5px;
+      color: #64748B;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .link-back a:hover {
+      color: #1E40AF;
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    .login-footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #F1F5F9;
+      text-align: center;
+      font-size: 11.5px;
+      color: #94A3B8;
+      line-height: 1.5;
+    }
+
+    .login-footer strong {
+      color: #64748B;
+    }
+
+    /* Toast Notification */
+    .toast-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1E293B;
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn 0.25s ease-out;
+    }
+
+    .toast-box.error {
+      background: #DC2626;
+    }
+
+    .toast-box.success {
+      background: #16A34A;
+    }
+
+    .toast-box.warning {
+      background: #D97706;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <!-- Header Banner Logo Dinas Kiri Atas -->
+  <header class="top-brand-bar">
+    <div class="top-brand-content">
+      <div class="top-brand-logo">SA</div>
+      <div class="top-brand-info">
+        <span class="top-brand-title">SIASTA</span>
+        <span class="top-brand-sub">Dinas Kearsipan & Perpustakaan Kab. Manggarai Barat</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="login-card">
+    
+    <!-- Emblem & Title -->
+    <div class="login-header">
+      <div class="logo-emblem">SA</div>
+      <h1 class="app-title">SIASTA</h1>
+      <p class="app-subtitle">Sistem Informasi Alih Media Arsip Statis</p>
+      <p style="font-size:12px; color:#64748B; margin-top:4px;">Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat</p>
+    </div>
+
+    <!-- Single Step Form Login -->
+    <form id="form-login" onsubmit="handleLoginSubmit(event)">
+      <div class="form-item">
+        <label class="form-label" for="input-username">Username / NIP Petugas <span class="required">*</span></label>
+        <div class="input-box">
+          <span class="input-icon">👤</span>
+          <input type="text" class="form-input" id="input-username" placeholder="Masukkan username atau NIP petugas" autocomplete="username" required>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label" for="input-password">Password <span class="required">*</span></label>
+        <div class="input-box">
+          <span class="input-icon">🔒</span>
+          <input type="password" class="form-input" id="input-password" placeholder="Masukkan password" autocomplete="current-password" required>
+          <button type="button" class="btn-eye" onclick="togglePassword()" title="Lihat Password">👁️</button>
+        </div>
+      </div>
+
+      <div class="form-item" id="staff-select-wrapper">
+        <label class="form-label" for="select-staff">Profil Petugas (Pilih Identitas Staf)</label>
+        <div class="input-box">
+          <span class="input-icon">🏷️</span>
+          <select class="form-input" id="select-staff" style="cursor:pointer; background:#fff;">
+            <option value="">— Otomatis Cocokkan dari Akun / NIP —</option>
+          </select>
+        </div>
+        <p style="font-size:11px; color:#94A3B8; margin-top:4px;">Nama petugas alih media akan terisi otomatis saat input arsip.</p>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-login-submit" style="margin-top:12px;">
+        🚀 Masuk ke Dashboard SIASTA
+      </button>
+    </form>
+
+    <!-- Footer Information -->
+    <div class="login-footer">
+      <p><strong><?= instansi ?></strong></p>
+      <p><?= daerah ?></p>
+      <p style="margin-top:6px; opacity:0.8;">SIASTA v<?= version ?></p>
+    </div>
+
+  </div>
+
+  <script>
+    var staffListData = [
+      {
+        id: 'STAF-001',
+        nama: 'Yohanes Don Bosco, S.Kom',
+        nip: '19880512 201402 1 003',
+        jabatan: 'Pranata Komputer / Petugas Alih Media'
+      },
+      {
+        id: 'STAF-002',
+        nama: 'Maria Theresia Nona, S.AP',
+        nip: '19900824 201603 2 001',
+        jabatan: 'Arsiparis Ahli Pertama / Verifikator'
+      },
+      {
+        id: 'STAF-003',
+        nama: 'Stefanus Rahmat, S.Sos',
+        nip: '19850215 201001 1 018',
+        jabatan: 'Kepala Bidang Pengelolaan Arsip'
+      },
+      {
+        id: 'STAF-004',
+        nama: 'Admin SIASTA',
+        nip: '19950101 202012 1 005',
+        jabatan: 'Administrator Sistem SIASTA'
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var userInput = document.getElementById('input-username');
+      if (userInput) userInput.focus();
+
+      populateStaffSelect(staffListData);
+      loadStaffFromScript();
+    });
+
+    function loadStaffFromScript() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(response) {
+            if (response && response.success && response.data && response.data.length > 0) {
+              staffListData = response.data;
+              populateStaffSelect(staffListData);
+            }
+          })
+          .getStaffList();
+      }
+    }
+
+    function populateStaffSelect(list) {
+      var sel = document.getElementById('select-staff');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">— Otomatis Cocokkan dari Akun / NIP —</option>';
+      list.forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.nama + ' (' + s.jabatan + ')';
+        sel.appendChild(opt);
+      });
+    }
+
+    function togglePassword() {
+      var p = document.getElementById('input-password');
+      p.type = (p.type === 'password') ? 'text' : 'password';
+    }
+
+    function handleLoginSubmit(e) {
+      if (e) e.preventDefault();
+      var user = document.getElementById('input-username').value.trim();
+      var pass = document.getElementById('input-password').value;
+      var staffId = document.getElementById('select-staff').value;
+
+      if (!user) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Username Kosong',
+            text: 'Harap masukkan username atau NIP Anda.',
+            confirmButtonColor: '#1B2A4A'
+          });
+        } else {
+          showToast('Harap masukkan username atau NIP.', 'warning');
+        }
+        document.getElementById('input-username').focus();
+        return;
+      }
+
+      if (!pass) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Password Kosong',
+            text: 'Harap masukkan password autentikasi.',
+            confirmButtonColor: '#1B2A4A'
+          });
+        } else {
+          showToast('Harap masukkan password.', 'warning');
+        }
+        document.getElementById('input-password').focus();
+        return;
+      }
+
+      var btn = document.getElementById('btn-login-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
+
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Memverifikasi Kredensial...',
+          text: 'Menghubungkan ke sistem autentikasi SIASTA...',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: function() {
+            Swal.showLoading();
+          }
+        });
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Login Berhasil!',
+                  text: 'Selamat datang, ' + (res.data ? res.data.nama : 'Petugas') + '!',
+                  showConfirmButton: false,
+                  timer: 1400
+                });
+              } else {
+                showToast('Selamat datang, ' + (res.data ? res.data.nama : 'Petugas') + '!', 'success');
+              }
+              try {
+                if (res.data) {
+                  sessionStorage.setItem('siasta_user', JSON.stringify(res.data));
+                }
+              } catch (errSession) {}
+              setTimeout(function() {
+                if (typeof transitionToApp === 'function') {
+                  transitionToApp(res.data);
+                } else {
+                  window.location.reload();
+                }
+              }, 400);
+            } else {
+              if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal Masuk',
+                  text: res.message || 'Kredensial salah atau profil staf tidak ditemukan.',
+                  confirmButtonColor: '#1B2A4A'
+                });
+              } else {
+                showToast(res.message || 'Login gagal.', 'error');
+              }
+              btn.disabled = false;
+              btn.innerHTML = '🚀 Masuk ke Dashboard SIASTA';
+            }
+          })
+          .withFailureHandler(function(err) {
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error Koneksi',
+                text: 'Terjadi kesalahan: ' + err.message,
+                confirmButtonColor: '#1B2A4A'
+              });
+            } else {
+              showToast('Error login: ' + err.message, 'error');
+            }
+            btn.disabled = false;
+            btn.innerHTML = '🚀 Masuk ke Dashboard SIASTA';
+          })
+          .login(user, pass, staffId);
+      } else {
+        // Fallback demo local
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Login Berhasil',
+            text: 'Mengalihkan ke dashboard...',
+            showConfirmButton: false,
+            timer: 800
+          });
+        }
+        setTimeout(function() {
+          if (typeof transitionToApp === 'function') {
+            transitionToApp({ id: 'STAF-001', nama: 'Yohanes Don Bosco, S.Kom', jabatan: 'Pranata Komputer' });
+          } else {
+            window.location.reload();
+          }
+        }, 500);
+      }
+    }
+
+    function showToast(msg, type) {
+      var oldToast = document.querySelector('.toast-box');
+      if (oldToast) oldToast.remove();
+
+      var toast = document.createElement('div');
+      toast.className = 'toast-box ' + (type || 'info');
+      var icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : 'ℹ️');
+      toast.innerHTML = '<span>' + icon + '</span><span>' + msg + '</span>';
+      document.body.appendChild(toast);
+
+      setTimeout(function() {
+        toast.style.transition = 'opacity 0.3s ease';
+        toast.style.opacity = '0';
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 3500);
+    }
+  </script>

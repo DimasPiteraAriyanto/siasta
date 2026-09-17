@@ -1,0 +1,719 @@
+<!-- Pengaturan Page -->
+<div id="pengaturan-page">
+  <!-- Page Header -->
+  <div style="margin-bottom: 20px;">
+    <h2 style="font-size: 22px; font-weight: 800; color: var(--primary); margin: 0 0 4px 0;">
+      ⚙️ Pengaturan Sistem SIASTA
+    </h2>
+    <div style="color: var(--text-muted); font-size: 13px;">
+      Konfigurasi aplikasi, profil dinas, template dokumen Berita Acara, pejabat penandatangan, dan pengujian sistem.
+    </div>
+  </div>
+
+  <!-- Navigation Tabs (Sesuai Gambar 1 Mockup) -->
+  <div class="tabs" style="display:flex; gap:6px; border-bottom:2px solid #e2e8f0; margin-bottom:24px; overflow-x:auto;">
+    <button type="button" class="tab-btn active" id="tab-btn-profil" onclick="switchPengaturanTab('profil')" style="display:flex; align-items:center; gap:8px; padding:12px 18px; border:none; background:transparent; font-weight:700; color:var(--primary); border-bottom:3px solid var(--primary); cursor:pointer; font-size:14px; white-space:nowrap;">
+      🏛️ Profil Instansi
+    </button>
+    <button type="button" class="tab-btn" id="tab-btn-template" onclick="switchPengaturanTab('template')" style="display:flex; align-items:center; gap:8px; padding:12px 18px; border:none; background:transparent; font-weight:600; color:var(--text-muted); border-bottom:3px solid transparent; cursor:pointer; font-size:14px; white-space:nowrap;">
+      📑 Template Dokumen
+    </button>
+    <button type="button" class="tab-btn" id="tab-btn-ttd" onclick="switchPengaturanTab('ttd')" style="display:flex; align-items:center; gap:8px; padding:12px 18px; border:none; background:transparent; font-weight:600; color:var(--text-muted); border-bottom:3px solid transparent; cursor:pointer; font-size:14px; white-space:nowrap;">
+      ✍️ Tanda Tangan
+    </button>
+    <button type="button" class="tab-btn" id="tab-btn-asal" onclick="switchPengaturanTab('asal')" style="display:flex; align-items:center; gap:8px; padding:12px 18px; border:none; background:transparent; font-weight:600; color:var(--text-muted); border-bottom:3px solid transparent; cursor:pointer; font-size:14px; white-space:nowrap;">
+      🏷️ Asal Arsip
+    </button>
+    <button type="button" class="tab-btn" id="tab-btn-tools" onclick="switchPengaturanTab('tools')" style="display:flex; align-items:center; gap:8px; padding:12px 18px; border:none; background:transparent; font-weight:600; color:var(--text-muted); border-bottom:3px solid transparent; cursor:pointer; font-size:14px; white-space:nowrap;">
+      🔧 Alat & Pengujian
+    </button>
+  </div>
+
+  <!-- TAB 1: PROFIL INSTANSI -->
+  <div id="tab-pane-profil" class="tab-pane">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🏛️ Profil Dinas & Aplikasi</span>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600;">Nama Aplikasi</label>
+            <input type="text" class="form-control" id="set-app-name" value="SIASTA" readonly style="background:#f8fafc;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600;">Nama Instansi</label>
+            <input type="text" class="form-control" id="set-instansi" value="Dinas Kearsipan dan Perpustakaan Daerah" readonly style="background:#f8fafc;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600;">Pemerintah Daerah</label>
+            <input type="text" class="form-control" id="set-daerah" value="Kabupaten Manggarai Barat" readonly style="background:#f8fafc;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600;">Alamat Kantor / Kop Dokumen</label>
+            <textarea class="form-control" id="set-alamat-kop" rows="2">Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600;">Target Arsip Tahunan</label>
+            <input type="number" class="form-control" id="set-target" value="250">
+            <div class="form-hint">Target akumulasi jumlah arsip fisik yang dialih mediakan dalam satu tahun anggaran.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600;">Teks Watermark Default</label>
+            <input type="text" class="form-control" id="set-watermark" value="DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH KAB. MANGGARAI BARAT — SIASTA ARSIP STATIS">
+            <div class="form-hint">Stempel air otomatis saat upload scan berkas alih media.</div>
+          </div>
+          <button class="btn btn-primary" onclick="savePengaturan()">💾 Simpan Pengaturan Profil</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">ℹ️ Informasi Sistem & Legalitas</span>
+        </div>
+        <div class="card-body" style="font-size:13px;">
+          <table style="width:100%; border-collapse:collapse;">
+            <tr><td style="padding:10px 0; color:var(--text-muted); width:140px; border-bottom:1px solid #f1f5f9;">Nama Sistem</td><td style="padding:10px 0; font-weight:700; border-bottom:1px solid #f1f5f9;">SIASTA</td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted); border-bottom:1px solid #f1f5f9;">Kepanjangan</td><td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">Sistem Informasi Alih Media Arsip Statis</td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted); border-bottom:1px solid #f1f5f9;">Versi Sistem</td><td style="padding:10px 0; border-bottom:1px solid #f1f5f9;"><span class="badge badge-success">1.0.0 (Production)</span></td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted); border-bottom:1px solid #f1f5f9;">Platform Backend</td><td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">Google Apps Script V8 Engine</td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted); border-bottom:1px solid #f1f5f9;">Penyimpanan Database</td><td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">Google Sheets Cloud Database</td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted); border-bottom:1px solid #f1f5f9;">Penyimpanan Digital</td><td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">Google Drive Workspace Cloud</td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted); border-bottom:1px solid #f1f5f9;">Dasar Hukum Utama</td><td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">UU No. 43 Tahun 2009 tentang Kearsipan</td></tr>
+            <tr><td style="padding:10px 0; color:var(--text-muted);">Dasar Pedoman Daerah</td><td style="padding:10px 0; font-weight:600; color:var(--primary);">Perbup Manggarai Barat No. 31/2024</td></tr>
+          </table>
+
+          <div class="alert alert-info mt-3" style="font-size:12px; margin-bottom:0;">
+            💡 Seluruh metadata dan fisik arsip tersinkronisasi otomatis dengan standar tata kelola kearsipan ANRI.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: TEMPLATE DOKUMEN (MOCKUP GAMBAR 1 - 6 KARTU) -->
+  <div id="tab-pane-template" class="tab-pane" style="display:none;">
+    <div style="margin-bottom:16px;">
+      <div style="font-size:15px; font-weight:700; color:var(--primary);">📑 Katalog Template Dokumen & Formulir Dinas</div>
+      <div style="font-size:13px; color:var(--text-muted);">Format resmi administrasi kearsipan sesuai tata naskah dinas Pemkab Manggarai Barat.</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+      <!-- Kartu 1: Berita Acara -->
+      <div class="card" style="border-top:4px solid var(--primary); transition:all 0.2s ease;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" style="font-size:15px; font-weight:700;">📋 Berita Acara Alih Media</span>
+          <span class="badge badge-success">Standar Kab. Mabar</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            Dokumen resmi penetapan dan legalitas alih media arsip statis per staf maupun gabungan seluruh tim alih media. Memuat klausul Perbup No. 31/2024.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="navigateTo('dashboard-ba')">👁️ Buka Dashboard BA</button>
+            <button class="btn btn-outline btn-sm" onclick="switchPengaturanTab('ttd')">✍️ Atur TTD</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kartu 2: Laporan Bulanan Internal -->
+      <div class="card" style="border-top:4px solid var(--gold); transition:all 0.2s ease;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" style="font-size:15px; font-weight:700;">📊 Laporan Bulanan Internal</span>
+          <span class="badge badge-primary">Aktif</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            Format rekapitulasi capaian alih media bulanan untuk Kepala Bidang dan Kepala Dinas Kearsipan dan Perpustakaan Daerah.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-gold btn-sm" onclick="navigateTo('generate-laporan')">📑 Generate Laporan</button>
+            <button class="btn btn-outline btn-sm" onclick="navigateTo('target-realisasi')">🎯 Cek Target</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kartu 3: Laporan Eksternal ANRI / BKD -->
+      <div class="card" style="border-top:4px solid #2ecc71; transition:all 0.2s ease;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" style="font-size:15px; font-weight:700;">🏛️ Laporan Eksternal ANRI</span>
+          <span class="badge badge-success">Standar ANRI</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            Format kompilasi daftar arsip statis teralih media siap serah dan pelaporan penyelenggaraan kearsipan daerah ke ANRI.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="navigateTo('generate-laporan')">📑 Buka Laporan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kartu 4: Kelola Tanda Tangan -->
+      <div class="card" style="border-top:4px solid #9b59b6; transition:all 0.2s ease;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" style="font-size:15px; font-weight:700;">✍️ Kelola Tanda Tangan</span>
+          <span class="badge badge-info">3 Pejabat</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            Pengaturan nama lengkap, gelar, pangkat, golongan, dan NIP pejabat penandatangan resmi pada dokumen cetak Berita Acara dan Laporan.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="switchPengaturanTab('ttd')">➡️ Kelola Pejabat</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kartu 5: Watermark Dokumen -->
+      <div class="card" style="border-top:4px solid #e67e22; transition:all 0.2s ease;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" style="font-size:15px; font-weight:700;">🏷️ Watermark Otomatis</span>
+          <span class="badge badge-warning">Otomatis Aktif</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            Stempel digital dinamis diagonal pada setiap file digital yang dialihkan guna menjamin otentisitas dan integritas berkas arsip statis.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="switchPengaturanTab('profil')">⚙️ Edit Teks Watermark</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kartu 6: Cadangan Data (Backup) -->
+      <div class="card" style="border-top:4px solid #34495e; transition:all 0.2s ease;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" style="font-size:15px; font-weight:700;">💾 Cadangan Data (Backup)</span>
+          <span class="badge badge-navy">Sheets Sync</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            Seluruh data master arsip dan berita acara otomatis tersimpan secara aman di Google Sheets Pemkab Manggarai Barat.
+          </p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="navigateTo('daftar-arsip')">📥 Unduh CSV/Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: TANDA TANGAN (KADIS, KABID, PELAKSANA) -->
+  <div id="tab-pane-ttd" class="tab-pane" style="display:none;">
+    <div class="card" style="margin-bottom:24px;">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span class="card-title" style="font-size:16px; font-weight:700;">✍️ Data Pejabat Penandatangan Dokumen Dinas</span>
+          <div style="font-size:12px; color:var(--text-muted);">Data ini dicetak otomatis pada Berita Acara Alih Media dan Formulir Laporan Rekapitulasi.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="savePejabatSettings()">💾 Simpan Pejabat</button>
+      </div>
+      <div class="card-body">
+        <form id="form-pejabat" onsubmit="event.preventDefault(); savePejabatSettings();">
+          <!-- Kepala Dinas -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:20px;">
+            <div style="font-weight:700; color:var(--primary); font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <span>👔</span> 1. Kepala Dinas (Penandatangan Berita Acara - Mengetahui)
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Nama Lengkap & Gelar</label>
+                <input type="text" class="form-control" id="ttd-kadis-nama" value="Augustinus Rinus, S.Pd" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Pangkat / Golongan Ruang</label>
+                <input type="text" class="form-control" id="ttd-kadis-pangkat" value="Pembina Utama Muda" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">NIP (Nomor Induk Pegawai)</label>
+                <input type="text" class="form-control" id="ttd-kadis-nip" value="19720219 199903 1 008" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Jabatan Struktural</label>
+                <input type="text" class="form-control" id="ttd-kadis-jabatan" value="Kepala Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kepala Bidang -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:20px;">
+            <div style="font-weight:700; color:var(--gold); font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <span>📁</span> 2. Kepala Bidang (Mengetahui Rekapitulasi Alih Media & Laporan)
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Nama Lengkap & Gelar</label>
+                <input type="text" class="form-control" id="ttd-kabid-nama" value="Stefanus Rahmat, S.Sos" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Pangkat / Golongan Ruang</label>
+                <input type="text" class="form-control" id="ttd-kabid-pangkat" value="Pembina / IV a" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">NIP (Nomor Induk Pegawai)</label>
+                <input type="text" class="form-control" id="ttd-kabid-nip" value="19850215 201001 1 018" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Jabatan</label>
+                <input type="text" class="form-control" id="ttd-kabid-jabatan" value="Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pelaksana Default -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:20px;">
+            <div style="font-weight:700; color:#2ecc71; font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <span>👤</span> 3. Koordinator / Pelaksana Utama Alih Media
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">Nama Lengkap & Gelar</label>
+                <input type="text" class="form-control" id="ttd-pelaksana-nama" value="Muhammad Dzaky Nathanegara, A.Md" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight:600;">NIP</label>
+                <input type="text" class="form-control" id="ttd-pelaksana-nip" value="19980508 202506 1 004" required>
+              </div>
+              <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" style="font-weight:600;">Jabatan Pelaksana</label>
+                <input type="text" class="form-control" id="ttd-pelaksana-jabatan" value="Pengelola Kearsipan" required>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <button type="button" class="btn btn-primary" onclick="savePejabatSettings()">
+              💾 Simpan Perubahan Pejabat Penandatangan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: ASAL ARSIP -->
+  <div id="tab-pane-asal" class="tab-pane" style="display:none;">
+    <div class="card">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span class="card-title">🏷️ Master Kode Asal Arsip (OPD / Instansi Pencipta)</span>
+          <div style="font-size:12px; color:var(--text-muted);">Digunakan pada penomoran kode unik arsip statis sesuai pedoman ANRI.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-kode-asal')">+ Tambah Kode Baru</button>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:100px;">Kode</th>
+                <th>Nama Unit Pencipta / Instansi Asal</th>
+                <th>Keterangan / Deskripsi</th>
+                <th style="width:100px; text-align:center;">Status</th>
+                <th style="width:90px; text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="kode-asal-tbody">
+              <tr><td colspan="5" class="text-center text-muted">Memuat data asal arsip...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: ALAT & PENGUJIAN (SUB-BAGIAN IT KHUSUS PENGUJIAN) -->
+  <div id="tab-pane-tools" class="tab-pane" style="display:none;">
+    <div class="card" style="border-left: 4px solid var(--gold);">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span class="card-title" style="font-size:16px; font-weight:700;">🔧 Pemeliharaan Basis Data & Alat Pengujian Sistem</span>
+          <div style="font-size:12px; color:var(--text-muted);">
+            Sub-bagian teknis untuk Administrator TI guna menguji kehandalan basis data dan menginisialisasi sistem.
+          </div>
+        </div>
+        <span class="badge badge-gold">Khusus IT & Admin</span>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-warning" style="margin-bottom:18px; font-size:13px;">
+          ⚠️ <strong>Catatan Staf Kearsipan:</strong> Bagian ini dirancang untuk pemeliharaan sistem. Staf operasional tidak perlu menjalankan perintah di sini kecuali diminta oleh Administrator TI.
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="runSetup('seedFullDummyData', true)">
+            🚀 Generate 40 Arsip Realistis + BA
+          </button>
+          <button class="btn btn-gold" onclick="runTestCRUD()" style="font-weight:700;">
+            🧪 Jalankan Uji Coba CRUD & Output ANRI
+          </button>
+          <button class="btn btn-navy" onclick="runSetup('initializeAllSheets')">
+            📊 Inisialisasi Sheets
+          </button>
+          <button class="btn btn-outline" onclick="runSetup('seedInitialData')">
+            🌱 Seed Data Awal
+          </button>
+          <button class="btn btn-outline" onclick="runSetup('createFolderStructure')">
+            📁 Buat Folder Drive
+          </button>
+        </div>
+
+        <div id="setup-result" class="mt-2"></div>
+        <div id="test-crud-result" class="mt-3" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Kode Asal -->
+  <div class="modal-overlay" id="modal-kode-asal" style="display:none;">
+    <div class="modal" style="max-width:500px; width:95%;">
+      <div class="modal-header">
+        <span class="modal-title">Tambah Kode Asal Arsip</span>
+        <button class="modal-close" onclick="closeModal('modal-kode-asal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" style="font-weight:600;">Kode <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="ka-kode" placeholder="Contoh: KOM, SAN, KUP" maxlength="5" style="text-transform:uppercase;">
+          <div class="form-hint">Maksimal 5 karakter singkatan huruf besar.</div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" style="font-weight:600;">Nama Instansi / Pencipta <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="ka-nama" placeholder="Contoh: Kantor Kecamatan Komodo">
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" style="font-weight:600;">Keterangan / Deskripsi</label>
+          <input type="text" class="form-control" id="ka-deskripsi" placeholder="Keterangan tambahan">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-kode-asal')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="saveKodeAsalForm()">💾 Simpan Kode</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function init_pengaturan() {
+  // Load settings umum
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (response && response.success && response.data) {
+        var d = response.data;
+        if (d.target_tahunan) document.getElementById('set-target').value = d.target_tahunan;
+        if (d.watermark_text) document.getElementById('set-watermark').value = d.watermark_text;
+        if (d.alamat_kop) document.getElementById('set-alamat-kop').value = d.alamat_kop;
+      }
+    })
+    .getPengaturan();
+  
+  // Load Pejabat TTD
+  loadPejabatSettings();
+
+  // Load Kode Asal
+  loadKodeAsalList();
+}
+
+function switchPengaturanTab(tabKey) {
+  var tabs = ['profil', 'template', 'ttd', 'asal', 'tools'];
+  tabs.forEach(function(t) {
+    var pane = document.getElementById('tab-pane-' + t);
+    var btn = document.getElementById('tab-btn-' + t);
+    if (pane) pane.style.display = (t === tabKey) ? 'block' : 'none';
+    if (btn) {
+      if (t === tabKey) {
+        btn.classList.add('active');
+        btn.style.color = 'var(--primary)';
+        btn.style.fontWeight = '700';
+        btn.style.borderBottom = '3px solid var(--primary)';
+      } else {
+        btn.classList.remove('active');
+        btn.style.color = 'var(--text-muted)';
+        btn.style.fontWeight = '600';
+        btn.style.borderBottom = '3px solid transparent';
+      }
+    }
+  });
+}
+
+function savePengaturan() {
+  var target = document.getElementById('set-target').value;
+  var watermark = document.getElementById('set-watermark').value;
+  var alamatKop = document.getElementById('set-alamat-kop').value;
+  
+  startProgressBar();
+  showProcessLoading('Menyimpan Pengaturan...', 'Menyimpan konfigurasi profil dinas...');
+  
+  google.script.run
+    .withSuccessHandler(function(res) {
+      finishProgressBar();
+      hideProcessLoading();
+      if (res && res.success) {
+        showSwalSuccess('Pengaturan profil dinas dan teks watermark berhasil disimpan!', 'Tersimpan');
+      } else {
+        showSwalError(res ? res.message : 'Gagal menyimpan pengaturan.', 'Gagal');
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      hideProcessLoading();
+      showSwalError('Error: ' + err.message, 'Kesalahan');
+    })
+    .savePengaturanAll(target, watermark);
+
+  // Simpan juga alamat kop jika ada
+  if (alamatKop) {
+    google.script.run.updatePengaturan('alamat_kop', alamatKop);
+  }
+}
+
+function loadPejabatSettings() {
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      if (resp && resp.success && resp.data) {
+        var d = resp.data;
+        if (d.kadis) {
+          if (d.kadis.nama) document.getElementById('ttd-kadis-nama').value = d.kadis.nama;
+          if (d.kadis.pangkat) document.getElementById('ttd-kadis-pangkat').value = d.kadis.pangkat;
+          if (d.kadis.nip) document.getElementById('ttd-kadis-nip').value = d.kadis.nip;
+          if (d.kadis.jabatan) document.getElementById('ttd-kadis-jabatan').value = d.kadis.jabatan;
+        }
+        if (d.kabid) {
+          if (d.kabid.nama) document.getElementById('ttd-kabid-nama').value = d.kabid.nama;
+          if (d.kabid.pangkat) document.getElementById('ttd-kabid-pangkat').value = d.kabid.pangkat;
+          if (d.kabid.nip) document.getElementById('ttd-kabid-nip').value = d.kabid.nip;
+          if (d.kabid.jabatan) document.getElementById('ttd-kabid-jabatan').value = d.kabid.jabatan;
+        }
+        if (d.pelaksana) {
+          if (d.pelaksana.nama) document.getElementById('ttd-pelaksana-nama').value = d.pelaksana.nama;
+          if (d.pelaksana.nip) document.getElementById('ttd-pelaksana-nip').value = d.pelaksana.nip;
+          if (d.pelaksana.jabatan) document.getElementById('ttd-pelaksana-jabatan').value = d.pelaksana.jabatan;
+        }
+      }
+    })
+    .getPejabatConfig();
+}
+
+function savePejabatSettings() {
+  var payload = {
+    kadisNama: document.getElementById('ttd-kadis-nama').value,
+    kadisPangkat: document.getElementById('ttd-kadis-pangkat').value,
+    kadisNip: document.getElementById('ttd-kadis-nip').value,
+    kadisJabatan: document.getElementById('ttd-kadis-jabatan').value,
+    kabidNama: document.getElementById('ttd-kabid-nama').value,
+    kabidPangkat: document.getElementById('ttd-kabid-pangkat').value,
+    kabidNip: document.getElementById('ttd-kabid-nip').value,
+    kabidJabatan: document.getElementById('ttd-kabid-jabatan').value,
+    pelaksanaNama: document.getElementById('ttd-pelaksana-nama').value,
+    pelaksanaNip: document.getElementById('ttd-pelaksana-nip').value,
+    pelaksanaJabatan: document.getElementById('ttd-pelaksana-jabatan').value,
+    alamatKop: document.getElementById('set-alamat-kop') ? document.getElementById('set-alamat-kop').value : ''
+  };
+
+  showProcessLoading('Menyimpan Data Pejabat...', 'Memperbarui nama dan NIP penandatangan dokumen dinas...');
+  
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      hideProcessLoading();
+      if (resp && resp.success) {
+        showSwalSuccess('Data pejabat penandatangan resmi berhasil diperbarui!', 'Berhasil');
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal menyimpan data pejabat.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .savePejabatConfig(payload);
+}
+
+function loadKodeAsalList() {
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (response && response.success && response.data) {
+        var html = '';
+        response.data.forEach(function(k) {
+          html += '<tr>' +
+            '<td><strong style="color:var(--accent); font-family:monospace; font-size:14px;">' + escapeHtml(k.kode) + '</strong></td>' +
+            '<td>' + escapeHtml(k.nama) + '</td>' +
+            '<td>' + escapeHtml(k.deskripsi || '-') + '</td>' +
+            '<td style="text-align:center;"><span class="badge badge-success">' + escapeHtml(k.status || 'Aktif') + '</span></td>' +
+            '<td style="text-align:center;"><button class="btn btn-sm btn-outline" onclick="showToast(\'Kode ' + escapeHtml(k.kode) + ' aktif digunakan\', \'info\')">ℹ️</button></td>' +
+          '</tr>';
+        });
+        document.getElementById('kode-asal-tbody').innerHTML = html || '<tr><td colspan="5" class="text-center text-muted">Belum ada data kode asal</td></tr>';
+      }
+    })
+    .getKodeAsalList();
+}
+
+function saveKodeAsalForm() {
+  var data = {
+    kode: document.getElementById('ka-kode').value.toUpperCase().trim(),
+    nama: document.getElementById('ka-nama').value.trim(),
+    deskripsi: document.getElementById('ka-deskripsi').value.trim()
+  };
+  if (!data.kode || !data.nama) {
+    showSwalWarning('Kode dan Nama instansi pencipta wajib diisi.');
+    return;
+  }
+  
+  showProcessLoading('Menyimpan Kode...', 'Menambahkan kode asal arsip ke master database...');
+  google.script.run
+    .withSuccessHandler(function(response) {
+      hideProcessLoading();
+      if (response && response.success) {
+        showSwalSuccess('Kode asal arsip berhasil ditambahkan!');
+        closeModal('modal-kode-asal');
+        loadKodeAsalList();
+        document.getElementById('ka-kode').value = '';
+        document.getElementById('ka-nama').value = '';
+        document.getElementById('ka-deskripsi').value = '';
+      } else {
+        showSwalError(response.message);
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .saveKodeAsal(data);
+}
+
+function runSetup(funcName, arg) {
+  var isSeed = (funcName === 'seedFullDummyData');
+  var confirmTitle = isSeed ? 'Generate 40 Data Dummy Realistis' : 'Jalankan Perintah Pemeliharaan';
+  var confirmText = isSeed ? 
+    'Aksi ini akan mengisi 40 arsip statis realistis Kab. Manggarai Barat, Berita Acara, staf kearsipan, dan log audit secara otomatis. Lanjutkan?' :
+    'Jalankan fungsi pemeliharaan ' + funcName + ' pada sistem?';
+
+  showSwalConfirm(confirmTitle, confirmText, 'Ya, Jalankan', 'Batal').then(function(confirmed) {
+    if (!confirmed) return;
+
+    showProcessLoading('Menjalankan ' + (isSeed ? 'Data Dummy' : 'Setup') + '...', 'Mohon tunggu sebentar...');
+    document.getElementById('setup-result').innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></div> Menjalankan proses...';
+    
+    var runner = google.script.run
+      .withSuccessHandler(function(result) {
+        hideProcessLoading();
+        var msg = typeof result === 'object' ? (result.message || JSON.stringify(result)) : result;
+        document.getElementById('setup-result').innerHTML = '<div class="badge badge-success" style="padding:10px 14px;font-size:13px;display:inline-block;">✓ ' + msg + '</div>';
+        showSwalSuccess(msg || 'Proses selesai!', 'Berhasil');
+        _pageHtmlCache = {};
+      })
+      .withFailureHandler(function(err) {
+        hideProcessLoading();
+        document.getElementById('setup-result').innerHTML = '<div class="badge badge-danger" style="padding:10px 14px;font-size:13px;display:inline-block;">Error: ' + err.message + '</div>';
+        showSwalError('Error: ' + err.message, 'Terjadi Kesalahan');
+      });
+    
+    if (arg !== undefined) {
+      runner[funcName](arg);
+    } else {
+      runner[funcName]();
+    }
+  });
+}
+
+function runTestCRUD() {
+  showSwalConfirm(
+    'Jalankan Uji Coba CRUD & Output ANRI',
+    'Sistem akan menguji siklus lengkap kearsipan ANRI secara otomatis:<br>' +
+    '1. <strong>CREATE</strong>: Input arsip baru statis dengan validasi nomor box & kode unik<br>' +
+    '2. <strong>READ</strong>: Verifikasi baca detail & query pencarian multi-parameter<br>' +
+    '3. <strong>UPDATE</strong>: Pembaruan deskripsi & status keterbukaan<br>' +
+    '4. <strong>OUTPUT</strong>: Kalkulasi statistik dashboard & kumulatif realisasi tahunan<br>' +
+    '5. <strong>DELETE</strong>: Soft-delete dan pencatatan audit trail ANRI.<br><br>' +
+    'Jalankan pengujian sekarang?',
+    'Ya, Jalankan Tes',
+    'Batal'
+  ).then(function(confirmed) {
+    if (!confirmed) return;
+    
+    showProcessLoading('Menjalankan Test Suite CRUD...', 'Sedang menguji Create, Read, Update, Delete & Output...');
+    var container = document.getElementById('test-crud-result');
+    container.style.display = 'block';
+    container.innerHTML = '<div class="card" style="border:1px solid var(--accent);background:var(--bg-light);padding:16px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;"><div class="loading-spinner" style="width:24px;height:24px;border-width:2px;"></div>' +
+      '<span>Sedang mengeksekusi 5 tahap pengujian CRUD & Output...</span></div></div>';
+    
+    startProgressBar();
+    google.script.run
+      .withSuccessHandler(function(suite) {
+        hideProcessLoading();
+        finishProgressBar();
+        
+        if (!suite) {
+          showSwalError('Tidak ada respon dari test suite.', 'Gagal Pengujian');
+          return;
+        }
+        
+        var passBadge = suite.success ? 
+          '<span class="badge badge-success" style="font-size:14px;padding:6px 16px;">✓ SEMUA TES BERHASIL (' + suite.passedCount + '/' + suite.testsCount + ')</span>' :
+          '<span class="badge badge-danger" style="font-size:14px;padding:6px 16px;">❌ SEBAGIAN GAGAL (' + suite.passedCount + '/' + suite.testsCount + ')</span>';
+          
+        var rowsHtml = '';
+        if (suite.tests && suite.tests.length > 0) {
+          suite.tests.forEach(function(t) {
+            var badge = t.status === 'PASS' ? '<span class="badge badge-success">LULUS</span>' : '<span class="badge badge-danger">GAGAL</span>';
+            rowsHtml += '<tr style="border-bottom:1px solid #E2E8F0;">' +
+              '<td style="padding:10px;font-weight:600;">' + t.test + '</td>' +
+              '<td style="padding:10px;text-align:center;">' + badge + '</td>' +
+              '<td style="padding:10px;text-align:center;">' + (t.durationMs || 0) + ' ms</td>' +
+              '<td style="padding:10px;font-size:12px;">' +
+                '<div><strong>Input:</strong> <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">' + JSON.stringify(t.input) + '</code></div>' +
+                '<div style="margin-top:4px;"><strong>Output:</strong> <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">' + JSON.stringify(t.output) + '</code></div>' +
+                '<div style="margin-top:4px;color:#047857;font-style:italic;">' + (t.assertion || '') + '</div>' +
+              '</td>' +
+            '</tr>';
+          });
+        }
+        
+        var reportHtml = '<div class="card" style="border:1px solid var(--navy);box-shadow:0 4px 15px rgba(0,0,0,0.08);">' +
+          '<div class="card-header" style="background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:center;">' +
+            '<span class="card-title" style="color:#fff;">📊 Laporan Hasil Uji Coba CRUD & Output Backend</span>' +
+            passBadge +
+          '</div>' +
+          '<div class="card-body">' +
+            '<div style="margin-bottom:12px;font-size:13px;display:flex;justify-content:space-between;color:var(--text-secondary);">' +
+              '<span><strong>Total Waktu Eksekusi:</strong> ' + suite.totalDurationMs + ' ms</span>' +
+              '<span><strong>Waktu Pengujian:</strong> ' + suite.timestamp + '</span>' +
+            '</div>' +
+            '<div class="table-container">' +
+              '<table class="data-table" style="width:100%;font-size:13px;">' +
+                '<thead><tr style="background:#f8fafc;">' +
+                  '<th style="width:28%;">Tahapan Uji</th>' +
+                  '<th style="width:10%;text-align:center;">Status</th>' +
+                  '<th style="width:12%;text-align:center;">Durasi</th>' +
+                  '<th style="width:50%;">Detail Input & Output</th>' +
+                '</tr></thead>' +
+                '<tbody>' + rowsHtml + '</tbody>' +
+              '</table>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+        
+        container.innerHTML = reportHtml;
+        
+        if (suite.success) {
+          showSwalSuccess('Seluruh pengujian CRUD dan Output berhasil 100% (' + suite.passedCount + ' dari ' + suite.testsCount + ' tahap)!', 'Uji Coba Berhasil');
+        } else {
+          showSwalWarning('Pengujian selesai dengan beberapa catatan.', 'Hasil Uji Coba');
+        }
+      })
+      .withFailureHandler(function(err) {
+        hideProcessLoading();
+        finishProgressBar();
+        container.innerHTML = '<div class="badge badge-danger" style="padding:12px;display:block;">Gagal menjalankan tes: ' + err.message + '</div>';
+        showSwalError('Gagal menjalankan tes: ' + err.message, 'Error Test Suite');
+      })
+      .runFullCRUDTestSuite();
+  });
+}
+
+if (typeof init_pengaturan === 'function') {
+  init_pengaturan();
+}
+</script>

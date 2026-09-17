@@ -1,0 +1,317 @@
+<!-- Dashboard Page Content -->
+<div id="dashboard-page">
+  <!-- Stats Grid: Berkas, Lembar, Bulan Ini, dan Target Tahunan -->
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon">📦</div>
+      <div class="stat-value" id="stat-total"><?= (typeof initialDash !== 'undefined' && initialDash) ? (initialDash.totalBerkas || initialDash.totalArsip) : '—' ?></div>
+      <div class="stat-label">Total Berkas (Entri Tabel)</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">📑</div>
+      <div class="stat-value" id="stat-lembar"><?= (typeof initialDash !== 'undefined' && initialDash) ? (initialDash.totalLembar || '0') : '—' ?></div>
+      <div class="stat-label">Total Lembar Fisik</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value" id="stat-bulan"><?= (typeof initialDash !== 'undefined' && initialDash) ? initialDash.berkasBulanIni : '—' ?></div>
+      <div class="stat-label">Berkas Bulan Ini (<span id="stat-bulan-lembar"><?= (typeof initialDash !== 'undefined' && initialDash) ? (initialDash.lembarBulanIni || 0) : '0' ?></span> lembar)</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-value" id="stat-target"><?= (typeof initialDash !== 'undefined' && initialDash) ? initialDash.persentaseTarget + '%' : '—%' ?></div>
+      <div class="stat-label">Target Tahun Ini (<span id="stat-target-num"><?= (typeof initialDash !== 'undefined' && initialDash) ? initialDash.targetTahunan : '250' ?></span> berkas)</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:24px;">
+    <!-- Progress Target -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📈 Progres Target Realisasi Tahunan</span>
+        <span class="badge badge-info" id="target-badge"><?= (typeof initialDash !== 'undefined' && initialDash) ? (initialDash.berkasTahunIni || initialDash.arsipTahunIni) + ' / ' + initialDash.targetTahunan : '0 / 250' ?></span>
+      </div>
+      <div class="card-body">
+        <div class="progress-bar" style="height:14px;">
+          <div class="progress-fill" id="progress-fill" style="width:<?= (typeof initialDash !== 'undefined' && initialDash) ? Math.min(initialDash.persentaseTarget, 100) + '%' : '0%' ?>;"></div>
+        </div>
+        <div class="progress-text" id="progress-text"><?= (typeof initialDash !== 'undefined' && initialDash) ? initialDash.persentaseTarget + '% tercapai' : '0% tercapai' ?></div>
+        <div class="d-flex justify-between mt-2" style="font-size:12px; color:var(--text-secondary);">
+          <span>Sisa Target: <strong id="sisa-target"><?= (typeof initialDash !== 'undefined' && initialDash) ? Math.max(0, initialDash.targetTahunan - (initialDash.berkasTahunIni || initialDash.arsipTahunIni)) : '250' ?></strong> berkas</span>
+          <span>Target Tahunan: <strong><?= (typeof initialDash !== 'undefined' && initialDash) ? initialDash.targetTahunan : '250' ?></strong> berkas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚡ Aksi Cepat Alih Media</span>
+      </div>
+      <div class="card-body">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <button class="btn btn-primary" onclick="navigateTo('input-arsip')" style="justify-content:center;">
+            📝 Input Arsip
+          </button>
+          <button class="btn btn-navy" onclick="navigateTo('daftar-arsip')" style="justify-content:center;">
+            📁 Daftar Arsip
+          </button>
+          <button class="btn btn-gold" onclick="navigateTo('dashboard-ba')" style="justify-content:center;">
+            📋 Berita Acara
+          </button>
+          <button class="btn btn-outline" onclick="navigateTo('generate-laporan')" style="justify-content:center;">
+            📑 Laporan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Flexible Dynamic Chart -->
+    <div class="card">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <span class="card-title" id="chart-main-title">📊 Grafik Alih Media Arsip</span>
+        <div class="chart-period-tabs" style="display:inline-flex; background:var(--border-light, #f1f5f9); padding:3px; border-radius:8px; gap:4px;">
+          <button type="button" class="btn-period" id="btn-period-day" onclick="switchChartFilter('day')">Per Hari</button>
+          <button type="button" class="btn-period" id="btn-period-week" onclick="switchChartFilter('week')">Per Minggu</button>
+          <button type="button" class="btn-period active" id="btn-period-month" onclick="switchChartFilter('month')">Per Bulan</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:10px; display:flex; justify-content:space-between;">
+          <span id="chart-sub-label">Menampilkan data arsip per bulan tahun <?= tahun ?></span>
+          <span style="font-size:11px; opacity:0.8;">Satuan: Berkas (Lembar)</span>
+        </div>
+        <div class="chart-bars" id="monthly-chart" style="min-height:175px;">
+          <? if (typeof initialDash !== 'undefined' && initialDash && initialDash.monthlyData && initialDash.monthlyData.length) { 
+               var maxV = 1;
+               for (var mi = 0; mi < initialDash.monthlyData.length; mi++) {
+                 if (initialDash.monthlyData[mi].jumlah > maxV) maxV = initialDash.monthlyData[mi].jumlah;
+               }
+               for (var mi = 0; mi < initialDash.monthlyData.length; mi++) {
+                 var mItem = initialDash.monthlyData[mi];
+                 var h = Math.max(6, (mItem.jumlah / maxV) * 140);
+          ?>
+            <div class="chart-bar-item" title="<?= mItem.namaLengkap ?>: <?= mItem.jumlah ?> berkas, <?= mItem.lembar || 0 ?> lembar">
+              <span class="chart-bar-value"><?= mItem.jumlah ?></span>
+              <div class="chart-bar" style="height:<?= h ?>px;"></div>
+              <span class="chart-bar-label"><?= mItem.label || mItem.bulanShort ?></span>
+            </div>
+          <?   }
+             } else { ?>
+            <div class="text-center text-muted" style="padding:40px;width:100%;font-size:13px;">Memuat data grafik alih media...</div>
+          <? } ?>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🕐 Aktivitas Terakhir</span>
+        <button class="btn btn-sm btn-outline" onclick="navigateTo('log-aktivitas')">Semua</button>
+      </div>
+      <div class="card-body" style="max-height:260px; overflow-y:auto;">
+        <div id="recent-activity">
+          <? if (typeof initialActivity !== 'undefined' && initialActivity && initialActivity.length) { ?>
+            <? for (var ai = 0; ai < initialActivity.length; ai++) { 
+                 var logItem = initialActivity[ai];
+                 var lIcon = logItem.aksi === 'INPUT_ARSIP' ? '📝' : (logItem.aksi === 'LOGIN' ? '🔐' : '📌');
+            ?>
+              <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);font-size:12px;">
+                <span style="font-size:16px;"><?= lIcon ?></span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:600;color:var(--text);"><?= logItem.detail || logItem.aksi ?></div>
+                  <div style="color:var(--text-light);margin-top:2px;"><?= logItem.staf_nama ?> — <?= logItem.timestamp_formatted ?></div>
+                </div>
+              </div>
+            <? } ?>
+          <? } else { ?>
+            <div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Belum ada aktivitas</div></div>
+          <? } ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.chart-period-tabs .btn-period {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.chart-period-tabs .btn-period:hover {
+  color: var(--primary, #1b2a4a);
+}
+.chart-period-tabs .btn-period.active {
+  background: #ffffff;
+  color: var(--primary, #1b2a4a);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+var _dashboardCacheData = <?!= (typeof initialDash !== 'undefined' && initialDash) ? JSON.stringify(initialDash) : 'null' ?>;
+var _currentChartPeriod = 'month';
+
+function init_dashboard() {
+  if (_dashboardCacheData) {
+    renderDynamicChart(_currentChartPeriod);
+  }
+  startProgressBar();
+
+  // Load dashboard stats
+  google.script.run
+    .withSuccessHandler(function(response) {
+      finishProgressBar();
+      if (response && response.success) {
+        var d = response.data;
+        _dashboardCacheData = d;
+        
+        // Update Metrik Berkas & Lembar
+        var elTotal = document.getElementById('stat-total');
+        if (elTotal) elTotal.textContent = formatNumber(d.totalBerkas !== undefined ? d.totalBerkas : d.totalArsip);
+        
+        var elLembar = document.getElementById('stat-lembar');
+        if (elLembar) elLembar.textContent = formatNumber(d.totalLembar || 0);
+
+        var elBulan = document.getElementById('stat-bulan');
+        if (elBulan) elBulan.textContent = formatNumber(d.berkasBulanIni !== undefined ? d.berkasBulanIni : d.arsipBulanIni);
+
+        var elBulanLembar = document.getElementById('stat-bulan-lembar');
+        if (elBulanLembar) elBulanLembar.textContent = formatNumber(d.lembarBulanIni || 0);
+
+        var elTarget = document.getElementById('stat-target');
+        if (elTarget) elTarget.textContent = (d.persentaseTarget || 0) + '%';
+
+        var elTargetNum = document.getElementById('stat-target-num');
+        if (elTargetNum) elTargetNum.textContent = d.targetTahunan || 250;
+
+        var elBadge = document.getElementById('target-badge');
+        if (elBadge) elBadge.textContent = (d.berkasTahunIni !== undefined ? d.berkasTahunIni : d.arsipTahunIni) + ' / ' + d.targetTahunan;
+
+        var elProgress = document.getElementById('progress-fill');
+        if (elProgress) elProgress.style.width = Math.min(d.persentaseTarget || 0, 100) + '%';
+
+        var elProgressText = document.getElementById('progress-text');
+        if (elProgressText) elProgressText.textContent = (d.persentaseTarget || 0) + '% tercapai';
+
+        var elSisa = document.getElementById('sisa-target');
+        if (elSisa) elSisa.textContent = Math.max(0, (d.targetTahunan || 250) - (d.berkasTahunIni !== undefined ? d.berkasTahunIni : d.arsipTahunIni));
+
+        // Render Chart sesuai filter aktif
+        renderDynamicChart(_currentChartPeriod);
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      console.warn('getDashboardStats error:', err);
+    })
+    .getDashboardStats();
+
+  // Load recent activity
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (response && response.success) {
+        renderRecentActivity(response.data);
+      } else {
+        renderRecentActivity([]);
+      }
+    })
+    .withFailureHandler(function(err) {
+      console.warn('getRecentActivity error:', err);
+      renderRecentActivity([]);
+    })
+    .getRecentActivity(8);
+}
+
+function switchChartFilter(period) {
+  _currentChartPeriod = period;
+  ['day', 'week', 'month'].forEach(function(p) {
+    var b = document.getElementById('btn-period-' + p);
+    if (b) {
+      if (p === period) b.classList.add('active');
+      else b.classList.remove('active');
+    }
+  });
+
+  renderDynamicChart(period);
+}
+
+function renderDynamicChart(period) {
+  var container = document.getElementById('monthly-chart');
+  var subLabel = document.getElementById('chart-sub-label');
+  if (!container) return;
+
+  var dataset = [];
+  if (_dashboardCacheData) {
+    if (period === 'day') {
+      dataset = _dashboardCacheData.dailyData || [];
+      if (subLabel) subLabel.textContent = 'Menampilkan grafik harian 7 hari terakhir';
+    } else if (period === 'week') {
+      dataset = _dashboardCacheData.weeklyData || [];
+      if (subLabel) subLabel.textContent = 'Menampilkan grafik mingguan 8 minggu terakhir';
+    } else {
+      dataset = _dashboardCacheData.monthlyData || [];
+      if (subLabel) subLabel.textContent = 'Menampilkan grafik bulanan tahun berjalan';
+    }
+  }
+
+  container.innerHTML = '';
+
+  if (!dataset || !Array.isArray(dataset) || dataset.length === 0) {
+    container.innerHTML = '<div class="text-center text-muted" style="padding:24px;">Belum ada data grafik untuk periode ini</div>';
+    return;
+  }
+
+  var maxVal = Math.max.apply(null, dataset.map(function(d) { return (d && d.jumlah) ? d.jumlah : 0; })) || 1;
+
+  dataset.forEach(function(item) {
+    var jlh = (item && item.jumlah !== undefined) ? item.jumlah : 0;
+    var lmbr = (item && item.lembar !== undefined) ? item.lembar : 0;
+    var lbl = (item && (item.label || item.bulanShort)) ? (item.label || item.bulanShort) : '';
+    var full = item.namaLengkap || lbl;
+    var height = Math.max(6, (jlh / maxVal) * 140);
+
+    var div = document.createElement('div');
+    div.className = 'chart-bar-item';
+    div.setAttribute('title', full + '\nBerkas: ' + jlh + '\nLembar: ' + lmbr);
+    div.innerHTML = '<span class="chart-bar-value">' + jlh + '</span>' +
+      '<div class="chart-bar" style="height:' + height + 'px;"></div>' +
+      '<span class="chart-bar-label">' + escapeHtml(lbl) + '</span>';
+    container.appendChild(div);
+  });
+}
+
+function renderRecentActivity(data) {
+  var container = document.getElementById('recent-activity');
+  if (!container) return;
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Belum ada aktivitas</div></div>';
+    return;
+  }
+  
+  var html = '';
+  data.forEach(function(log) {
+    var icons = { 'INPUT_ARSIP': '📝', 'LOGIN': '🔐', 'LOGOUT': '🚪', 'EDIT_ARSIP': '✏️', 'GENERATE_BA': '📋', 'GENERATE_LAPORAN': '📑' };
+    var icon = icons[log.aksi] || '📌';
+    html += '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);font-size:12px;">' +
+      '<span style="font-size:16px;">' + icon + '</span>' +
+      '<div style="flex:1;min-width:0;">' +
+      '<div style="font-weight:600;color:var(--text);">' + (log.detail || log.aksi) + '</div>' +
+      '<div style="color:var(--text-light);margin-top:2px;">' + log.staf_nama + ' — ' + log.timestamp_formatted + '</div>' +
+      '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+if (typeof init_dashboard === 'function') init_dashboard();
+</script>

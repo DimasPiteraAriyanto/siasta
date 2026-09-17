@@ -1,0 +1,169 @@
+<!-- Log Aktivitas Page -->
+<div id="log-aktivitas-page">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📜 Log Aktivitas Sistem</span>
+    </div>
+    <div class="card-body">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="log-search" placeholder="Cari aktivitas..." oninput="searchLogDebounced()">
+        </div>
+        <select class="form-control" id="log-filter-aksi" style="width:auto;min-width:160px;" onchange="loadLogList()">
+          <option value="">Semua Aksi</option>
+          <option value="LOGIN">Login</option>
+          <option value="LOGOUT">Logout</option>
+          <option value="INPUT_ARSIP">Input Arsip</option>
+          <option value="EDIT_ARSIP">Edit Arsip</option>
+          <option value="GENERATE_BA">Generate BA</option>
+          <option value="GENERATE_LAPORAN">Generate Laporan</option>
+        </select>
+        <input type="date" class="form-control" id="log-date-from" style="width:auto;" onchange="loadLogList()">
+        <input type="date" class="form-control" id="log-date-to" style="width:auto;" onchange="loadLogList()">
+      </div>
+
+      <div class="table-container" style="position:relative;">
+        <div class="loading-overlay" id="log-loading" style="display:none;">
+          <div class="loading-spinner"></div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Staf</th>
+              <th>Aksi</th>
+              <th>Modul</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody">
+            <? if (typeof initialLogs !== 'undefined' && initialLogs && initialLogs.data && initialLogs.data.length) { ?>
+              <? for (var i = 0; i < initialLogs.data.length; i++) { 
+                   var log = initialLogs.data[i];
+                   var aksiColors = {
+                     'LOGIN': 'badge-info', 'LOGOUT': 'badge-navy', 'INPUT_ARSIP': 'badge-success',
+                     'EDIT_ARSIP': 'badge-warning', 'GENERATE_BA': 'badge-gold', 'GENERATE_LAPORAN': 'badge-gold'
+                   };
+                   var bClass = aksiColors[log.aksi] || 'badge-navy';
+              ?>
+                <tr>
+                  <td class="text-sm"><?= log.timestamp_formatted || '-' ?></td>
+                  <td><?= log.staf_nama || '-' ?></td>
+                  <td><span class="badge <?= bClass ?>"><?= log.aksi || '-' ?></span></td>
+                  <td><?= log.modul || '-' ?></td>
+                  <td class="text-sm" style="max-width:250px;overflow:hidden;text-overflow:ellipsis;"><?= log.detail || '-' ?></td>
+                </tr>
+              <? } ?>
+            <? } else { ?>
+              <tr><td colspan="5" class="text-center text-muted">Memuat log...</td></tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div class="pagination-info" id="log-pagination-info">
+          <? if (typeof initialLogs !== 'undefined' && initialLogs && initialLogs.data) { ?>
+            Menampilkan <?= initialLogs.data.length ?> dari <?= initialLogs.total ?> log
+          <? } else { ?>
+            0 data
+          <? } ?>
+        </div>
+        <div class="pagination-buttons" id="log-pagination-buttons">
+          <? if (typeof initialLogs !== 'undefined' && initialLogs && initialLogs.totalPages > 1) { ?>
+            <button disabled>‹</button>
+            <? for (var p = 1; p <= initialLogs.totalPages; p++) { ?>
+              <? if (p <= 3 || p > initialLogs.totalPages - 2 || Math.abs(p - 1) <= 1) { ?>
+                <button class="<?= p === 1 ? 'active' : '' ?>" onclick="loadLogList(<?= p ?>)"><?= p ?></button>
+              <? } else if (p === 4) { ?>
+                <button disabled>...</button>
+              <? } ?>
+            <? } ?>
+            <button onclick="loadLogList(2)">›</button>
+          <? } ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var logCurrentPage = 1;
+
+function init_log_aktivitas() {
+  // Hanya panggil loadLogList jika data belum terisi dari pre-rendering server
+  var tb = document.getElementById('log-tbody');
+  if (!tb || tb.querySelectorAll('tr').length <= 1) {
+    loadLogList(1);
+  }
+}
+
+var searchLogDebounced = debounce(function() {
+  logCurrentPage = 1;
+  loadLogList();
+}, 400);
+
+function loadLogList(page) {
+  logCurrentPage = page || logCurrentPage;
+  
+  var params = {
+    page: logCurrentPage,
+    pageSize: 25,
+    search: document.getElementById('log-search').value,
+    aksi: document.getElementById('log-filter-aksi').value,
+    tanggalMulai: document.getElementById('log-date-from').value,
+    tanggalAkhir: document.getElementById('log-date-to').value
+  };
+  
+  document.getElementById('log-loading').style.display = 'flex';
+  
+  google.script.run
+    .withSuccessHandler(function(response) {
+      document.getElementById('log-loading').style.display = 'none';
+      if (response.success) {
+        var d = response.data;
+        var html = '';
+        if (d.data.length === 0) {
+          html = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Tidak ada log</div></div></td></tr>';
+        } else {
+          var aksiColors = {
+            'LOGIN': 'badge-info', 'LOGOUT': 'badge-navy', 'INPUT_ARSIP': 'badge-success',
+            'EDIT_ARSIP': 'badge-warning', 'GENERATE_BA': 'badge-gold', 'GENERATE_LAPORAN': 'badge-gold'
+          };
+          d.data.forEach(function(log) {
+            var badgeClass = aksiColors[log.aksi] || 'badge-navy';
+            html += '<tr><td class="text-sm">' + log.timestamp_formatted + '</td>' +
+              '<td>' + log.staf_nama + '</td>' +
+              '<td><span class="badge ' + badgeClass + '">' + log.aksi + '</span></td>' +
+              '<td>' + (log.modul || '-') + '</td>' +
+              '<td class="text-sm" style="max-width:250px;overflow:hidden;text-overflow:ellipsis;">' + (log.detail || '-') + '</td></tr>';
+          });
+        }
+        document.getElementById('log-tbody').innerHTML = html;
+        document.getElementById('log-pagination-info').textContent = 'Menampilkan ' + d.data.length + ' dari ' + d.total + ' log';
+        
+        // Pagination buttons
+        var pHtml = '';
+        pHtml += '<button ' + (d.page <= 1 ? 'disabled' : '') + ' onclick="loadLogList(' + (d.page - 1) + ')">‹</button>';
+        for (var p = 1; p <= d.totalPages; p++) {
+          if (p <= 3 || p > d.totalPages - 2 || Math.abs(p - d.page) <= 1) {
+            pHtml += '<button class="' + (p === d.page ? 'active' : '') + '" onclick="loadLogList(' + p + ')">' + p + '</button>';
+          }
+        }
+        pHtml += '<button ' + (d.page >= d.totalPages ? 'disabled' : '') + ' onclick="loadLogList(' + (d.page + 1) + ')">›</button>';
+        document.getElementById('log-pagination-buttons').innerHTML = pHtml;
+      }
+    })
+    .withFailureHandler(function(err) {
+      var loadingEl = document.getElementById('log-loading');
+      if (loadingEl) loadingEl.style.display = 'none';
+      var tb = document.getElementById('log-tbody');
+      if (tb) tb.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat log: ' + err.message + '</td></tr>';
+      showToast('Gagal memuat log: ' + err.message, 'error');
+    })
+    .getActivityLog(params);
+}
+
+if (typeof init_log_aktivitas === 'function') init_log_aktivitas();
+</script>

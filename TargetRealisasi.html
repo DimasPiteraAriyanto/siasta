@@ -1,0 +1,166 @@
+<!-- Target & Realisasi Page -->
+<div id="target-realisasi-page">
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-value" id="tr-target">250</div>
+      <div class="stat-label">Target Tahunan</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value" id="tr-realisasi">0</div>
+      <div class="stat-label">Realisasi</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">📊</div>
+      <div class="stat-value" id="tr-persentase">0%</div>
+      <div class="stat-label">Persentase Capaian</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-icon">📌</div>
+      <div class="stat-value" id="tr-sisa">250</div>
+      <div class="stat-label">Sisa Target</div>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+      <span class="card-title">📈 Progres Capaian Tahun <span id="tr-tahun">2026</span></span>
+    </div>
+    <div class="card-body">
+      <div class="progress-bar" style="height:20px;">
+        <div class="progress-fill" id="tr-progress" style="width:0%;"></div>
+      </div>
+      <div class="progress-text" id="tr-progress-text">0% tercapai</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Monthly Chart -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📊 Realisasi Per Bulan</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-bars" id="tr-monthly-chart" style="height:200px;"></div>
+      </div>
+    </div>
+
+    <!-- Per Staf -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">👥 Capaian Per Staf</span>
+      </div>
+      <div class="card-body">
+        <div id="tr-staf-list">
+          <div class="text-center text-muted" style="padding:20px;">Memuat data...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Detail Table -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <span class="card-title">📋 Detail Realisasi Bulanan</span>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Bulan</th>
+              <th>Realisasi</th>
+              <th>Kumulatif</th>
+              <th>% Target</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tr-monthly-tbody">
+            <tr><td colspan="5" class="text-center text-muted">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function init_target_realisasi() {
+  startProgressBar();
+  google.script.run
+    .withSuccessHandler(function(response) {
+      finishProgressBar();
+      if (response && response.success && response.data) {
+        var d = response.data;
+        d.monthlyData = d.monthlyData || [];
+        d.stafSummary = d.stafSummary || [];
+        
+        var targetEl = document.getElementById('tr-target');
+        if (targetEl) targetEl.textContent = formatNumber(d.targetTahunan || 0);
+        var realisasiEl = document.getElementById('tr-realisasi');
+        if (realisasiEl) realisasiEl.textContent = formatNumber(d.totalRealisasi || 0);
+        var persentaseEl = document.getElementById('tr-persentase');
+        if (persentaseEl) persentaseEl.textContent = (d.persentase || 0) + '%';
+        var sisaEl = document.getElementById('tr-sisa');
+        if (sisaEl) sisaEl.textContent = formatNumber(d.sisaTarget || 0);
+        var tahunEl = document.getElementById('tr-tahun');
+        if (tahunEl) tahunEl.textContent = d.tahun || 2026;
+        var progEl = document.getElementById('tr-progress');
+        if (progEl) progEl.style.width = Math.min(d.persentase || 0, 100) + '%';
+        var progTextEl = document.getElementById('tr-progress-text');
+        if (progTextEl) progTextEl.textContent = (d.persentase || 0) + '% tercapai (' + (d.totalRealisasi || 0) + ' dari ' + (d.targetTahunan || 0) + ')';
+
+        // Monthly chart
+        var maxVal = Math.max.apply(null, d.monthlyData.map(function(m) { return (m && m.realisasi) ? m.realisasi : 0; })) || 1;
+        var chartHtml = '';
+        d.monthlyData.forEach(function(m) {
+          var h = Math.max(2, (m.realisasi / maxVal) * 170);
+          chartHtml += '<div class="chart-bar-item"><span class="chart-bar-value">' + m.realisasi + '</span>' +
+            '<div class="chart-bar" style="height:' + h + 'px;"></div>' +
+            '<span class="chart-bar-label">' + m.namaBulanShort + '</span></div>';
+        });
+        document.getElementById('tr-monthly-chart').innerHTML = chartHtml;
+
+        // Monthly table
+        var tableHtml = '';
+        d.monthlyData.forEach(function(m) {
+          var statusBadge = m.persentase >= 100 ? '<span class="badge badge-success">Tercapai</span>' :
+            m.persentase >= 50 ? '<span class="badge badge-warning">Proses</span>' :
+            m.realisasi > 0 ? '<span class="badge badge-info">Mulai</span>' : '<span class="badge badge-navy">—</span>';
+          tableHtml += '<tr><td>' + m.namaBulan + '</td><td>' + m.realisasi + '</td><td>' + m.kumulatif + '</td>' +
+            '<td>' + m.persentase + '%</td><td>' + statusBadge + '</td></tr>';
+        });
+        document.getElementById('tr-monthly-tbody').innerHTML = tableHtml;
+
+        // Per staf
+        var stafHtml = '';
+        if (!d.stafSummary || d.stafSummary.length === 0) {
+          stafHtml = '<div class="text-center text-muted" style="padding:20px;">Belum ada kontribusi staf tercatat</div>';
+        } else {
+          d.stafSummary.forEach(function(s) {
+            var pct = d.totalRealisasi > 0 ? Math.round((s.total / d.totalRealisasi) * 100) : 0;
+            stafHtml += '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light);">' +
+              '<div class="user-avatar" style="width:32px;height:32px;font-size:12px;">' + s.nama.charAt(0) + '</div>' +
+              '<div style="flex:1;"><div style="font-weight:600;font-size:13px;">' + s.nama + '</div>' +
+              '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">' +
+              '<div class="progress-bar" style="height:6px;flex:1;"><div class="progress-fill" style="width:' + pct + '%;"></div></div>' +
+              '<span class="text-sm fw-600">' + s.total + '</span></div></div></div>';
+          });
+        }
+        document.getElementById('tr-staf-list').innerHTML = stafHtml;
+      } else {
+        document.getElementById('tr-monthly-tbody').innerHTML = '<tr><td colspan="5" class="text-center text-muted">Data kosong atau belum terisi</td></tr>';
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      console.warn('getTargetRealisasi error:', err);
+      document.getElementById('tr-monthly-tbody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat: ' + err.message + '</td></tr>';
+    })
+    .getTargetRealisasi();
+}
+
+if (typeof init_target_realisasi === 'function') init_target_realisasi();
+</script>

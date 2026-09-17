@@ -1,0 +1,125 @@
+<!-- Berita Acara Gabungan Page -->
+<div id="ba-gabungan-page">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">👥 Berita Acara Gabungan</span>
+    </div>
+    <div class="card-body">
+      <div class="form-row" style="margin-bottom:18px;">
+        <div class="form-group">
+          <label class="form-label">Bulan</label>
+          <select class="form-control" id="bag-bulan" onchange="loadBAGabungan()">
+            <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+            <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+            <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+            <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tahun</label>
+          <input type="number" class="form-control" id="bag-tahun" value="2026" onchange="loadBAGabungan()">
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="loadBAGabungan()">🔍 Tampilkan</button>
+        </div>
+      </div>
+      
+      <div id="bag-result">
+        <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Pilih periode lalu klik Tampilkan</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function init_ba_gabungan() {
+  var now = new Date();
+  document.getElementById('bag-bulan').value = now.getMonth();
+  document.getElementById('bag-tahun').value = now.getFullYear();
+  if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    var $el = jQuery('#bag-bulan');
+    if ($el.hasClass('select2-hidden-accessible')) {
+      $el.select2('destroy');
+    }
+  }
+}
+
+function loadBAGabungan() {
+  var bulan = document.getElementById('bag-bulan').value;
+  var tahun = document.getElementById('bag-tahun').value;
+  
+  var resultBox = document.getElementById('bag-result');
+  resultBox.innerHTML = '<div class="loading-overlay" style="position:relative;min-height:160px;display:flex;"><div class="loading-spinner"></div><div class="loading-text">Memuat rekap gabungan...</div></div>';
+  startProgressBar();
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      finishProgressBar();
+      if (response.success) {
+        var d = response.data;
+        var html = '<div class="stats-grid" style="margin-bottom:18px;">' +
+          '<div class="stat-card primary"><div class="stat-value">' + d.totalArsip + '</div><div class="stat-label">Total Arsip</div></div>' +
+          '<div class="stat-card gold"><div class="stat-value">' + d.totalStaf + '</div><div class="stat-label">Staf Terlibat</div></div>' +
+          '<div class="stat-card success"><div class="stat-value">' + d.periode + '</div><div class="stat-label">Periode</div></div></div>';
+        
+        if (d.perStaf && d.perStaf.length > 0) {
+          html += '<div class="table-container"><table class="data-table"><thead><tr>' +
+            '<th>No</th><th>Nama Staf</th><th>NIP</th><th>Jabatan</th><th>Jumlah Arsip</th></tr></thead><tbody>';
+          d.perStaf.forEach(function(s, i) {
+            html += '<tr><td>' + (i+1) + '</td><td><strong>' + s.stafNama + '</strong></td>' +
+              '<td>' + s.stafNip + '</td><td>' + s.stafJabatan + '</td>' +
+              '<td><span class="badge badge-info">' + s.jumlah + ' arsip</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          html += '<div style="margin-top:16px;"><button class="btn btn-primary" onclick="generateBAGabungan()">📄 Generate BA Gabungan Seluruh Tim</button></div>';
+        } else {
+          html += '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Tidak ada arsip alih media di periode ini</div><div class="empty-desc">Belum ada staf yang menyelesaikan digitalisasi arsip pada periode ' + d.periode + '.</div></div>';
+        }
+        resultBox.innerHTML = html;
+      } else {
+        resultBox.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">' + (response.message || 'Error') + '</div></div>';
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      resultBox.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Gagal: ' + err.message + '</div></div>';
+    })
+    .getBeritaAcaraGabungan(bulan, tahun);
+}
+
+function generateBAGabungan() {
+  var bulan = document.getElementById('bag-bulan').value;
+  var tahun = document.getElementById('bag-tahun').value;
+  
+  showSwalConfirm(
+    'Generate BA Gabungan',
+    'Terbitkan Berita Acara Alih Media Gabungan untuk seluruh staf pada periode ini?',
+    'Ya, Terbitkan',
+    'Batal'
+  ).then(function(confirmed) {
+    if (confirmed) {
+      showProcessLoading('Menerbitkan BA Gabungan...', 'Menghimpun seluruh kontribusi staf dan menyusun Berita Acara resmi...');
+      google.script.run
+        .withSuccessHandler(function(response) {
+          hideProcessLoading();
+          if (response.success) {
+            showSwalSuccess(response.message, 'Berhasil Terbit');
+            delete _pageHtmlCache['dashboard-ba'];
+          } else {
+            showSwalError(response.message, 'Gagal');
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideProcessLoading();
+          showSwalError('Error: ' + err.message, 'Kesalahan');
+        })
+        .generateBeritaAcara({
+          bulan: bulan, tahun: tahun, tipe: 'gabungan',
+          activeUser: (typeof getActiveUserFromSession === 'function' ? getActiveUserFromSession() : null)
+        });
+    }
+  });
+}
+
+if (typeof init_ba_gabungan === 'function') init_ba_gabungan();
+</script>

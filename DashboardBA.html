@@ -1,0 +1,691 @@
+<!-- Dashboard Berita Acara Page -->
+<div id="dashboard-ba-page">
+  <!-- Stats Grid -->
+  <div class="stats-grid" style="margin-bottom: 24px;">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(27, 42, 74, 0.1); color: var(--primary);">📋</div>
+      <div>
+        <div class="stat-value" id="ba-stat-total">0</div>
+        <div class="stat-label">Total BA Terbit</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(30, 144, 255, 0.1); color: #1e90ff;">👤</div>
+      <div>
+        <div class="stat-value" id="ba-stat-staf">0</div>
+        <div class="stat-label">BA Per Staf</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(200, 150, 62, 0.1); color: var(--gold);">👥</div>
+      <div>
+        <div class="stat-value" id="ba-stat-gabungan">0</div>
+        <div class="stat-label">BA Gabungan</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">📦</div>
+      <div>
+        <div class="stat-value" id="ba-stat-arsip">0</div>
+        <div class="stat-label">Arsip Teralih Media</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Card & Quick Actions -->
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <span class="card-title" style="font-size:18px; font-weight:700; color:var(--primary);">
+          📋 Pusat Kendali Berita Acara Alih Media — Tahun <span id="ba-tahun">2026</span>
+        </span>
+        <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+          Kelola, terbitkan, dan cetak dokumen resmi Berita Acara Alih Media sesuai format Pemkab Manggarai Barat.
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="openModalCreateBA()">➕ Buat BA Baru</button>
+        <button class="btn btn-outline btn-sm" onclick="init_dashboard_ba()" title="Segarkan Data">🔄 Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Riwayat Dokumen BA Terbit -->
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <span class="card-title" style="font-size:16px; font-weight:700;">📜 Riwayat Dokumen Berita Acara Terbit</span>
+      <span class="badge badge-primary" id="ba-history-count">0 Dokumen</span>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">No</th>
+              <th>No. Registrasi BA</th>
+              <th>Periode Alih Media</th>
+              <th>Tipe BA</th>
+              <th>Pelaksana / Tim</th>
+              <th class="text-right">Jml Arsip</th>
+              <th>Status</th>
+              <th class="text-center" style="width:160px;">Aksi Dokumen</th>
+            </tr>
+          </thead>
+          <tbody id="ba-history-tbody">
+            <tr><td colspan="8" class="text-center text-muted" style="padding:24px;">Memuat riwayat Berita Acara...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rekapitulasi Alih Media Bulanan -->
+  <div class="card">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <span class="card-title" style="font-size:16px; font-weight:700;">📅 Rekapitulasi Alih Media Bulanan (Tahun Ini)</span>
+        <div style="font-size:12px; color:var(--text-muted);">Pantau ketersediaan arsip siap terbit Berita Acara per bulan</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Bulan</th>
+              <th class="text-right">Jumlah Arsip Masuk</th>
+              <th class="text-center">Staf Terlibat</th>
+              <th>Status Penerbitan</th>
+              <th class="text-center" style="width:240px;">Tindakan Cepat</th>
+            </tr>
+          </thead>
+          <tbody id="ba-tbody">
+            <tr><td colspan="5" class="text-center text-muted" style="padding:24px;">Memuat data bulanan...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BUAT BERITA ACARA CEPAT -->
+  <div class="modal-overlay" id="modal-create-ba" style="display:none;">
+    <div class="modal" style="max-width:560px; width:95%;">
+      <div class="modal-header">
+        <span class="modal-title" style="font-weight:700; color:var(--primary);">➕ Terbitkan Berita Acara Baru</span>
+        <button class="modal-close" onclick="closeModal('modal-create-ba')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-create-ba" onsubmit="event.preventDefault(); submitCreateBA();">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-weight:600;">Tipe Berita Acara <span class="text-danger">*</span></label>
+            <select class="form-control" id="modal-ba-tipe" onchange="toggleModalStafField()" required>
+              <option value="gabungan">👥 Berita Acara Gabungan (Seluruh Tim)</option>
+              <option value="per_staf">👤 Berita Acara Per Staf Pelaksana</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="modal-ba-staf-group" style="margin-bottom:14px; display:none;">
+            <label class="form-label" style="font-weight:600;">Pilih Staf Pelaksana <span class="text-danger">*</span></label>
+            <select class="form-control" id="modal-ba-staf">
+              <option value="">-- Pilih Staf --</option>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight:600;">Bulan Pelaksanaan <span class="text-danger">*</span></label>
+              <select class="form-control" id="modal-ba-bulan" required>
+                <option value="0">Januari</option>
+                <option value="1">Februari</option>
+                <option value="2">Maret</option>
+                <option value="3">April</option>
+                <option value="4">Mei</option>
+                <option value="5">Juni</option>
+                <option value="6">Juli</option>
+                <option value="7">Agustus</option>
+                <option value="8">September</option>
+                <option value="9">Oktober</option>
+                <option value="10">November</option>
+                <option value="11">Desember</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:600;">Tahun <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="modal-ba-tahun" value="2026" min="2020" max="2035" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-weight:600;">Tempat Pelaksanaan</label>
+            <input type="text" class="form-control" id="modal-ba-tempat" value="Dinas Kearsipan dan Perpustakaan Daerah Kab. Manggarai Barat">
+          </div>
+
+          <div class="alert alert-info" style="font-size:12px; padding:10px 14px; margin-bottom:0;">
+            ℹ️ Sistem akan mengumpulkan seluruh arsip fisik yang telah dialih-mediakan pada periode ini dan mengenerate dokumen Berita Acara resmi berkekuatan hukum.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-create-ba')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitCreateBA()">🚀 Terbitkan Berita Acara</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PRATINJAU & CETAK DOKUMEN RESMI FORMAT PEMKAB MABAR (GAMBAR 2) -->
+  <div class="modal-overlay" id="modal-ba-formal" style="display:none; align-items:flex-start; padding:20px 10px; overflow-y:auto;">
+    <div class="modal" style="max-width:860px; width:100%; margin:20px auto; background:#ffffff; box-shadow:0 10px 30px rgba(0,0,0,0.25); border-radius:8px; overflow:hidden;">
+      <div class="modal-header" style="background:#1B2A4A; color:#ffffff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:18px;">📄</span>
+          <span class="modal-title" style="color:#ffffff; font-weight:700;">Pratinjau Format Resmi Berita Acara Alih Media</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-gold btn-sm" onclick="printFormalBA()" style="display:flex; align-items:center; gap:6px;">
+            🖨️ Cetak Berita Acara
+          </button>
+          <button class="modal-close" onclick="closeModal('modal-ba-formal')" style="color:#fff;">✕</button>
+        </div>
+      </div>
+      
+      <div class="modal-body" style="padding:0; background:#e2e8f0;">
+        <!-- Kertas A4 Wrapper -->
+        <div id="ba-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:210mm; min-height:297mm; padding:25mm 20mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:12pt; line-height:1.5;">
+          <!-- Watermark Dokumen Resmi (Format Contoh Alih Media Pemkab Manggarai Barat) -->
+          <div class="watermark-pdf-overlay" style="position:absolute; top:52%; left:50%; transform:translate(-50%, -50%) rotate(-38deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:130%; white-space:nowrap;">
+            <div style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:32pt; font-weight:800; color:rgba(100, 116, 139, 0.18); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
+              ARSIP HASIL ALIH MEDIA<br>
+              DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
+              KABUPATEN MANGGARAI BARAT
+            </div>
+          </div>
+          <div style="position:relative; z-index:1;">
+          <!-- Kop Surat Resmi -->
+          <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
+            <div style="position:absolute; left:10px; top:0; width:70px; height:80px; display:flex; align-items:center; justify-content:center;"><img id="doc-logo-img" src="" alt="Logo Pemkab Manggarai Barat" style="width:65px; height:auto; max-height:80px; object-fit:contain;"></div>
+            <div style="margin-left:75px;">
+              <div style="font-size:14pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
+              <div style="font-size:16pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
+              <div style="font-size:10pt; font-style:italic; margin-top:4px;" id="doc-alamat-kop">
+                Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT
+              </div>
+            </div>
+            <div style="border-bottom:3px solid #000; margin-top:14px;"></div>
+            <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
+          </div>
+
+          <!-- Judul Dokumen -->
+          <div style="text-align:center; margin-bottom:20px;">
+            <div style="font-size:13pt; font-weight:bold; text-decoration:underline;">BERITA ACARA ALIH MEDIA ARSIP</div>
+            <div style="font-size:11pt; margin-top:4px;">Nomor: <span id="doc-nomor-ba">....................................................</span></div>
+          </div>
+
+          <!-- Paragraf Pembuka -->
+          <div style="text-align:justify; margin-bottom:14px; text-indent:36px;">
+            Pada hari ini, <strong id="doc-hari">Senin</strong> tanggal <strong id="doc-tgl-terbilang">Delapan Belas</strong> bulan <strong id="doc-bulan">September</strong> tahun <strong id="doc-thn-terbilang">Dua Ribu Dua Puluh Enam</strong> (<span id="doc-tgl-angka">18-09-2026</span>), bertempat di <span id="doc-tempat">Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat</span>, kami yang bertanda tangan di bawah ini telah melaksanakan kegiatan alih media arsip sebagai berikut:
+          </div>
+
+          <!-- Butir-butir Rincian -->
+          <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:11.5pt;">
+            <tr style="vertical-align:top;">
+              <td style="width:28px; padding:3px 0;">1.</td>
+              <td style="width:170px; padding:3px 0;">Jenis Kegiatan</td>
+              <td style="width:14px; padding:3px 0;">:</td>
+              <td style="padding:3px 0;" id="doc-jenis-kegiatan">Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)</td>
+            </tr>
+            <tr style="vertical-align:top;">
+              <td style="padding:3px 0;">2.</td>
+              <td style="padding:3px 0;">Jenis Arsip</td>
+              <td style="padding:3px 0;">:</td>
+              <td style="padding:3px 0;" id="doc-jenis-arsip">Arsip Statis</td>
+            </tr>
+            <tr style="vertical-align:top;">
+              <td style="padding:3px 0;">3.</td>
+              <td style="padding:3px 0;">Jumlah Arsip</td>
+              <td style="padding:3px 0;">:</td>
+              <td style="padding:3px 0;">
+                <strong id="doc-jumlah-arsip">0</strong> (<span id="doc-jumlah-terbilang">Nol</span>) berkas berkas / <span id="doc-total-lembar">0</span> lembar
+              </td>
+            </tr>
+            <tr style="vertical-align:top;">
+              <td style="padding:3px 0;">4.</td>
+              <td style="padding:3px 0;">Asal Arsip</td>
+              <td style="padding:3px 0;">:</td>
+              <td style="padding:3px 0;" id="doc-asal-arsip">Pemerintah Kabupaten Manggarai Barat</td>
+            </tr>
+            <tr style="vertical-align:top;">
+              <td style="padding:3px 0;">5.</td>
+              <td style="padding:3px 0;">Dasar Pelaksanaan</td>
+              <td style="padding:3px 0;">:</td>
+              <td style="padding:3px 0;" id="doc-dasar-hukum">
+                Peraturan Bupati Manggarai Barat Nomor 31 Tahun 2024 tentang Pedoman Alih Media Arsip di Lingkungan Pemerintah Daerah Kabupaten Manggarai Barat
+              </td>
+            </tr>
+          </table>
+
+          <!-- Klausul Penutup -->
+          <div style="text-align:justify; margin-bottom:28px; text-indent:36px;">
+            Demikian Berita Acara Alih Media Arsip ini dibuat dengan sesungguhnya rangkap 2 (dua) untuk dipergunakan sebagaimana mestinya dan memiliki kekuatan hukum yang sah sesuai ketentuan Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala Arsip Nasional Republik Indonesia Nomor 9 Tahun 2018 tentang Pedoman Pemeliharaan Arsip Dinamis.
+          </div>
+
+          <!-- Tanda Tangan Format 2 Kolom -->
+          <div style="display:flex; justify-content:space-between; margin-top:30px; font-size:11.5pt;">
+            <div style="width:46%; text-align:center;">
+              <div>Mengetahui,</div>
+              <div style="font-weight:bold; margin-top:2px;">Kepala Dinas Kearsipan dan Perpustakaan<br>Kabupaten Manggarai Barat</div>
+              <div style="height:75px;"></div>
+              <div style="font-weight:bold; text-decoration:underline;" id="doc-kadis-nama">AUGUSTINUS RINUS, S.Pd</div>
+              <div id="doc-kadis-pangkat">Pembina Utama Muda</div>
+              <div>NIP. <span id="doc-kadis-nip">19720219 199903 1 008</span></div>
+            </div>
+
+            <div style="width:46%; text-align:center;">
+              <div>Labuan Bajo, <span id="doc-tgl-surat">18 September 2026</span></div>
+              <div style="font-weight:bold; margin-top:2px;" id="doc-pelaksana-title">Pelaksana Alih Media,</div>
+              <div style="height:75px;"></div>
+              <div style="font-weight:bold; text-decoration:underline;" id="doc-pelaksana-nama">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
+              <div id="doc-pelaksana-jabatan">Pengelola Kearsipan</div>
+              <div>NIP. <span id="doc-pelaksana-nip">19980508 202506 1 004</span></div>
+            </div>
+          </div>
+        </div></div></div>
+      <div class="modal-footer" style="background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+        <div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center;">
+          📌 Sesuai format fisik resmi Dinas Kearsipan & Perpustakaan Kab. Manggarai Barat
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-ba-formal')">Tutup</button>
+          <button type="button" class="btn btn-primary" onclick="printFormalBA()">🖨️ Cetak Dokumen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var _dashboardData = null;
+var _activeStafList = [];
+
+function init_dashboard_ba() {
+  startProgressBar();
+  google.script.run
+    .withSuccessHandler(function(response) {
+      finishProgressBar();
+      if (response && response.success && response.data) {
+        _dashboardData = response.data;
+        renderDashboardBA(_dashboardData);
+      } else {
+        showSwalError((response && response.message) || 'Gagal memuat data dashboard.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      showSwalError(err.message, 'Koneksi Gagal');
+    })
+    .getBeritaAcaraDashboard();
+}
+
+function renderDashboardBA(d) {
+  // Tahun
+  var thnEl = document.getElementById('ba-tahun');
+  if (thnEl) thnEl.textContent = d.tahun || 2026;
+  var modalThn = document.getElementById('modal-ba-tahun');
+  if (modalThn) modalThn.value = d.tahun || 2026;
+
+  // Stats Grid
+  var st = d.stats || {};
+  document.getElementById('ba-stat-total').textContent = st.totalBA || 0;
+  document.getElementById('ba-stat-staf').textContent = st.totalBAStaf || 0;
+  document.getElementById('ba-stat-gabungan').textContent = st.totalBAGabungan || 0;
+  document.getElementById('ba-stat-arsip').textContent = (st.totalArsipTeralih || 0) + ' berkas';
+
+  // Render Riwayat BA Terbit
+  renderHistoryBA(d.historyBA || []);
+
+  // Render Rekap Bulanan
+  renderMonthlyBA(d.monthlyData || []);
+
+  // Load Staf list for dropdown
+  loadStafDropdown();
+}
+
+function renderHistoryBA(list) {
+  var tbody = document.getElementById('ba-history-tbody');
+  var countBadge = document.getElementById('ba-history-count');
+  if (countBadge) countBadge.textContent = list.length + ' Dokumen';
+  if (!tbody) return;
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding:28px;">Belum ada Berita Acara yang diterbitkan tahun ini. Silakan buat melalui tombol di atas atau tabel rekap bulanan.</td></tr>';
+    return;
+  }
+
+  var html = '';
+  list.forEach(function(item, idx) {
+    var tipeBadge = item.tipe === 'per_staf' 
+      ? '<span class="badge badge-info" style="font-size:11px;">👤 Per Staf</span>'
+      : '<span class="badge badge-gold" style="font-size:11px;">👥 Gabungan</span>';
+
+    html += '<tr>' +
+      '<td>' + (idx + 1) + '</td>' +
+      '<td><strong>' + escapeHtml(item.nomorBA) + '</strong></td>' +
+      '<td>' + escapeHtml(item.periode) + '</td>' +
+      '<td>' + tipeBadge + '</td>' +
+      '<td>' + escapeHtml(item.stafNama || 'Seluruh Tim') + '</td>' +
+      '<td class="text-right"><strong>' + item.jumlahArsip + '</strong> berkas</td>' +
+      '<td><span class="badge badge-success">Final</span></td>' +
+      '<td class="text-center">' +
+        '<div class="cell-actions" style="justify-content:center; gap:6px;">' +
+          '<button class="btn btn-sm btn-primary" onclick="previewFormalBA(\'' + item.id + '\')" title="Pratinjau & Cetak Resmi">' +
+            '👁️ Cetak' +
+          '</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="confirmDeleteBA(\'' + item.id + '\', \'' + escapeHtml(item.nomorBA) + '\')" title="Hapus Dokumen">' +
+            '🗑️' +
+          '</button>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+function renderMonthlyBA(list) {
+  var tbody = document.getElementById('ba-tbody');
+  if (!tbody) return;
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Tidak ada data bulanan</td></tr>';
+    return;
+  }
+
+  var html = '';
+  list.forEach(function(m) {
+    var statusBadge = m.statusBA === 'Sudah Dibuat' 
+      ? '<span class="badge badge-success">✓ Terbit (' + m.baList.length + ' BA)</span>' 
+      : (m.jumlahArsip > 0 
+          ? '<span class="badge badge-warning">⚠️ Siap Diterbitkan (' + m.jumlahArsip + ' Arsip)</span>' 
+          : '<span class="badge badge-navy" style="opacity:0.6;">Belum Ada Arsip</span>');
+
+    var actionButtons = '';
+    if (m.jumlahArsip > 0) {
+      actionButtons = 
+        '<button class="btn btn-sm btn-primary" onclick="quickCreateBA(' + m.bulan + ', \'gabungan\')" title="Terbitkan BA Gabungan">' +
+          '👥 Gabungan' +
+        '</button> ' +
+        '<button class="btn btn-sm btn-outline" onclick="quickCreateBA(' + m.bulan + ', \'per_staf\')" title="Terbitkan BA Staf">' +
+          '👤 Staf' +
+        '</button> ' +
+        '<button class="btn btn-sm btn-gold" onclick="previewFormalBAMonth(' + m.bulan + ')" title="Pratinjau Draft Cetak">' +
+          '👁️' +
+        '</button>';
+    } else {
+      actionButtons = '<span style="color:var(--text-muted); font-size:12px;">Tidak ada arsip</span>';
+    }
+
+    html += '<tr>' +
+      '<td><strong>' + m.namaBulan + '</strong></td>' +
+      '<td class="text-right"><strong>' + m.jumlahArsip + '</strong> berkas</td>' +
+      '<td class="text-center">' + (m.jumlahStaf > 0 ? m.jumlahStaf + ' staf' : '-') + '</td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td class="text-center"><div class="cell-actions" style="justify-content:center;">' + actionButtons + '</div></td>' +
+    '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+function loadStafDropdown() {
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      if (resp && resp.success && resp.data) {
+        _activeStafList = resp.data.filter(function(s) { return s.status === 'Aktif'; });
+        populateModalStafSelect();
+      }
+    })
+    .getAllStaf();
+}
+
+function populateModalStafSelect() {
+  var sel = document.getElementById('modal-ba-staf');
+  if (sel) {
+    if (_activeStafList && _activeStafList.length > 0) {
+      sel.innerHTML = '<option value="">-- Pilih Staf Pelaksana --</option>' +
+        _activeStafList.map(function(s) {
+          return '<option value="' + s.id + '" data-nama="' + escapeHtml(s.nama) + '" data-nip="' + escapeHtml(s.nip || '') + '">' + 
+                 escapeHtml(s.nama) + ' (' + (s.jabatan || 'Pelaksana') + ')</option>';
+        }).join('');
+    } else {
+      sel.innerHTML = '<option value="">-- Memuat daftar staf... --</option>';
+      loadStafDropdown();
+    }
+  }
+}
+
+function openModalCreateBA() {
+  document.getElementById('modal-ba-tipe').value = 'gabungan';
+  populateModalStafSelect();
+  toggleModalStafField();
+  var now = new Date();
+  document.getElementById('modal-ba-bulan').value = now.getMonth();
+  openModal('modal-create-ba');
+}
+
+function quickCreateBA(bulan, tipe) {
+  document.getElementById('modal-ba-tipe').value = tipe;
+  document.getElementById('modal-ba-bulan').value = bulan;
+  populateModalStafSelect();
+  toggleModalStafField();
+  openModal('modal-create-ba');
+}
+
+function toggleModalStafField() {
+  var tipe = document.getElementById('modal-ba-tipe').value;
+  var stafGroup = document.getElementById('modal-ba-staf-group');
+  if (tipe === 'per_staf') {
+    stafGroup.style.display = 'block';
+  } else {
+    stafGroup.style.display = 'none';
+  }
+}
+
+function submitCreateBA() {
+  var tipe = document.getElementById('modal-ba-tipe').value;
+  var bulan = parseInt(document.getElementById('modal-ba-bulan').value);
+  var tahun = parseInt(document.getElementById('modal-ba-tahun').value) || 2026;
+  var tempat = document.getElementById('modal-ba-tempat').value || 'Dinas Kearsipan dan Perpustakaan Daerah Kab. Manggarai Barat';
+  var stafId = 'ALL';
+  var stafNama = 'Seluruh Staf Tim Alih Media';
+
+  if (tipe === 'per_staf') {
+    var stafSelect = document.getElementById('modal-ba-staf');
+    stafId = stafSelect.value;
+    if (!stafId) {
+      showSwalWarning('Silakan pilih salah satu staf pelaksana alih media.');
+      return;
+    }
+    var opt = stafSelect.options[stafSelect.selectedIndex];
+    stafNama = opt.getAttribute('data-nama') || opt.text;
+  }
+
+  showProcessLoading('Menerbitkan Berita Acara...', 'Menyusun berkas dan mencatat dokumen alih media resmi...');
+
+  var payload = {
+    bulan: bulan,
+    tahun: tahun,
+    tipe: tipe,
+    stafId: stafId,
+    stafNama: stafNama,
+    tempatPelaksanaan: tempat
+  };
+
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      hideProcessLoading();
+      closeModal('modal-create-ba');
+      if (resp && resp.success) {
+        showSwalSuccess('Berita Acara Alih Media berhasil diterbitkan!');
+        init_dashboard_ba();
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal membuat berita acara.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .generateBeritaAcara(payload);
+}
+
+function confirmDeleteBA(id, nomor) {
+  showSwalConfirm(
+    'Hapus Berita Acara?',
+    'Apakah Anda yakin ingin menghapus Berita Acara ' + (nomor || id) + '? Tindakan ini tidak dapat dibatalkan.',
+    'Ya, Hapus',
+    'Batal'
+  ).then(function(confirmed) {
+    if (confirmed) {
+      showProcessLoading('Menghapus Dokumen...', 'Mohon tunggu sebentar...');
+      google.script.run
+        .withSuccessHandler(function(resp) {
+          hideProcessLoading();
+          if (resp && resp.success) {
+            showSwalSuccess('Berita Acara berhasil dihapus.');
+            init_dashboard_ba();
+          } else {
+            showSwalError((resp && resp.message) || 'Gagal menghapus Berita Acara.');
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideProcessLoading();
+          showSwalError(err.message);
+        })
+        .deleteBeritaAcara(id);
+    }
+  });
+}
+
+// Pratinjau Dokumen Berdasarkan Record ID
+function previewFormalBA(baId) {
+  showProcessLoading('Memuat Format Resmi...', 'Mengambil data dokumen dan klausul...');
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      hideProcessLoading();
+      if (resp && resp.success && resp.data) {
+        populateFormalBAModal(resp.data);
+        openModal('modal-ba-formal');
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal memuat detail Berita Acara.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .getBeritaAcaraFormalDetail({ baId: baId });
+}
+
+// Pratinjau Draft Bulanan
+function previewFormalBAMonth(bulan) {
+  var tahun = parseInt(document.getElementById('ba-tahun').textContent) || 2026;
+  showProcessLoading('Memuat Draft Dokumen...', 'Mengambil arsip bulan ' + getNamaBulanClient(bulan) + '...');
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      hideProcessLoading();
+      if (resp && resp.success && resp.data) {
+        populateFormalBAModal(resp.data);
+        openModal('modal-ba-formal');
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal memuat rincian arsip.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .getBeritaAcaraFormalDetail({ bulan: bulan, tahun: tahun, tipe: 'gabungan' });
+}
+
+function populateFormalBAModal(d) {
+  var logoEl = document.getElementById('doc-logo-img');
+  if (logoEl) logoEl.src = window._logoMabar || '';
+  document.getElementById('doc-alamat-kop').textContent = d.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT';
+  document.getElementById('doc-nomor-ba').textContent = d.nomorBA || '....................................................';
+  document.getElementById('doc-hari').textContent = d.hariNama || 'Senin';
+  var tglNum = (d.tanggalAngka !== undefined && d.tanggalAngka !== null && !isNaN(d.tanggalAngka)) ? parseInt(d.tanggalAngka) : 18;
+  var blnNum = (d.bulanAngka !== undefined && d.bulanAngka !== null && !isNaN(d.bulanAngka)) ? parseInt(d.bulanAngka) : ((d.bulan !== undefined && !isNaN(d.bulan)) ? (parseInt(d.bulan) + 1) : 6);
+  var thnNum = d.tahunAngka || d.tahun || 2026;
+  document.getElementById('doc-tgl-angka').textContent = d.tanggalAngkaLengkap || (padZero(tglNum) + '-' + padZero(blnNum) + '-' + thnNum);
+  document.getElementById('doc-tgl-terbilang').textContent = d.tanggalTerbilang || 'Delapan Belas';
+  document.getElementById('doc-bulan').textContent = d.bulanNama || 'Juni';
+  document.getElementById('doc-thn-terbilang').textContent = d.tahunTerbilang || 'Dua Ribu Dua Puluh Enam';
+  document.getElementById('doc-tempat').textContent = d.tempatPelaksanaan || 'Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat';
+  
+  document.getElementById('doc-jenis-kegiatan').textContent = d.jenisKegiatan;
+  document.getElementById('doc-jenis-arsip').textContent = d.jenisArsip;
+  document.getElementById('doc-jumlah-arsip').textContent = d.jumlahArsip || 0;
+  document.getElementById('doc-jumlah-terbilang').textContent = d.jumlahArsipTerbilang || 'Nol';
+  document.getElementById('doc-total-lembar').textContent = d.totalLembar || 0;
+  document.getElementById('doc-asal-arsip').textContent = d.asalArsip;
+  document.getElementById('doc-dasar-hukum').textContent = d.dasarPelaksanaan;
+
+  // Tanggal TTD
+  document.getElementById('doc-tgl-surat').textContent = d.tanggalAngka + ' ' + d.bulanNama + ' ' + d.tahunAngka;
+
+  // Kadis
+  if (d.kadis) {
+    document.getElementById('doc-kadis-nama').textContent = (d.kadis.NAMA || 'AUGUSTINUS RINUS, S.Pd').toUpperCase();
+    document.getElementById('doc-kadis-pangkat').textContent = d.kadis.PANGKAT || 'Pembina Utama Muda';
+    document.getElementById('doc-kadis-nip').textContent = d.kadis.NIP || '19720219 199903 1 008';
+  }
+
+  // Pelaksana
+  if (d.pelaksana) {
+    document.getElementById('doc-pelaksana-nama').textContent = (d.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md').toUpperCase();
+    document.getElementById('doc-pelaksana-jabatan').textContent = d.pelaksana.jabatan || 'Pelaksana Alih Media';
+    document.getElementById('doc-pelaksana-nip').textContent = d.pelaksana.nip || '-';
+    if (d.tipe === 'gabungan') {
+      document.getElementById('doc-pelaksana-title').textContent = 'Koordinator Pelaksana Alih Media,';
+    } else {
+      document.getElementById('doc-pelaksana-title').textContent = 'Pelaksana Alih Media,';
+    }
+  }
+}
+
+function printFormalBA() {
+  var sheet = document.getElementById('ba-print-sheet');
+  if (!sheet) return;
+
+  var printWindow = window.open('', '_blank');
+  printWindow.document.write('<!DOCTYPE html><html><head><title>Cetak Berita Acara Alih Media</title>');
+  printWindow.document.write('<style>');
+  printWindow.document.write('@page { size: A4 portrait; margin: 20mm 18mm; }');
+  printWindow.document.write('body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; font-size: 12pt; line-height: 1.5; }');
+  printWindow.document.write('table { border-collapse: collapse; }');
+  printWindow.document.write('@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .watermark-pdf-overlay { display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }');
+  printWindow.document.write('</style></head><body>');
+  printWindow.document.write(sheet.innerHTML);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(function() {
+    printWindow.print();
+    printWindow.close();
+  }, 350);
+}
+
+function getNamaBulanClient(idx) {
+  var names = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return names[idx] || '';
+}
+
+function padZero(n) {
+  var num = parseInt(n);
+  if (isNaN(num)) return '01';
+  return num < 10 ? '0' + num : '' + num;
+}
+
+if (typeof init_dashboard_ba === 'function') {
+  init_dashboard_ba();
+}
+</script>

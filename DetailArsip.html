@@ -1,0 +1,506 @@
+<!-- Detail Arsip Page -->
+<div id="detail-arsip-page">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+    <button class="btn btn-outline btn-sm" onclick="navigateTo('daftar-arsip')">← Kembali ke Daftar</button>
+    <div id="detail-action-buttons" style="display:<?= (typeof initialDetail !== 'undefined' && initialDetail) ? 'flex' : 'none' ?>; gap:8px;">
+      <button class="btn btn-primary btn-sm" onclick="openEditArsipModal()">✏️ Edit Arsip</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteArsip()" style="background:#dc2626;color:#fff;border:none;">🗑️ Hapus Arsip</button>
+    </div>
+  </div>
+  
+  <div id="detail-content">
+    <? if (typeof initialDetail !== 'undefined' && initialDetail) { ?>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📋 Informasi Arsip</span>
+            <span class="badge badge-info" style="font-size:14px;padding:6px 14px;"><?= initialDetail.kode_unik ?></span>
+          </div>
+          <div class="card-body">
+            <table style="width:100%;font-size:13px;">
+              <tr>
+                <td style="width:160px;padding:8px 0;color:var(--text-secondary);font-weight:500;">Status Keterbukaan</td>
+                <td style="padding:8px 0;">
+                  <? if (initialDetail.status_keterbukaan === 'Terbuka') { ?>
+                    <span class="badge badge-success">Terbuka</span>
+                  <? } else { ?>
+                    <span class="badge badge-warning">Tertutup</span>
+                  <? } ?>
+                </td>
+              </tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Asal Arsip</td><td style="padding:8px 0;"><?= initialDetail.asal_arsip || '-' ?> (<?= initialDetail.kode_asal || '-' ?>)</td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Nomor Box</td><td style="padding:8px 0;"><?= initialDetail.nomor_box || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jenis Arsip</td><td style="padding:8px 0;"><span class="badge badge-navy"><?= initialDetail.jenis_arsip || '-' ?></span></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Deskripsi</td><td style="padding:8px 0;"><?= initialDetail.deskripsi || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Lembar</td><td style="padding:8px 0;"><?= initialDetail.jumlah_lembar || 0 ?> lembar</td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Berkas</td><td style="padding:8px 0;"><?= initialDetail.jumlah_berkas || 0 ?> berkas</td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;"><?= initialDetail.kurun_waktu_mulai || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Unit Pengelola</td><td style="padding:8px 0;"><?= initialDetail.unit_pengelola || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Lokasi Simpan</td><td style="padding:8px 0;"><?= initialDetail.lokasi_simpan || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Keterangan</td><td style="padding:8px 0;"><?= initialDetail.keterangan || '-' ?></td></tr>
+            </table>
+          </div>
+        </div>
+        
+        <div>
+          <div class="card" style="margin-bottom:18px;">
+            <div class="card-header">
+              <span class="card-title">📎 File Digital</span>
+              <? if (initialDetail.watermark_applied === 'Ya') { ?>
+                <span class="badge badge-success">🔒 Watermark</span>
+              <? } ?>
+            </div>
+            <div class="card-body">
+              <? if (initialDetail.file_pelestarian_url || initialDetail.file_akses_url) { 
+                   var pUrl = initialDetail.file_akses_url || initialDetail.file_pelestarian_url;
+              ?>
+                <div style="margin-bottom:12px;">
+                  <button type="button" class="btn btn-primary btn-sm" style="width:100%; justify-content:center; gap:8px;" onclick="openPreviewModal('<?= pUrl ?>', '<?= initialDetail.kode_unik ?>')">
+                    👁️ Pratinjau Dokumen Langsung (Pop-up)
+                  </button>
+                </div>
+                <div class="form-row">
+                  <div><a href="<?= initialDetail.file_pelestarian_url ?>" target="_blank" class="btn btn-sm btn-outline" style="width:100%; justify-content:center;">📁 File Pelestarian</a></div>
+                  <div><a href="<?= initialDetail.file_akses_url ?>" target="_blank" class="btn btn-sm btn-outline" style="width:100%; justify-content:center;">📂 File Akses</a></div>
+                </div>
+              <? } else { ?>
+                <span class="text-muted text-sm">Tidak ada file</span>
+              <? } ?>
+            </div>
+          </div>
+          
+          <div class="card" style="margin-bottom:18px;">
+            <div class="card-header"><span class="card-title">✅ Checklist Kualitas</span></div>
+            <div class="card-body">
+              <? if (initialDetail.qa_checklist_parsed && initialDetail.qa_checklist_parsed.length) { ?>
+                <? for (var q = 0; q < initialDetail.qa_checklist_parsed.length; q++) { 
+                     var qa = initialDetail.qa_checklist_parsed[q];
+                     var qaText = typeof qa === 'string' ? qa : (qa.item || qa.text || qa.label || qa.name || '-');
+                     var isChecked = typeof qa === 'string' || (qa && qa.checked !== false);
+                ?>
+                  <div style="padding:6px 0;font-size:12px;display:flex;gap:8px;align-items:center;">
+                    <span><?= isChecked ? '✅' : '❌' ?></span>
+                    <span><?= qaText ?></span>
+                  </div>
+                <? } ?>
+              <? } else { ?>
+                <span class="text-muted text-sm">Tidak ada data checklist</span>
+              <? } ?>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header"><span class="card-title">ℹ️ Metadata</span></div>
+            <div class="card-body" style="font-size:12px;">
+              <div style="margin-bottom:6px;"><span class="text-muted">Input oleh:</span> <strong><?= initialDetail.staf_nama || '-' ?></strong></div>
+              <div style="margin-bottom:6px;"><span class="text-muted">Tanggal Input:</span> <?= initialDetail.tanggal_input_formatted || '-' ?></div>
+              <div><span class="text-muted">Terakhir Update:</span> <?= initialDetail.tanggal_update_formatted || '-' ?></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <? } else { ?>
+      <div class="loading-overlay" style="position:relative; min-height:300px;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Memuat detail arsip...</div>
+      </div>
+    <? } ?>
+  </div>
+
+  <!-- Modal Preview Dokumen Langsung (Pop-up) -->
+  <div class="modal-overlay" id="modal-preview-dokumen">
+    <div class="modal" style="max-width:960px; width:95%; height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div class="modal-header" style="padding:14px 20px; border-bottom:1px solid var(--border, #e2e8f0); display:flex; justify-content:space-between; align-items:center; background:#fff;">
+        <span class="modal-title" id="preview-modal-title" style="font-weight:700; color:var(--primary, #1b2a4a);">👁️ Pratinjau Dokumen Alih Media</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <a id="preview-open-external-btn" href="#" target="_blank" class="btn btn-sm btn-outline" title="Buka di tab baru jika browser membatasi iframe">↗ Buka di Tab Baru</a>
+          <button class="modal-close" onclick="closeModal('modal-preview-dokumen')" style="background:transparent; border:none; font-size:18px; cursor:pointer; padding:4px 8px;">✕</button>
+        </div>
+      </div>
+      <div class="modal-body" style="flex:1; padding:0; background:#0f172a; position:relative; display:flex; align-items:center; justify-content:center;">
+        <div id="preview-loading-spinner" style="position:absolute; color:#fff; font-size:13px; text-align:center;">
+          <div class="loading-spinner" style="border-top-color:#38bdf8; margin:0 auto 10px;"></div>
+          Memuat pratinjau dokumen alih media...
+        </div>
+        <iframe id="preview-doc-iframe" src="" style="width:100%; height:100%; border:none; position:relative; z-index:2;" onload="var sp=document.getElementById('preview-loading-spinner'); if(sp) sp.style.display='none';"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Arsip -->
+  <div class="modal-overlay" id="modal-edit-arsip">
+    <div class="modal" style="max-width:650px;">
+      <div class="modal-header">
+        <span class="modal-title" id="edit-modal-title">✏️ Edit Data Arsip</span>
+        <button class="modal-close" onclick="closeModal('modal-edit-arsip')">✕</button>
+      </div>
+      <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+        <input type="hidden" id="edit-arsip-id">
+        <div class="form-group">
+          <label class="form-label">Deskripsi / Uraian Informasi <span class="required">*</span></label>
+          <textarea class="form-control" id="edit-deskripsi" rows="3"></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Status Keterbukaan</label>
+            <select class="form-control" id="edit-status-keterbukaan">
+              <option value="Terbuka">Terbuka</option>
+              <option value="Tertutup">Tertutup</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jenis Arsip</label>
+            <select class="form-control" id="edit-jenis-arsip">
+              <option value="Tekstual">Tekstual</option>
+              <option value="Kartografi/Gambar Teknik">Kartografi/Gambar Teknik</option>
+              <option value="Kearsitekturan">Kearsitekturan</option>
+              <option value="Foto">Foto</option>
+              <option value="Film/Video">Film/Video</option>
+              <option value="Rekaman Suara">Rekaman Suara</option>
+              <option value="Bentuk Lain">Bentuk Lain</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Jumlah Lembar</label>
+            <input type="number" class="form-control" id="edit-jumlah-lembar" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jumlah Berkas</label>
+            <input type="number" class="form-control" id="edit-jumlah-berkas" min="1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kurun Waktu (Tahun Pembuatan)</label>
+          <input type="text" class="form-control" id="edit-kurun-mulai" placeholder="Contoh: 2004">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit Pengelola</label>
+          <input type="text" class="form-control" id="edit-unit-pengelola">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lokasi Simpan Fisik</label>
+          <input type="text" class="form-control" id="edit-lokasi-simpan">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Keterangan Tambahan</label>
+          <input type="text" class="form-control" id="edit-keterangan">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-edit-arsip')">Batal</button>
+        <button class="btn btn-primary" onclick="submitEditArsip()">💾 Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window._currentDetailData = <?!= (typeof initialDetail !== 'undefined' && initialDetail) ? JSON.stringify(initialDetail) : 'null' ?>;
+
+if (window._currentDetailData) {
+  var actBtns = document.getElementById('detail-action-buttons');
+  if (actBtns) actBtns.style.display = 'flex';
+  try {
+    sessionStorage.setItem('siasta_detail_id', window._currentDetailData.id);
+  } catch(e) {}
+}
+
+function init_detail_arsip() {
+  // Jika sudah pre-rendered dari server, langsung siap pakai
+  if (window._currentDetailData) {
+    var actBtns = document.getElementById('detail-action-buttons');
+    if (actBtns) actBtns.style.display = 'flex';
+    return;
+  }
+
+  var arsipId = window._arsipDetailId;
+  if (!arsipId) {
+    try {
+      arsipId = sessionStorage.getItem('siasta_detail_id');
+    } catch(e) {}
+  }
+  if (!arsipId) {
+    document.getElementById('detail-content').innerHTML = 
+      '<div class="empty-state"><div class="empty-icon">❓</div><div class="empty-title">Arsip tidak ditemukan</div>' +
+      '<div class="empty-desc">Silakan pilih arsip dari daftar inventaris untuk melihat rincian metadata.</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="navigateTo(\'daftar-arsip\')" style="margin-top:10px;">Ke Daftar Arsip</button></div>';
+    var actBtns = document.getElementById('detail-action-buttons');
+    if (actBtns) actBtns.style.display = 'none';
+    return;
+  }
+  try {
+    sessionStorage.setItem('siasta_detail_id', arsipId);
+  } catch(e) {}
+  window._arsipDetailId = arsipId;
+  
+  startProgressBar();
+
+  // Safety Timeout 8 detik agar user tidak pernah macet di spinner
+  var hasResponded = false;
+  var timeoutTimer = setTimeout(function() {
+    if (!hasResponded) {
+      hasResponded = true;
+      finishProgressBar();
+      document.getElementById('detail-content').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⏱️</div>' +
+        '<div class="empty-title">Koneksi Lambat</div>' +
+        '<div class="empty-desc">Waktu memuat detail arsip habis. Silakan klik tombol muat ulang di bawah.</div>' +
+        '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">' +
+        '<button class="btn btn-primary btn-sm" onclick="init_detail_arsip()">🔄 Coba Lagi</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="navigateTo(\'daftar-arsip\')">← Kembali ke Daftar</button>' +
+        '</div></div>';
+    }
+  }, 8000);
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (hasResponded) return;
+      hasResponded = true;
+      clearTimeout(timeoutTimer);
+      finishProgressBar();
+      if (response && response.success && response.data) {
+        window._currentDetailData = response.data;
+        renderArsipDetail(response.data);
+        var actBtns = document.getElementById('detail-action-buttons');
+        if (actBtns) actBtns.style.display = 'flex';
+      } else {
+        document.getElementById('detail-content').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-title">' + (response ? response.message : 'Arsip tidak ditemukan.') + '</div>' +
+          '<button class="btn btn-primary btn-sm" onclick="navigateTo(\'daftar-arsip\')" style="margin-top:10px;">Ke Daftar Arsip</button></div>';
+        var actBtns = document.getElementById('detail-action-buttons');
+        if (actBtns) actBtns.style.display = 'none';
+      }
+    })
+    .withFailureHandler(function(err) {
+      if (hasResponded) return;
+      hasResponded = true;
+      clearTimeout(timeoutTimer);
+      finishProgressBar();
+      document.getElementById('detail-content').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div>' +
+        '<div class="empty-title">Gangguan Jaringan</div>' +
+        '<div class="empty-desc">' + err.message + '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">' +
+        '<button class="btn btn-primary btn-sm" onclick="init_detail_arsip()">🔄 Coba Lagi</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="navigateTo(\'daftar-arsip\')">← Kembali ke Daftar</button>' +
+        '</div></div>';
+    })
+    .getArsipDetail(arsipId);
+}
+
+function renderArsipDetail(arsip) {
+  try {
+    var qaHtml = '';
+    var qaList = Array.isArray(arsip.qa_checklist_parsed) ? arsip.qa_checklist_parsed : [];
+    if (qaList.length > 0) {
+      qaList.forEach(function(qa) {
+        var qaText = typeof qa === 'string' ? qa : (qa.item || qa.text || qa.label || qa.name || '-');
+        var isChecked = typeof qa === 'string' || (qa && qa.checked !== false);
+        var icon = isChecked ? '✅' : '❌';
+        qaHtml += '<div style="padding:6px 0;font-size:12px;display:flex;gap:8px;align-items:center;">' +
+          '<span>' + icon + '</span><span>' + qaText + '</span></div>';
+      });
+    } else {
+      qaHtml = '<span class="text-muted text-sm">Tidak ada data checklist</span>';
+    }
+    
+    var fileHtml = '';
+    var previewUrl = arsip.file_akses_url || arsip.file_pelestarian_url;
+    if (previewUrl) {
+      fileHtml = '<div style="margin-bottom:12px;">' +
+        '<button type="button" class="btn btn-primary btn-sm" style="width:100%; justify-content:center; gap:8px;" onclick="openPreviewModal(\'' + escapeHtml(previewUrl) + '\', \'' + escapeHtml(arsip.kode_unik || 'Dokumen') + '\')">' +
+        '👁️ Pratinjau Dokumen Langsung (Pop-up)</button>' +
+        '</div>' +
+        '<div class="form-row">' +
+        '<div><a href="' + (arsip.file_pelestarian_url || '#') + '" target="_blank" class="btn btn-sm btn-outline" style="width:100%; justify-content:center;">📁 File Pelestarian</a></div>' +
+        '<div><a href="' + (arsip.file_akses_url || '#') + '" target="_blank" class="btn btn-sm btn-outline" style="width:100%; justify-content:center;">📂 File Akses</a></div>' +
+        '</div>';
+    } else {
+      fileHtml = '<span class="text-muted text-sm">Tidak ada file</span>';
+    }
+    
+    var html = '<div class="grid-2">' +
+      '<div class="card">' +
+        '<div class="card-header"><span class="card-title">📋 Informasi Arsip</span>' +
+          '<span class="badge badge-info" style="font-size:14px;padding:6px 14px;">' + (arsip.kode_unik || '-') + '</span></div>' +
+        '<div class="card-body">' +
+          '<table style="width:100%;font-size:13px;">' +
+          '<tr><td style="width:170px;padding:8px 0;color:var(--text-secondary);font-weight:500;">Status Keterbukaan</td>' +
+            '<td style="padding:8px 0;">' + (arsip.status_keterbukaan === 'Terbuka' ? '<span class="badge badge-success">Terbuka</span>' : '<span class="badge badge-warning">Tertutup</span>') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jenis Arsip</td><td style="padding:8px 0;"><span class="badge badge-navy">' + (arsip.jenis_arsip || '-') + '</span></td></tr>' +
+          (arsip.kategori_urusan ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kategori Urusan</td><td style="padding:8px 0;"><span class="badge badge-info">' + arsip.kategori_urusan + '</span></td></tr>' : '') +
+          (arsip.kode_klasifikasi_asli ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kode Klasifikasi Asli</td><td style="padding:8px 0;"><strong>' + arsip.kode_klasifikasi_asli + '</strong></td></tr>' : '') +
+          (arsip.nomor_asli ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Nomor Asli / Ref</td><td style="padding:8px 0;">' + arsip.nomor_asli + '</td></tr>' : '') +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Asal Arsip</td><td style="padding:8px 0;">' + (arsip.asal_arsip || '-') + ' (' + (arsip.kode_asal || '-') + ')</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Nomor Box</td><td style="padding:8px 0;">' + (arsip.nomor_box || '-') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Deskripsi / Uraian</td><td style="padding:8px 0;">' + (arsip.deskripsi || '-') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Lembar</td><td style="padding:8px 0;">' + (arsip.jumlah_lembar || 0) + ' lembar</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Berkas</td><td style="padding:8px 0;">' + (arsip.jumlah_berkas || 1) + ' berkas</td></tr>' +
+          (arsip.rangkap_ke ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Rangkap Ke</td><td style="padding:8px 0;">' + arsip.rangkap_ke + '</td></tr>' : '') +
+          (arsip.kondisi_fisik ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kondisi Fisik</td><td style="padding:8px 0;">' + arsip.kondisi_fisik + '</td></tr>' : '') +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;">' + (arsip.kurun_waktu_mulai || '-') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Unit Pengelola</td><td style="padding:8px 0;">' + (arsip.unit_pengelola || '-') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Lokasi Simpan</td><td style="padding:8px 0;">' + (arsip.lokasi_simpan || '-') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Keterangan</td><td style="padding:8px 0;">' + (arsip.keterangan || '-') + '</td></tr>' +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+      
+      '<div>' +
+        '<div class="card" style="margin-bottom:18px;">' +
+          '<div class="card-header"><span class="card-title">📎 File Digital</span>' +
+            (arsip.watermark_applied === 'Ya' ? '<span class="badge badge-success">🔒 Watermark</span>' : '') + '</div>' +
+          '<div class="card-body">' + fileHtml + '</div>' +
+        '</div>' +
+        
+        '<div class="card" style="margin-bottom:18px;">' +
+          '<div class="card-header"><span class="card-title">✅ Checklist Kualitas</span></div>' +
+          '<div class="card-body">' + qaHtml + '</div>' +
+        '</div>' +
+        
+        '<div class="card">' +
+          '<div class="card-header"><span class="card-title">ℹ️ Metadata</span></div>' +
+          '<div class="card-body" style="font-size:12px;">' +
+            '<div style="margin-bottom:6px;"><span class="text-muted">Input oleh:</span> <strong>' + (arsip.staf_nama || '-') + '</strong></div>' +
+            '<div style="margin-bottom:6px;"><span class="text-muted">Tanggal Input:</span> ' + (arsip.tanggal_input_formatted || '-') + '</div>' +
+            '<div><span class="text-muted">Terakhir Update:</span> ' + (arsip.tanggal_update_formatted || '-') + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+    
+    document.getElementById('detail-content').innerHTML = html;
+  } catch (renderErr) {
+    document.getElementById('detail-content').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Gagal merender detail arsip</div>' +
+      '<div class="empty-desc">' + renderErr.message + '</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="navigateTo(\'daftar-arsip\')" style="margin-top:10px;">Ke Daftar Arsip</button></div>';
+  }
+}
+
+function openPreviewModal(url, kodeUnik) {
+  if (!url || url === '#' || url === 'undefined') {
+    showSwalWarning('Tautan berkas digital tidak tersedia untuk arsip ini.', 'Pratinjau Tidak Tersedia');
+    return;
+  }
+
+  var iframeUrl = url;
+  if (iframeUrl.indexOf('drive.google.com') !== -1) {
+    if (iframeUrl.indexOf('/preview') === -1) {
+      iframeUrl = iframeUrl.replace(/\/view(\?.*)?$/, '/preview');
+    }
+  }
+
+  var titleEl = document.getElementById('preview-modal-title');
+  if (titleEl) titleEl.textContent = '👁️ Pratinjau Dokumen Alih Media — ' + (kodeUnik || 'Arsip');
+
+  var extBtn = document.getElementById('preview-open-external-btn');
+  if (extBtn) extBtn.href = url;
+
+  var spinner = document.getElementById('preview-loading-spinner');
+  if (spinner) spinner.style.display = 'block';
+
+  var iframe = document.getElementById('preview-doc-iframe');
+  if (iframe) iframe.src = iframeUrl;
+
+  openModal('modal-preview-dokumen');
+}
+
+function openEditArsipModal() {
+  var d = window._currentDetailData;
+  if (!d) {
+    showSwalWarning('Data arsip sedang disinkronkan, mohon tunggu sebentar...', 'Menyiapkan Data');
+    return;
+  }
+  document.getElementById('edit-arsip-id').value = d.id || '';
+  document.getElementById('edit-modal-title').innerText = '✏️ Edit Arsip: ' + (d.kode_unik || '');
+  document.getElementById('edit-deskripsi').value = d.deskripsi || '';
+  document.getElementById('edit-status-keterbukaan').value = d.status_keterbukaan || 'Terbuka';
+  document.getElementById('edit-jenis-arsip').value = d.jenis_arsip || 'Tekstual';
+  document.getElementById('edit-jumlah-lembar').value = d.jumlah_lembar || '';
+  document.getElementById('edit-jumlah-berkas').value = d.jumlah_berkas || '';
+  document.getElementById('edit-kurun-mulai').value = d.kurun_waktu_mulai || '';
+  document.getElementById('edit-unit-pengelola').value = d.unit_pengelola || '';
+  document.getElementById('edit-lokasi-simpan').value = d.lokasi_simpan || '';
+  document.getElementById('edit-keterangan').value = d.keterangan || '';
+  
+  openModal('modal-edit-arsip');
+}
+
+function submitEditArsip() {
+  var arsipId = document.getElementById('edit-arsip-id').value;
+  var deskripsi = document.getElementById('edit-deskripsi').value.trim();
+  
+  if (!deskripsi) {
+    showSwalWarning('Deskripsi atau uraian informasi arsip wajib diisi.', 'Form Belum Lengkap');
+    return;
+  }
+  
+  var editData = {
+    deskripsi: deskripsi,
+    status_keterbukaan: document.getElementById('edit-status-keterbukaan').value,
+    jenis_arsip: document.getElementById('edit-jenis-arsip').value,
+    jumlah_lembar: parseInt(document.getElementById('edit-jumlah-lembar').value) || 0,
+    jumlah_berkas: parseInt(document.getElementById('edit-jumlah-berkas').value) || 0,
+    kurun_waktu_mulai: document.getElementById('edit-kurun-mulai').value.trim(),
+    kurun_waktu_akhir: '',
+    unit_pengelola: document.getElementById('edit-unit-pengelola').value.trim(),
+    lokasi_simpan: document.getElementById('edit-lokasi-simpan').value.trim(),
+    keterangan: document.getElementById('edit-keterangan').value.trim()
+  };
+  
+  showProcessLoading('Menyimpan Perubahan...', 'Sedang memperbarui basis data arsip statis...');
+  google.script.run
+    .withSuccessHandler(function(response) {
+      hideProcessLoading();
+      if (response.success) {
+        closeModal('modal-edit-arsip');
+        showSwalSuccess('Data arsip berhasil diperbarui!', 'Update Berhasil');
+        window._currentDetailData = null;
+        init_detail_arsip(); // Reload detail
+      } else {
+        showSwalError(response.message || 'Gagal menyimpan perubahan.', 'Gagal Update');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError('Terjadi kesalahan: ' + err.message, 'Koneksi Gagal');
+    })
+    .updateArsip(arsipId, editData);
+}
+
+function confirmDeleteArsip() {
+  if (!window._currentDetailData) return;
+  var d = window._currentDetailData;
+  
+  showSwalConfirm(
+    'Konfirmasi Hapus Arsip',
+    'Apakah Anda yakin ingin menghapus arsip <strong>' + d.kode_unik + '</strong>?<br><span style="font-size:12px;color:#64748B;">Sesuai regulasi ANRI, arsip akan diarsipkan ke audit log dan dikeluarkan dari inventaris aktif.</span>',
+    'Ya, Hapus Arsip',
+    'Batal'
+  ).then(function(confirmed) {
+    if (!confirmed) return;
+    
+    showProcessLoading('Menghapus Arsip...', 'Sedang memproses soft-delete sesuai standar ANRI...');
+    google.script.run
+      .withSuccessHandler(function(response) {
+        hideProcessLoading();
+        if (response.success) {
+          showSwalSuccess('Arsip ' + d.kode_unik + ' telah berhasil dihapus.', 'Berhasil Dihapus');
+          navigateTo('daftar-arsip');
+        } else {
+          showSwalError(response.message || 'Gagal menghapus arsip.', 'Gagal');
+        }
+      })
+      .withFailureHandler(function(err) {
+        hideProcessLoading();
+        showSwalError('Terjadi kesalahan: ' + err.message, 'Koneksi Gagal');
+      })
+      .deleteArsip(d.id);
+  });
+}
+
+if (typeof init_detail_arsip === 'function') init_detail_arsip();
+</script>

@@ -1,0 +1,221 @@
+<!-- Generate Laporan Page -->
+<div id="generate-laporan-page">
+  <div class="grid-2">
+    <!-- Form Generate -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📑 Parameter Laporan</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Tipe Laporan <span class="required">*</span></label>
+          <select class="form-control" id="lap-tipe">
+            <option value="internal">📋 Internal (Lengkap)</option>
+            <option value="eksternal">📄 Eksternal / Publik (Terbatas)</option>
+          </select>
+          <p class="form-hint">Internal mencakup seluruh detail; Eksternal tanpa data sensitif</p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Bulan</label>
+            <select class="form-control" id="lap-bulan">
+              <option value="">Semua Bulan</option>
+              <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+              <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+              <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+              <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tahun</label>
+            <input type="number" class="form-control" id="lap-tahun" value="2026">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Staf</label>
+          <select class="form-control" id="lap-staf">
+            <option value="">Semua Staf</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-lg" id="btn-generate-lap" onclick="generateLaporan()" style="width:100%;justify-content:center;">
+          📊 Generate Laporan
+        </button>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">ℹ️ Informasi</span></div>
+      <div class="card-body">
+        <div style="font-size:13px;line-height:1.8;">
+          <h4 style="color:var(--accent);margin-bottom:8px;">📋 Laporan Internal</h4>
+          <ul style="padding-left:18px;margin-bottom:16px;">
+            <li>Seluruh detail arsip termasuk lokasi simpan</li>
+            <li>Data staf pelaksana</li>
+            <li>Hasil checklist QA</li>
+            <li>Breakdown per staf</li>
+          </ul>
+          <h4 style="color:var(--gold);margin-bottom:8px;">📄 Laporan Eksternal</h4>
+          <ul style="padding-left:18px;">
+            <li>Data terbatas sesuai kebijakan</li>
+            <li>Tanpa lokasi simpan & info staf</li>
+            <li>Sesuai format resmi dinas</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Area -->
+  <div class="card mt-3" id="lap-preview-card" style="display:none;">
+    <div class="card-header">
+      <span class="card-title">📄 Preview Laporan</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm btn-outline" onclick="printElement('lap-preview-content')">🖨️ Cetak</button>
+      </div>
+    </div>
+    <div class="card-body" id="lap-preview-content">
+      <!-- Dynamically rendered -->
+    </div>
+  </div>
+</div>
+
+<script>
+function init_generate_laporan() {
+  document.getElementById('lap-tahun').value = new Date().getFullYear();
+  
+  // Pastikan tidak ada instans Select2 lama yang menempel
+  if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    jQuery('#lap-tipe, #lap-bulan, #lap-staf').each(function() {
+      var $el = jQuery(this);
+      if ($el.hasClass('select2-hidden-accessible')) {
+        $el.select2('destroy');
+      }
+    });
+  }
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (response.success) {
+        var select = document.getElementById('lap-staf');
+        // Kosongkan opsi staf dinamis kecuali opsi pertama "Semua Staf"
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        response.data.forEach(function(s) {
+          var opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.nama;
+          select.appendChild(opt);
+        });
+      }
+    })
+    .withFailureHandler(function(err) {
+      showToast('Gagal memuat staf: ' + err.message, 'error');
+    })
+    .getStaffList();
+}
+
+function generateLaporan() {
+  var params = {
+    tipe: document.getElementById('lap-tipe').value,
+    bulan: document.getElementById('lap-bulan').value,
+    tahun: document.getElementById('lap-tahun').value,
+    stafId: document.getElementById('lap-staf').value
+  };
+  
+  var btn = document.getElementById('btn-generate-lap');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;"></span> Generating...';
+  
+  google.script.run
+    .withSuccessHandler(function(response) {
+      btn.disabled = false;
+      btn.innerHTML = '📊 Generate Laporan';
+      
+      if (response.success) {
+        renderLaporanPreview(response.data);
+        document.getElementById('lap-preview-card').style.display = 'block';
+        showToast('Laporan berhasil di-generate!', 'success');
+      } else {
+        showToast(response.message, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '📊 Generate Laporan';
+      showToast('Error: ' + err.message, 'error');
+    })
+    .generateLaporanData(params);
+}
+
+function renderLaporanPreview(data) {
+  var isInternal = data.tipe === 'internal';
+  var html = '<div class="doc-preview" style="position:relative; overflow:hidden; background:#fff; padding:25px 30px;">
+    <!-- Watermark Dokumen Resmi -->
+    <div class="watermark-pdf-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-35deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:130%; white-space:nowrap;">
+      <div style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:28pt; font-weight:800; color:rgba(100, 116, 139, 0.16); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
+        ARSIP HASIL ALIH MEDIA<br>
+        DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
+        KABUPATEN MANGGARAI BARAT
+      </div>
+    </div>
+    <div style="position:relative; z-index:1;">
+      <div class="doc-header" style="text-align:center; position:relative; padding-bottom:12px; margin-bottom:18px; border-bottom:none;">
+        <div style="position:absolute; left:5px; top:0; width:65px; display:flex; align-items:center; justify-content:center;">
+          <img src="' + (window._logoMabar || '') + '" alt="Logo Pemkab Manggarai Barat" style="width:60px; height:auto; object-fit:contain;">
+        </div>
+        <div style="margin-left:70px;">
+          <div style="font-size:12pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
+          <div style="font-size:14pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
+          <div style="font-size:9.5pt; font-style:italic; margin-top:3px;">Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT</div>
+        </div>
+        <div style="border-bottom:3px solid #000; margin-top:12px;"></div>
+        <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
+      </div>
+      <div style="text-align:center; margin-bottom:16px;">
+        <div class="doc-title" style="font-size:13pt; font-weight:bold; text-decoration:underline;">LAPORAN ' + (isInternal ? 'INTERNAL' : 'EKSTERNAL') + '</div>
+        <div style="font-size:11pt; font-weight:600; margin-top:2px;">KEGIATAN ALIH MEDIA ARSIP STATIS</div>
+        <div style="font-size:10.5pt; margin-top:2px;">Periode: ' + data.periode + '</div>
+      </div>';
+  
+  // Summary
+  html += '<h3 style="margin:16px 0 8px;font-size:14px;">I. Ringkasan</h3>' +
+    '<table><tr><th style="width:200px;">Uraian</th><th>Keterangan</th></tr>' +
+    '<tr><td>Total Arsip</td><td><strong>' + data.totalArsip + '</strong> arsip</td></tr>' +
+    '<tr><td>Total Lembar</td><td>' + data.totalLembar + ' lembar</td></tr>' +
+    '<tr><td>Total Berkas</td><td>' + data.totalBerkas + ' berkas</td></tr>' +
+    '<tr><td>Tanggal Generate</td><td>' + data.tanggalGenerate + '</td></tr></table>';
+  
+  // Arsip detail table
+  if (data.arsipDetail && data.arsipDetail.length > 0) {
+    html += '<h3 style="margin:20px 0 8px;font-size:14px;">II. Daftar Arsip</h3><table><thead><tr>' +
+      '<th>No</th><th>Kode</th><th>Deskripsi</th><th>Jenis</th>';
+    if (isInternal) html += '<th>Staf</th><th>Lokasi</th>';
+    html += '<th>Status</th></tr></thead><tbody>';
+    
+    data.arsipDetail.forEach(function(a) {
+      html += '<tr><td>' + a.no + '</td><td>' + a.kode_unik + '</td>' +
+        '<td style="max-width:200px;">' + (a.deskripsi || '-') + '</td><td>' + (a.jenis_arsip || '-') + '</td>';
+      if (isInternal) html += '<td>' + (a.staf_nama || '-') + '</td><td>' + (a.lokasi_simpan || '-') + '</td>';
+      html += '<td>' + (a.status_keterbukaan || '-') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  
+  // Staf breakdown (internal only)
+  if (isInternal && data.stafBreakdown) {
+    html += '<h3 style="margin:20px 0 8px;font-size:14px;">III. Breakdown Per Staf</h3><table>' +
+      '<tr><th>Nama Staf</th><th>Jumlah Arsip</th></tr>';
+    data.stafBreakdown.forEach(function(s) {
+      html += '<tr><td>' + s.nama + '</td><td>' + s.jumlah + '</td></tr>';
+    });
+    html += '</table>';
+  }
+  
+  html += '</div></div>';
+  document.getElementById('lap-preview-content').innerHTML = html;
+}
+
+if (typeof init_generate_laporan === 'function') init_generate_laporan();
+</script>

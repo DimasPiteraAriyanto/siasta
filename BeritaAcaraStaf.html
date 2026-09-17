@@ -1,0 +1,166 @@
+<!-- Berita Acara Per Staf Page -->
+<div id="ba-staf-page">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">👤 Berita Acara Per Staf</span>
+    </div>
+    <div class="card-body">
+      <div class="form-row" style="margin-bottom:18px;">
+        <div class="form-group">
+          <label class="form-label">Bulan</label>
+          <select class="form-control" id="ba-bulan" onchange="loadBAStaf()">
+            <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+            <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+            <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+            <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tahun</label>
+          <input type="number" class="form-control" id="ba-tahun-input" value="2026" onchange="loadBAStaf()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Staf</label>
+          <select class="form-control" id="ba-staf-select" onchange="loadBAStaf()">
+            <option value="">— Pilih Staf —</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="ba-staf-result">
+        <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Pilih bulan, tahun, dan staf</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function init_ba_staf() {
+  // Set current month
+  var now = new Date();
+  document.getElementById('ba-bulan').value = now.getMonth();
+  document.getElementById('ba-tahun-input').value = now.getFullYear();
+  
+  // Pastikan tidak ada instans Select2 lama yang menempel
+  if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    jQuery('#ba-bulan, #ba-staf-select').each(function() {
+      var $el = jQuery(this);
+      if ($el.hasClass('select2-hidden-accessible')) {
+        $el.select2('destroy');
+      }
+    });
+  }
+
+  // Load staf list
+  google.script.run
+    .withSuccessHandler(function(response) {
+      if (response.success) {
+        var select = document.getElementById('ba-staf-select');
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        response.data.forEach(function(s) {
+          var opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.nama;
+          select.appendChild(opt);
+        });
+      }
+    })
+    .withFailureHandler(function(err) {
+      showToast('Gagal memuat daftar staf: ' + err.message, 'error');
+    })
+    .getStaffList();
+}
+
+function loadBAStaf() {
+  var bulan = document.getElementById('ba-bulan').value;
+  var tahun = document.getElementById('ba-tahun-input').value;
+  var stafId = document.getElementById('ba-staf-select').value;
+  if (!stafId) return;
+  
+  var resultBox = document.getElementById('ba-staf-result');
+  resultBox.innerHTML = '<div class="loading-overlay" style="position:relative;min-height:160px;display:flex;"><div class="loading-spinner"></div><div class="loading-text">Memuat data arsip staf...</div></div>';
+  startProgressBar();
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      finishProgressBar();
+      if (response.success) {
+        var d = response.data;
+        var html = '<div class="stats-grid" style="margin-bottom:18px;">' +
+          '<div class="stat-card primary"><div class="stat-value">' + d.jumlahArsip + '</div><div class="stat-label">Total Arsip</div></div>' +
+          '<div class="stat-card gold"><div class="stat-value">' + d.periode + '</div><div class="stat-label">Periode</div></div>' +
+          '</div>';
+        
+        if (d.arsipList && d.arsipList.length > 0) {
+          html += '<div class="table-container"><table class="data-table"><thead><tr>' +
+            '<th>No</th><th>Kode Unik</th><th>Deskripsi</th><th>Jenis</th><th>Kurun Waktu</th></tr></thead><tbody>';
+          d.arsipList.forEach(function(a, i) {
+            html += '<tr><td>' + (i+1) + '</td><td><strong style="color:var(--accent);">' + a.kode_unik + '</strong></td>' +
+              '<td>' + (a.deskripsi || '-') + '</td><td>' + (a.jenis_arsip || '-') + '</td><td>' + (a.kurun_waktu_mulai || '-') + '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+          html += '<div style="margin-top:16px;display:flex;gap:8px;">' +
+            '<button class="btn btn-primary" onclick="generateBAStaf()">📄 Generate Berita Acara Formal</button>' +
+            '</div>';
+        } else {
+          html += '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Tidak ada arsip di periode ini</div><div class="empty-desc">Staf ini belum memiliki rekaman alih media pada bulan ' + d.periode + '.</div></div>';
+        }
+        resultBox.innerHTML = html;
+      } else {
+        resultBox.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">' + (response.message || 'Error') + '</div></div>';
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      resultBox.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Gagal memuat: ' + err.message + '</div></div>';
+    })
+    .getBeritaAcaraPerStaf(bulan, tahun, stafId);
+}
+
+function generateBAStaf() {
+  var bulan = document.getElementById('ba-bulan').value;
+  var tahun = document.getElementById('ba-tahun-input').value;
+  var stafSelect = document.getElementById('ba-staf-select');
+  var stafId = stafSelect.value;
+  var stafNama = stafSelect.options[stafSelect.selectedIndex].text;
+  
+  if (!stafId) {
+    showSwalWarning('Pilih salah satu staf terlebih dahulu.', 'Pilih Staf');
+    return;
+  }
+
+  showSwalConfirm(
+    'Konfirmasi Pembuatan Berita Acara',
+    'Apakah Anda yakin ingin menerbitkan Berita Acara Alih Media untuk staf: ' + stafNama + '?',
+    'Ya, Terbitkan BA',
+    'Batal'
+  ).then(function(confirmed) {
+    if (confirmed) {
+      showProcessLoading('Menerbitkan Berita Acara...', 'Menyusun berkas BA, menghitung nomor urut, dan mencatat nomor BA...');
+      google.script.run
+        .withSuccessHandler(function(response) {
+          hideProcessLoading();
+          if (response.success) {
+            showSwalSuccess(response.message, 'Berita Acara Terbit');
+            delete _pageHtmlCache['dashboard-ba'];
+          } else {
+            showSwalError(response.message, 'Gagal');
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideProcessLoading();
+          showSwalError('Error: ' + err.message, 'Kesalahan Sistem');
+        })
+        .generateBeritaAcara({
+          bulan: bulan, tahun: tahun, tipe: 'per_staf',
+          stafId: stafId, stafNama: stafNama,
+          activeUser: (typeof getActiveUserFromSession === 'function' ? getActiveUserFromSession() : null)
+        });
+    }
+  });
+}
+
+if (typeof init_ba_staf === 'function') init_ba_staf();
+</script>

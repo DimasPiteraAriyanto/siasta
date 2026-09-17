@@ -1,0 +1,763 @@
+<!-- Daftar Arsip Page -->
+<div id="daftar-arsip-page">
+  <div class="card">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <span class="card-title">📁 Daftar Arsip Terdigitalisasi</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-gold btn-sm" onclick="openModalExportRekap()" style="display:flex; align-items:center; gap:6px;">
+          📥 Export Rekapitulasi / Excel
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="navigateTo('input-arsip')">+ Input Arsip Baru</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-arsip" placeholder="Cari kode, deskripsi, asal arsip..." oninput="searchArsipDebounced()">
+        </div>
+        <select class="form-control" id="filter-asal" style="width:auto;min-width:180px;" onchange="loadArsipList(1)">
+          <option value="">Semua Asal Arsip</option>
+          <? if (typeof kodeAsalList !== 'undefined' && kodeAsalList && kodeAsalList.length) { ?>
+            <? for (var i = 0; i < kodeAsalList.length; i++) { ?>
+              <option value="<?= kodeAsalList[i].kode ?>"><?= kodeAsalList[i].kode ?> — <?= kodeAsalList[i].nama ?></option>
+            <? } ?>
+          <? } else { ?>
+            <option value="KOM">KOM — Dinas Komunikasi dan Informatika</option>
+            <option value="DIS">DIS — Dinas Pendidikan, Kepemudaan dan Olahraga</option>
+            <option value="SETDA">SETDA — Sekretariat Daerah</option>
+            <option value="DINKES">DINKES — Dinas Kesehatan</option>
+            <option value="INSPEK">INSPEK — Inspektorat Daerah</option>
+            <option value="BAPENDA">BAPENDA — Badan Pendapatan Daerah</option>
+            <option value="KEC-KMD">KEC-KMD — Kecamatan Komodo</option>
+          <? } ?>
+        </select>
+        <select class="form-control" id="filter-jenis" style="width:auto;min-width:170px;" onchange="loadArsipList(1)">
+          <option value="">Semua Jenis Arsip</option>
+          <option value="Tekstual">Tekstual</option>
+          <option value="Kartografi/Gambar Teknik">Kartografi/Gambar Teknik</option>
+          <option value="Kearsitekturan">Kearsitekturan</option>
+          <option value="Foto">Foto</option>
+          <option value="Film/Video">Film/Video</option>
+          <option value="Rekaman Suara">Rekaman Suara</option>
+          <option value="Bentuk Lain">Bentuk Lain</option>
+        </select>
+        <select class="form-control" id="filter-status" style="width:auto;min-width:150px;" onchange="loadArsipList(1)">
+          <option value="">Semua Status</option>
+          <option value="Terbuka">Terbuka</option>
+          <option value="Tertutup">Tertutup</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container" style="position:relative;">
+        <div class="loading-overlay" id="arsip-loading" style="display:none;">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Memuat data...</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:40px;">No</th>
+              <th>Kode Unik</th>
+              <th>Deskripsi</th>
+              <th>Asal Arsip</th>
+              <th>Jenis</th>
+              <th>Status</th>
+              <th>Tanggal</th>
+              <th>Staf</th>
+              <th style="width:80px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="arsip-tbody">
+            <? if (typeof initialArsip !== 'undefined' && initialArsip && initialArsip.data && initialArsip.data.length) { ?>
+              <? for (var i = 0; i < initialArsip.data.length; i++) { 
+                   var aItem = initialArsip.data[i];
+              ?>
+                <tr onclick="viewArsipDetail('<?= aItem.id ?>')" style="cursor:pointer;">
+                  <td><?= i + 1 ?></td>
+                  <td><strong style="color:var(--accent);"><?= aItem.kode_unik ?></strong></td>
+                  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= aItem.deskripsi || '-' ?></td>
+                  <td><?= aItem.asal_arsip || '-' ?></td>
+                  <td><span class="badge badge-navy"><?= aItem.jenis_arsip || '-' ?></span></td>
+                  <td>
+                    <? if (aItem.status_keterbukaan === 'Terbuka') { ?>
+                      <span class="badge badge-success">Terbuka</span>
+                    <? } else { ?>
+                      <span class="badge badge-warning">Tertutup</span>
+                    <? } ?>
+                  </td>
+                  <td><?= aItem.tanggal_input_formatted || '-' ?></td>
+                  <td><?= aItem.staf_nama || '-' ?></td>
+                  <td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();viewArsipDetail('<?= aItem.id ?>')">👁</button></td>
+                </tr>
+              <? } ?>
+            <? } else { ?>
+              <tr><td colspan="9" class="text-center text-muted" style="padding:40px;">Memuat data...</td></tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="arsip-pagination">
+        <div class="pagination-info" id="pagination-info">
+          <? if (typeof initialArsip !== 'undefined' && initialArsip && initialArsip.data) { ?>
+            Menampilkan 1-<?= Math.min(initialArsip.pageSize, initialArsip.total) ?> dari <?= initialArsip.total ?> arsip
+          <? } else { ?>
+            Menampilkan 0 data
+          <? } ?>
+        </div>
+        <div class="pagination-buttons" id="pagination-buttons">
+          <? if (typeof initialArsip !== 'undefined' && initialArsip && initialArsip.totalPages > 1) { ?>
+            <button disabled>‹</button>
+            <? for (var p = 1; p <= initialArsip.totalPages; p++) { ?>
+              <? if (p <= 3 || p > initialArsip.totalPages - 2 || Math.abs(p - 1) <= 1) { ?>
+                <button class="<?= p === 1 ? 'active' : '' ?>" onclick="loadArsipList(<?= p ?>)"><?= p ?></button>
+              <? } else if (p === 4) { ?>
+                <button disabled>...</button>
+              <? } ?>
+            <? } ?>
+            <button onclick="loadArsipList(2)">›</button>
+          <? } ?>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: FILTER EXPORT REKAPITULASI -->
+  <div class="modal-overlay" id="modal-export-rekap" style="display:none;">
+    <div class="modal" style="max-width:540px; width:95%;">
+      <div class="modal-header">
+        <span class="modal-title" style="font-weight:700; color:var(--primary);">📥 Export Rekapitulasi Alih Media Arsip</span>
+        <button class="modal-close" onclick="closeModal('modal-export-rekap')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-export-rekap" onsubmit="event.preventDefault();">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-weight:600;">Pilihan Periode Rekapitulasi</label>
+            <select class="form-control" id="export-periode-type" onchange="toggleExportPeriodFields()">
+              <option value="all">🌐 Seluruh Periode (Semua Arsip Teralih Media)</option>
+              <option value="tahun" selected>📅 Per Tahun Anggaran</option>
+              <option value="bulan">📆 Per Bulan Tertentu</option>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;" id="export-period-grid">
+            <div class="form-group" id="export-group-bulan" style="display:none;">
+              <label class="form-label" style="font-weight:600;">Bulan</label>
+              <select class="form-control" id="export-bulan">
+                <option value="0">Januari</option>
+                <option value="1">Februari</option>
+                <option value="2">Maret</option>
+                <option value="3">April</option>
+                <option value="4">Mei</option>
+                <option value="5">Juni</option>
+                <option value="6">Juli</option>
+                <option value="7">Agustus</option>
+                <option value="8">September</option>
+                <option value="9">Oktober</option>
+                <option value="10">November</option>
+                <option value="11">Desember</option>
+              </select>
+            </div>
+            <div class="form-group" id="export-group-tahun">
+              <label class="form-label" style="font-weight:600;">Tahun</label>
+              <input type="number" class="form-control" id="export-tahun" value="2026" min="2020" max="2035">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" style="font-weight:600;">Filter Asal Arsip (OPD)</label>
+            <select class="form-control" id="export-kode-asal">
+              <option value="">Semua Asal Arsip (Seluruh OPD)</option>
+            </select>
+          </div>
+
+          <div class="alert alert-info" style="font-size:12px; margin-bottom:0; line-height:1.4;">
+            💡 Anda dapat memilih untuk mengunduh berkas tabel Excel (.CSV) yang rapi, atau mencetak Dokumen Rekapitulasi Resmi ber-kop dinas lengkap dengan pengesahan Kepala Bidang.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-export-rekap')">Batal</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-gold" onclick="doExportExcel()" style="display:flex; align-items:center; gap:6px;">
+            📊 Unduh Excel (.csv)
+          </button>
+          <button type="button" class="btn btn-primary" onclick="doPreviewPrintRekap()" style="display:flex; align-items:center; gap:6px;">
+            🖨️ Cetak Rekap Resmi
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PRATINJAU & CETAK DOKUMEN REKAPITULASI RESMI DINAS -->
+  <div class="modal-overlay" id="modal-preview-rekap-print" style="display:none; align-items:flex-start; padding:20px 10px; overflow-y:auto;">
+    <div class="modal" style="max-width:1050px; width:100%; margin:20px auto; background:#fff; box-shadow:0 10px 30px rgba(0,0,0,0.25); border-radius:8px; overflow:hidden;">
+      <div class="modal-header" style="background:#1B2A4A; color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:18px;">📄</span>
+          <span class="modal-title" style="color:#fff; font-weight:700;">Pratinjau Dokumen Rekapitulasi Hasil Alih Media Arsip</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-gold btn-sm" onclick="printRekapDoc()" style="display:flex; align-items:center; gap:6px;">
+            🖨️ Cetak Dokumen
+          </button>
+          <button class="modal-close" onclick="closeModal('modal-preview-rekap-print')" style="color:#fff;">✕</button>
+        </div>
+      </div>
+      
+      <div class="modal-body" style="padding:0; background:#e2e8f0;">
+        <div id="rekap-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:280mm; min-height:210mm; padding:20mm 18mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:11pt; line-height:1.4;">
+          <!-- Watermark Dokumen Resmi (Format Contoh Alih Media Pemkab Manggarai Barat) -->
+          <div class="watermark-pdf-overlay" style="position:absolute; top:52%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:135%; white-space:nowrap;">
+            <div style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:32pt; font-weight:800; color:rgba(100, 116, 139, 0.18); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
+              ARSIP HASIL ALIH MEDIA<br>
+              DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
+              KABUPATEN MANGGARAI BARAT
+            </div>
+          </div>
+          <div style="position:relative; z-index:1;">
+          <!-- Kop Surat Resmi -->
+          <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
+            <div style="position:absolute; left:10px; top:0; width:65px; height:75px; display:flex; align-items:center; justify-content:center;"><img id="rekap-doc-logo-img" src="" alt="Logo Pemkab Manggarai Barat" style="width:60px; height:auto; max-height:75px; object-fit:contain;"></div>
+            <div style="margin-left:70px;">
+              <div style="font-size:13pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
+              <div style="font-size:15pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
+              <div style="font-size:9.5pt; font-style:italic; margin-top:4px;" id="rekap-doc-alamat-kop">
+                Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT
+              </div>
+            </div>
+            <div style="border-bottom:3px solid #000; margin-top:12px;"></div>
+            <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
+          </div>
+
+          <!-- Judul Rekapitulasi -->
+          <div style="text-align:center; margin-bottom:16px;">
+            <div style="font-size:12pt; font-weight:bold; text-decoration:underline;">DAFTAR ARSIP HASIL ALIH MEDIA ARSIP STATIS</div>
+            <div style="font-size:11pt; margin-top:3px; font-weight:600;">Periode: <span id="rekap-doc-periode">Tahun 2026</span></div>
+          </div>
+
+          <!-- Tabel Rekapitulasi Lengkap (16 Kolom Standar Naskah Dinas) -->
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:8pt;" border="1" cellpadding="3">
+            <thead>
+              <tr style="background:#f1f5f9; text-align:center; font-weight:bold;">
+                <th style="width:25px; border:1px solid #000;">No</th>
+                <th style="width:45px; border:1px solid #000;">No. Box</th>
+                <th style="width:80px; border:1px solid #000;">Kode Unik</th>
+                <th style="width:85px; border:1px solid #000;">Nomor Arsip Asli</th>
+                <th style="width:70px; border:1px solid #000;">Kode Klasifikasi</th>
+                <th style="border:1px solid #000;">Uraian Informasi Arsip</th>
+                <th style="width:45px; border:1px solid #000;">Kurun Waktu</th>
+                <th style="width:55px; border:1px solid #000;">Jenis</th>
+                <th style="width:75px; border:1px solid #000;">Kategori Urusan</th>
+                <th style="width:90px; border:1px solid #000;">Unit Pengolah</th>
+                <th style="width:40px; border:1px solid #000;">Jml Berkas</th>
+                <th style="width:40px; border:1px solid #000;">Jml Lembar</th>
+                <th style="width:80px; border:1px solid #000;">Lokasi Simpan</th>
+                <th style="width:50px; border:1px solid #000;">Kondisi</th>
+                <th style="width:55px; border:1px solid #000;">Status</th>
+                <th style="width:70px; border:1px solid #000;">Standar</th>
+              </tr>
+            </thead>
+            <tbody id="rekap-doc-tbody">
+              <tr><td colspan="16" style="text-align:center; padding:15px; border:1px solid #000;">Memuat data rekapitulasi...</td></tr>
+            </tbody>
+            <tfoot>
+              <tr style="font-weight:bold; background:#fafafa;">
+                <td colspan="10" style="text-align:right; border:1px solid #000; padding:5px;">Total Arsip Teralih Media:</td>
+                <td style="text-align:center; border:1px solid #000; padding:5px;" id="rekap-doc-total-berkas">0</td>
+                <td style="text-align:center; border:1px solid #000; padding:5px;" id="rekap-doc-total-lbr">0</td>
+                <td colspan="4" style="border:1px solid #000; text-align:center; padding:5px;">Sesuai Standar ANRI</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Blok Tanda Tangan: Mengetahui Kepala Bidang & Pelaksana -->
+          <div style="display:flex; justify-content:space-between; margin-top:24px; font-size:11pt; page-break-inside:avoid;">
+            <div style="width:48%; text-align:center;">
+              <div>Mengetahui,</div>
+              <div style="font-weight:bold; margin-top:2px;" id="rekap-doc-kabid-jabatan">Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip</div>
+              <div style="height:70px;"></div>
+              <div style="font-weight:bold; text-decoration:underline;" id="rekap-doc-kabid-nama">STEFANUS RAHMAT, S.Sos</div>
+              <div id="rekap-doc-kabid-pangkat">Pembina / IV a</div>
+              <div>NIP. <span id="rekap-doc-kabid-nip">19850215 201001 1 018</span></div>
+            </div>
+
+            <div style="width:48%; text-align:center;">
+              <div>Labuan Bajo, <span id="rekap-doc-tgl-surat">18 September 2026</span></div>
+              <div style="font-weight:bold; margin-top:2px;" id="rekap-doc-pelaksana-jabatan">Pelaksana Alih Media,</div>
+              <div style="height:70px;"></div>
+              <div style="font-weight:bold; text-decoration:underline;" id="rekap-doc-pelaksana-nama">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
+              <div>Pengelola Kearsipan</div>
+              <div>NIP. <span id="rekap-doc-pelaksana-nip">19980508 202506 1 004</span></div>
+            </div>
+          </div>
+        </div></div></div>
+      <div class="modal-footer" style="background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+        <div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center;">
+          📌 Sesuai format tata naskah dinas resmi Dinas Kearsipan & Perpustakaan Daerah Kab. Manggarai Barat
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-preview-rekap-print')">Tutup</button>
+          <button type="button" class="btn btn-primary" onclick="printRekapDoc()">🖨️ Cetak Dokumen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var arsipCurrentPage = 1;
+var arsipPageSize = 25;
+var _isLoadingArsip = false;
+
+function init_daftar_arsip() {
+  // Pastikan filter toolbar menggunakan select native murni (hancurkan instans Select2 lama jika ada)
+  if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    jQuery('#filter-asal, #filter-jenis, #filter-status').each(function() {
+      var $el = jQuery(this);
+      if ($el.hasClass('select2-hidden-accessible')) {
+        $el.select2('destroy');
+      }
+    });
+  }
+
+  // Load filter asal options via AJAX ONLY IF not already populated by server
+  var filterAsal = document.getElementById('filter-asal');
+  if (filterAsal && filterAsal.options.length <= 1) {
+    google.script.run
+      .withSuccessHandler(function(response) {
+        if (response && response.success && response.data && response.data.length > 0) {
+          response.data.forEach(function(item) {
+            var opt = document.createElement('option');
+            opt.value = item.kode;
+            opt.textContent = item.kode + ' — ' + item.nama;
+            filterAsal.appendChild(opt);
+          });
+        }
+      })
+      .getKodeAsalList();
+  }
+  
+  // Only call loadArsipList if table is not already populated by server
+  var tbody = document.getElementById('arsip-tbody');
+  if (!tbody || tbody.querySelectorAll('tr').length <= 1) {
+    loadArsipList(1);
+  }
+}
+
+var searchArsipDebounced = debounce(function() {
+  loadArsipList(1);
+}, 400);
+
+function loadArsipList(page) {
+  if (_isLoadingArsip) return;
+  _isLoadingArsip = true;
+
+  arsipCurrentPage = page || arsipCurrentPage;
+  
+  var searchEl = document.getElementById('search-arsip');
+  var asalEl = document.getElementById('filter-asal');
+  var jenisEl = document.getElementById('filter-jenis');
+  var statusEl = document.getElementById('filter-status');
+
+  var params = {
+    page: arsipCurrentPage,
+    pageSize: arsipPageSize,
+    search: searchEl ? searchEl.value : '',
+    kodeAsal: asalEl ? asalEl.value : '',
+    jenisArsip: jenisEl ? jenisEl.value : '',
+    statusKeterbukaan: statusEl ? statusEl.value : ''
+  };
+  
+  var tbody = document.getElementById('arsip-tbody');
+  if (tbody) {
+    tbody.innerHTML = 
+      '<tr class="skeleton-row"><td><span class="skeleton-shimmer" style="width:20px;"></span></td><td><span class="skeleton-shimmer" style="width:90px;"></span></td><td><span class="skeleton-shimmer"></span></td><td><span class="skeleton-shimmer" style="width:110px;"></span></td><td><span class="skeleton-shimmer" style="width:60px;"></span></td><td><span class="skeleton-shimmer" style="width:50px;"></span></td><td><span class="skeleton-shimmer" style="width:70px;"></span></td><td><span class="skeleton-shimmer" style="width:80px;"></span></td><td><span class="skeleton-shimmer" style="width:40px;"></span></td></tr>' +
+      '<tr class="skeleton-row"><td><span class="skeleton-shimmer" style="width:20px;"></span></td><td><span class="skeleton-shimmer" style="width:90px;"></span></td><td><span class="skeleton-shimmer"></span></td><td><span class="skeleton-shimmer" style="width:110px;"></span></td><td><span class="skeleton-shimmer" style="width:60px;"></span></td><td><span class="skeleton-shimmer" style="width:50px;"></span></td><td><span class="skeleton-shimmer" style="width:70px;"></span></td><td><span class="skeleton-shimmer" style="width:80px;"></span></td><td><span class="skeleton-shimmer" style="width:40px;"></span></td></tr>' +
+      '<tr class="skeleton-row"><td><span class="skeleton-shimmer" style="width:20px;"></span></td><td><span class="skeleton-shimmer" style="width:90px;"></span></td><td><span class="skeleton-shimmer"></span></td><td><span class="skeleton-shimmer" style="width:110px;"></span></td><td><span class="skeleton-shimmer" style="width:60px;"></span></td><td><span class="skeleton-shimmer" style="width:50px;"></span></td><td><span class="skeleton-shimmer" style="width:70px;"></span></td><td><span class="skeleton-shimmer" style="width:80px;"></span></td><td><span class="skeleton-shimmer" style="width:40px;"></span></td></tr>';
+  }
+  
+  startProgressBar();
+  google.script.run
+    .withSuccessHandler(function(response) {
+      _isLoadingArsip = false;
+      var loadingEl = document.getElementById('arsip-loading');
+      if (loadingEl) loadingEl.style.display = 'none';
+      finishProgressBar();
+      if (response && response.success) {
+        renderArsipTable(response.data);
+      } else {
+        showSwalError(response ? response.message : 'Gagal mengambil data.', 'Gagal Mengambil Data');
+      }
+    })
+    .withFailureHandler(function(err) {
+      _isLoadingArsip = false;
+      var loadingEl = document.getElementById('arsip-loading');
+      if (loadingEl) loadingEl.style.display = 'none';
+      finishProgressBar();
+      showSwalError('Error: ' + err.message, 'Kesalahan Jaringan');
+    })
+    .getArsipList(params);
+}
+
+function renderArsipTable(result) {
+  var tbody = document.getElementById('arsip-tbody');
+  
+  if (!result.data || result.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📭</div>' +
+      '<div class="empty-title">Database Arsip Belum Memiliki Data</div>' +
+      '<div class="empty-desc">Belum ada arsip statis yang tercatat di sistem. Anda dapat menginput arsip baru atau mengenerate 40 data realistis.</div>' +
+      '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;">' +
+      '<button class="btn btn-primary btn-sm" onclick="navigateTo(\'input-arsip\')">📝 + Input Arsip Baru</button>' +
+      '<button class="btn btn-gold btn-sm" onclick="triggerQuickSeed()">🚀 Generate 40 Data Dummy</button>' +
+      '</div></div></td></tr>';
+    return;
+  }
+  
+  var startNum = (result.page - 1) * result.pageSize;
+  var html = '';
+  result.data.forEach(function(arsip, i) {
+    var statusBadge = arsip.status_keterbukaan === 'Terbuka' ?
+      '<span class="badge badge-success">Terbuka</span>' :
+      '<span class="badge badge-warning">Tertutup</span>';
+    
+    html += '<tr onclick="viewArsipDetail(\'' + arsip.id + '\')" style="cursor:pointer;">' +
+      '<td>' + (startNum + i + 1) + '</td>' +
+      '<td><strong style="color:var(--accent);">' + arsip.kode_unik + '</strong></td>' +
+      '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (arsip.deskripsi || '-') + '</td>' +
+      '<td>' + (arsip.asal_arsip || '-') + '</td>' +
+      '<td><span class="badge badge-navy">' + (arsip.jenis_arsip || '-') + '</span></td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td>' + (arsip.tanggal_input_formatted || '-') + '</td>' +
+      '<td>' + (arsip.staf_nama || '-') + '</td>' +
+      '<td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();viewArsipDetail(\'' + arsip.id + '\')">👁</button></td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+  
+  // Pagination
+  document.getElementById('pagination-info').textContent =
+    'Menampilkan ' + ((result.page - 1) * result.pageSize + 1) + '-' +
+    Math.min(result.page * result.pageSize, result.total) + ' dari ' + result.total + ' arsip';
+  
+  var paginationHtml = '';
+  paginationHtml += '<button ' + (result.page <= 1 ? 'disabled' : '') + ' onclick="loadArsipList(' + (result.page - 1) + ')">‹</button>';
+  for (var p = 1; p <= result.totalPages; p++) {
+    if (p <= 3 || p > result.totalPages - 2 || Math.abs(p - result.page) <= 1) {
+      paginationHtml += '<button class="' + (p === result.page ? 'active' : '') + '" onclick="loadArsipList(' + p + ')">' + p + '</button>';
+    } else if (p === 4 || p === result.totalPages - 2) {
+      paginationHtml += '<button disabled>...</button>';
+    }
+  }
+  paginationHtml += '<button ' + (result.page >= result.totalPages ? 'disabled' : '') + ' onclick="loadArsipList(' + (result.page + 1) + ')">›</button>';
+  document.getElementById('pagination-buttons').innerHTML = paginationHtml;
+}
+
+function viewArsipDetail(arsipId) {
+  // Store arsip ID and navigate to detail
+  window._arsipDetailId = arsipId;
+  try {
+    sessionStorage.setItem('siasta_detail_id', arsipId);
+  } catch(e) {}
+  navigateTo('detail-arsip', arsipId);
+}
+
+function triggerQuickSeed() {
+  showSwalConfirm(
+    'Isi Data Dummy Otomatis',
+    'Sistem akan mengisi database dengan 40 arsip statis realistis Kab. Manggarai Barat, 4 Berita Acara, master staf, dan 14 riwayat aktivitas secara instan. Lanjutkan?',
+    'Ya, Isi Data Dummy',
+    'Batal'
+  ).then(function(confirmed) {
+    if (confirmed) {
+      showProcessLoading('Mengisi Database...', 'Menyimpan 40 arsip statis, Berita Acara, dan log aktivitas ke Google Sheets...');
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideProcessLoading();
+          if (res && res.success) {
+            showSwalSuccess(res.message, 'Data Berhasil Dibuat!');
+            delete _pageHtmlCache['dashboard'];
+            delete _pageHtmlCache['daftar-arsip'];
+            loadArsipList(1);
+          } else {
+            showSwalError(res ? res.message : 'Terjadi kegagalan.', 'Gagal');
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideProcessLoading();
+          showSwalError('Error: ' + err.message, 'Kesalahan');
+        })
+        .seedFullDummyData(true);
+    }
+  });
+}
+
+// ============ EXPORT REKAPITULASI & DOKUMEN RESMI CETAK ============
+function openModalExportRekap() {
+  // Isi dropdown asal jika belum
+  var expAsal = document.getElementById('export-kode-asal');
+  var srcAsal = document.getElementById('filter-asal');
+  if (expAsal && srcAsal && expAsal.options.length <= 1) {
+    for (var i = 1; i < srcAsal.options.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = srcAsal.options[i].value;
+      opt.textContent = srcAsal.options[i].textContent;
+      expAsal.appendChild(opt);
+    }
+  }
+  toggleExportPeriodFields();
+  openModal('modal-export-rekap');
+}
+
+function toggleExportPeriodFields() {
+  var pType = document.getElementById('export-periode-type').value;
+  var gBulan = document.getElementById('export-group-bulan');
+  var gTahun = document.getElementById('export-group-tahun');
+  
+  if (pType === 'bulan') {
+    if (gBulan) gBulan.style.display = 'block';
+    if (gTahun) gTahun.style.display = 'block';
+  } else if (pType === 'tahun') {
+    if (gBulan) gBulan.style.display = 'none';
+    if (gTahun) gTahun.style.display = 'block';
+  } else {
+    if (gBulan) gBulan.style.display = 'none';
+    if (gTahun) gTahun.style.display = 'none';
+  }
+}
+
+function getExportParams() {
+  return {
+    periodeType: document.getElementById('export-periode-type').value,
+    tahun: document.getElementById('export-tahun').value,
+    bulan: document.getElementById('export-bulan').value,
+    kodeAsal: document.getElementById('export-kode-asal').value
+  };
+}
+
+function doExportExcel() {
+  var params = getExportParams();
+  showProcessLoading('Mempersiapkan File Excel...', 'Mengumpulkan arsip dan menyusun lembar kerja...');
+
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      hideProcessLoading();
+      if (resp && resp.success && resp.data) {
+        var data = resp.data;
+        if (!data.items || data.items.length === 0) {
+          showSwalWarning('Tidak ada arsip yang ditemukan pada kriteria filter yang dipilih.');
+          return;
+        }
+        generateAndDownloadCSV(data);
+        closeModal('modal-export-rekap');
+        showSwalSuccess('File rekapitulasi berhasil diunduh dalam format Excel (.csv)!');
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal mengekspor data.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .getRekapitulasiArsipExport(params);
+}
+
+function generateAndDownloadCSV(d) {
+  var rows = [];
+  // Header instansi
+  rows.push(['PEMERINTAH KABUPATEN MANGGARAI BARAT']);
+  rows.push(['DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH']);
+  rows.push(['DAFTAR ARSIP HASIL ALIH MEDIA ARSIP STATIS']);
+  rows.push(['Periode:', d.periodeLabel]);
+  rows.push(['Tanggal Export:', d.tanggalCetak]);
+  rows.push([]);
+
+  // Kolom Tabel Lengkap (16 Kolom Sesuai Input Arsip)
+  rows.push([
+    'No',
+    'Nomor Box',
+    'Kode Unik Arsip',
+    'Nomor Arsip / Nomor Arsip Asli',
+    'Kode Klasifikasi Asli',
+    'Uraian Informasi Arsip',
+    'Kurun Waktu',
+    'Jenis Arsip',
+    'Kategori Urusan',
+    'Unit Pengolah / Pengelola',
+    'Jumlah Berkas',
+    'Jumlah Lembar',
+    'Lokasi Simpan Fisik',
+    'Kondisi Fisik',
+    'Status Keterbukaan',
+    'Kesesuaian Standar'
+  ]);
+
+  // Data items
+  d.items.forEach(function(item) {
+    rows.push([
+      item.no,
+      item.nomorBox,
+      item.kodeUnik,
+      item.nomorAsli || '-',
+      item.kodeKlasifikasiAsli || '-',
+      item.deskripsi,
+      item.kurunWaktu,
+      item.jenisArsip,
+      item.kategoriUrusan || '-',
+      item.unitPengelola || item.asalArsip || '-',
+      item.jumlahBerkas || 1,
+      item.jumlahLembar,
+      item.lokasiSimpan || '-',
+      item.kondisiFisik || 'Baik',
+      item.statusKeterbukaan || 'Terbuka',
+      item.kesesuaianStandar || 'Sesuai Standar ANRI'
+    ]);
+  });
+
+  // Footer totals
+  rows.push([]);
+  rows.push(['Total Arsip', d.totalArsip + ' Berkas']);
+  rows.push(['Total Lembar', d.totalLembar + ' Lembar']);
+  rows.push([]);
+  
+  // TTD Pejabat
+  var kabid = (d.pejabat && d.pejabat.kabid) ? d.pejabat.kabid : {};
+  var pelaksana = (d.pejabat && d.pejabat.pelaksana) ? d.pejabat.pelaksana : {};
+  rows.push(['Mengetahui,', '', '', '', '', 'Labuan Bajo, ' + d.tanggalCetak]);
+  rows.push([kabid.jabatan || 'Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip', '', '', '', '', 'Pelaksana Alih Media,']);
+  rows.push([]);
+  rows.push([]);
+  rows.push([]);
+  rows.push([kabid.nama || 'Stefanus Rahmat, S.Sos', '', '', '', '', pelaksana.nama || 'Muhammad Dzaky Nathanegara, A.Md']);
+  rows.push(['NIP. ' + (kabid.nip || '19850215 201001 1 018'), '', '', '', '', 'NIP. ' + (pelaksana.nip || '19980508 202506 1 004')]);
+
+  // Convert to CSV with BOM for Excel UTF-8 support
+  var csvContent = '\uFEFF';
+  rows.forEach(function(r) {
+    var line = r.map(function(cell) {
+      if (cell === null || cell === undefined) cell = '';
+      var str = cell.toString().replace(/"/g, '""');
+      return '"' + str + '"';
+    }).join(';');
+    csvContent += line + '\r\n';
+  });
+
+  var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  var filename = 'Rekapitulasi_Alih_Media_SIASTA_' + (d.periodeLabel || 'Export').replace(/[^a-zA-Z0-9]/g, '_') + '.csv';
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function doPreviewPrintRekap() {
+  var params = getExportParams();
+  showProcessLoading('Menyiapkan Dokumen Rekap...', 'Mengambil arsip dan menyusun format cetak resmi...');
+
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      hideProcessLoading();
+      if (resp && resp.success && resp.data) {
+        var data = resp.data;
+        if (!data.items || data.items.length === 0) {
+          showSwalWarning('Tidak ada arsip yang ditemukan pada periode yang dipilih.');
+          return;
+        }
+        populateRekapPrintModal(data);
+        closeModal('modal-export-rekap');
+        openModal('modal-preview-rekap-print');
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal memuat dokumen rekapitulasi.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideProcessLoading();
+      showSwalError(err.message);
+    })
+    .getRekapitulasiArsipExport(params);
+}
+
+function populateRekapPrintModal(d) {
+  var logoEl = document.getElementById('rekap-doc-logo-img');
+  if (logoEl) logoEl.src = window._logoMabar || '';
+  var pe = d.pejabat || {};
+  document.getElementById('rekap-doc-alamat-kop').textContent = pe.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT';
+  document.getElementById('rekap-doc-periode').textContent = d.periodeLabel || 'Tahun 2026';
+  document.getElementById('rekap-doc-tgl-surat').textContent = d.tanggalCetak || '';
+
+  // Render Rows
+  var tbody = document.getElementById('rekap-doc-tbody');
+  var html = '';
+  d.items.forEach(function(item) {
+    html += '<tr style="vertical-align:top; font-size:7.5pt;">' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + item.no + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.nomorBox) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px; font-weight:bold;">' + escapeHtml(item.kodeUnik) + '</td>' +
+      '<td style="border:1px solid #000; padding:3px;">' + escapeHtml(item.nomorAsli || '-') + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kodeKlasifikasiAsli || '-') + '</td>' +
+      '<td style="border:1px solid #000; padding:3px; text-align:justify;">' + escapeHtml(item.deskripsi) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kurunWaktu) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.jenisArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kategoriUrusan || '-') + '</td>' +
+      '<td style="border:1px solid #000; padding:3px;">' + escapeHtml(item.unitPengelola || item.asalArsip || '-') + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + (item.jumlahBerkas || 1) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + item.jumlahLembar + '</td>' +
+      '<td style="border:1px solid #000; padding:3px;">' + escapeHtml(item.lokasiSimpan || '-') + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kondisiFisik || 'Baik') + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.statusKeterbukaan || 'Terbuka') + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kesesuaianStandar || 'Sesuai') + '</td>' +
+    '</tr>';
+  });
+  tbody.innerHTML = html;
+
+  document.getElementById('rekap-doc-total-lbr').textContent = d.totalLembar || 0;
+  document.getElementById('rekap-doc-total-berkas').textContent = d.totalArsip || 0;
+
+  // Pejabat Kabid (Mengetahui)
+  if (pe.kabid) {
+    document.getElementById('rekap-doc-kabid-nama').textContent = (pe.kabid.nama || 'STEFANUS RAHMAT, S.Sos').toUpperCase();
+    document.getElementById('rekap-doc-kabid-pangkat').textContent = pe.kabid.pangkat || 'Pembina / IV a';
+    document.getElementById('rekap-doc-kabid-nip').textContent = pe.kabid.nip || '19850215 201001 1 018';
+    document.getElementById('rekap-doc-kabid-jabatan').textContent = pe.kabid.jabatan || 'Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip';
+  }
+
+  // Pelaksana
+  if (pe.pelaksana) {
+    document.getElementById('rekap-doc-pelaksana-nama').textContent = (pe.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md').toUpperCase();
+    document.getElementById('rekap-doc-pelaksana-nip').textContent = pe.pelaksana.nip || '19980508 202506 1 004';
+  }
+}
+
+function printRekapDoc() {
+  var sheet = document.getElementById('rekap-print-sheet');
+  if (!sheet) return;
+
+  var printWindow = window.open('', '_blank');
+  printWindow.document.write('<!DOCTYPE html><html><head><title>Daftar Arsip Hasil Alih Media</title>');
+  printWindow.document.write('<style>');
+  printWindow.document.write('@page { size: A4 landscape; margin: 15mm 12mm; }');
+  printWindow.document.write('body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; font-size: 10pt; line-height: 1.3; }');
+  printWindow.document.write('table { border-collapse: collapse; width: 100%; }');
+  printWindow.document.write('th, td { border: 1px solid #000; }');
+  printWindow.document.write('@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .watermark-pdf-overlay { display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }');
+  printWindow.document.write('</style></head><body>');
+  printWindow.document.write(sheet.innerHTML);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(function() {
+    printWindow.print();
+    printWindow.close();
+  }, 350);
+}
+
+if (typeof init_daftar_arsip === 'function') init_daftar_arsip();
+</script>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>SIASTA — Sistem Informasi Alih Media Arsip Statis</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Select2 & jQuery CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <!-- SweetAlert2 CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <?!= include('Styles') ?>
+  <script>
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('in-iframe');
+    }
+  </script>
+</head>
+<body>
+  <!-- Top Animated Progress Bar -->
+  <div class="top-progress-bar" id="top-progress-bar"></div>
+
+  <!-- Zero-Reload Unified Shell: Auth View -->
+  <div id="auth-view" class="<?= isLoggedIn ? 'hidden' : '' ?>" style="<?= isLoggedIn ? 'display:none;' : 'display:flex;' ?>">
+    <?!= include('Login') ?>
+  </div>
+
+  <!-- Zero-Reload Unified Shell: Main App Container -->
+  <div class="app-container <?= isLoggedIn ? '' : 'hidden' ?>" id="main-app-container" style="<?= isLoggedIn ? 'display:flex;' : 'display:none;' ?>">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon">SA</div>
+          <div>
+            <div class="logo-text">SIASTA</div>
+            <div class="logo-subtitle">Alih Media Arsip Statis</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Utama</div>
+        <a class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a class="nav-item" data-page="input-arsip" onclick="navigateTo('input-arsip')">
+          <span class="nav-icon">📝</span> Input Arsip Baru
+        </a>
+        <a class="nav-item" data-page="daftar-arsip" onclick="navigateTo('daftar-arsip')">
+          <span class="nav-icon">📁</span> Daftar Arsip
+        </a>
+
+        <div class="nav-section-title">Monitoring</div>
+        <a class="nav-item" data-page="target-realisasi" onclick="navigateTo('target-realisasi')">
+          <span class="nav-icon">🎯</span> Target & Realisasi
+        </a>
+
+        <div class="nav-section-title">Berita Acara</div>
+        <a class="nav-item" data-page="dashboard-ba" onclick="navigateTo('dashboard-ba')">
+          <span class="nav-icon">📋</span> Berita Acara
+        </a>
+
+        <div class="nav-section-title">Laporan</div>
+        <a class="nav-item" data-page="generate-laporan" onclick="navigateTo('generate-laporan')">
+          <span class="nav-icon">📑</span> Generate Laporan
+        </a>
+
+        <div class="nav-section-title">Administrasi</div>
+        <a class="nav-item" data-page="kelola-staf" onclick="navigateTo('kelola-staf')">
+          <span class="nav-icon">👥</span> Kelola Staf
+        </a>
+        <a class="nav-item" data-page="log-aktivitas" onclick="navigateTo('log-aktivitas')">
+          <span class="nav-icon">📜</span> Log Aktivitas
+        </a>
+        <a class="nav-item" data-page="pengaturan" onclick="navigateTo('pengaturan')">
+          <span class="nav-icon">⚙️</span> Pengaturan
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="user-avatar"><?= userInitial ?></div>
+          <div class="user-info">
+            <div class="user-name" id="user-name"><?= userName ?></div>
+            <div class="user-role" id="user-role"><?= userJabatan ?></div>
+          </div>
+          <button class="btn-logout" onclick="doLogout()" title="Keluar">🚪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button type="button" class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Menu Navigasi" title="Buka Menu">
+            <span>☰</span>
+          </button>
+          <div class="page-title-section">
+            <h1 class="page-title" id="page-title">Dashboard</h1>
+          </div>
+        </div>
+        <div class="page-breadcrumb">
+          <?= instansi ?> — <?= daerah ?>
+        </div>
+      </header>
+
+      <div class="content-area" id="page-content">
+        <!-- Page content loaded here dynamically -->
+        <div class="loading-overlay" id="loading-overlay" style="display:flex; position:relative; min-height:300px;">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Memuat halaman...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <?!= include('ClientScript') ?>
+  
+  <script>
+    // Auto-load dashboard on init if logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      <? if (isLoggedIn) { ?>
+        navigateTo('dashboard');
+      <? } ?>
+    });
+  </script>
+</body>
+</html>

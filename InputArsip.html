@@ -1,0 +1,614 @@
+<!-- Input Arsip Baru Page -->
+<div id="input-arsip-page">
+  <div class="card" style="max-width:960px;">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <span class="card-title">📝 Formulir Input Alih Media Arsip Baru</span>
+      <span class="badge badge-info" style="font-size:12px;">Sesuai Peraturan Kepala ANRI Nomor 2 Tahun 2021</span>
+    </div>
+    <div class="card-body">
+      <form id="form-arsip" onsubmit="return false;">
+        
+        <!-- Section 1: Identifikasi & Petugas -->
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--primary);">📌 1. Identifikasi & Petugas</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nama Petugas Alih Media <span class="required">*</span></label>
+            <input type="text" class="form-control" id="stafNama" readonly style="background:var(--border-light, #f8fafc); font-weight:600; color:var(--primary);" placeholder="Otomatis dari profil akun masuk">
+            <input type="hidden" id="stafId">
+            <p class="form-hint">Otomatis terisi dari identitas akun yang sedang login (tidak bisa diedit manual)</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status Keterbukaan <span class="required">*</span></label>
+            <select class="form-control" id="statusKeterbukaan" required>
+              <option value="Tertutup" selected>Tertutup (Default)</option>
+              <option value="Terbuka">Terbuka</option>
+            </select>
+            <p class="form-hint">Keterbukaan akses arsip statis</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Jenis Arsip <span class="required">*</span></label>
+            <select class="form-control" id="jenisArsip" required>
+              <option value="Tekstual" selected>Tekstual</option>
+              <option value="Foto">Foto</option>
+              <option value="Kartografi/Gambar Teknik">Kartografi / Gambar Teknik</option>
+              <option value="Kearsitekturan">Kearsitekturan</option>
+              <option value="Film/Video">Film / Video</option>
+              <option value="Rekaman Suara">Rekaman Suara</option>
+              <option value="Bentuk Lain">Bentuk Lain</option>
+            </select>
+            <p class="form-hint">Pilih sesuai bentuk fisik media arsip</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kategori Urusan <span class="required">*</span></label>
+            <select class="form-control" id="kategoriUrusan" required>
+              <option value="Pemerintahan" selected>Pemerintahan</option>
+              <option value="Pembangunan">Pembangunan</option>
+              <option value="Kesra">Kesejahteraan Rakyat (Kesra)</option>
+              <option value="Keuangan">Keuangan</option>
+              <option value="Kepegawaian">Kepegawaian</option>
+            </select>
+            <p class="form-hint">Sesuai bidang urusan/substansi isi arsip</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Kode Klasifikasi Asli <span class="required">*</span></label>
+            <input type="text" class="form-control" id="kodeKlasifikasiAsli" required placeholder="Contoh: 045.2, HK.01, UM.02">
+            <p class="form-hint">Salin PERSIS dari kode klasifikasi arsip aslinya</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor Asli / Referensi Asli</label>
+            <input type="text" class="form-control" id="nomorAsli" placeholder="Contoh: 180/HK/2004 (opsional)">
+            <p class="form-hint">Salin nomor surat/naskah lengkap dari arsip jika ada</p>
+          </div>
+        </div>
+
+        <!-- Section 2: Penomoran & Sumber Fisik -->
+        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">🏷️ 2. Penomoran & Lokasi Simpan</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Asal / Sumber Arsip <span class="required">*</span></label>
+            <select class="form-control select2" id="kodeAsal" data-placeholder="— Cari / Pilih Asal Arsip —" required onchange="onAsalBoxChange()">
+              <option value="">— Cari / Pilih Asal Arsip —</option>
+              <? if (typeof kodeAsalList !== 'undefined' && kodeAsalList && kodeAsalList.length) { ?>
+                <? for (var i = 0; i < kodeAsalList.length; i++) { ?>
+                  <option value="<?= kodeAsalList[i].kode ?>" data-nama="<?= kodeAsalList[i].nama ?>"><?= kodeAsalList[i].kode ?> — <?= kodeAsalList[i].nama ?></option>
+                <? } ?>
+              <? } ?>
+            </select>
+            <p class="form-hint">Menentukan awalan Kode Unik sistem</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor Box Fisik <span class="required">*</span></label>
+            <input type="number" class="form-control" id="nomorBox" min="1" max="999" placeholder="Contoh: 5" required onchange="onAsalBoxChange()">
+            <p class="form-hint">Angka nomor box penyimpanan fisik</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Kode Unik Arsip (Otomatis / Bisa Diedit)</label>
+            <input type="text" class="form-control" id="kodeUnik" placeholder="Contoh: KOM-B05-001" style="background:var(--border-light, #f8fafc);font-weight:700;color:var(--accent, #d97706);font-size:16px;">
+            <p class="form-hint">Format: KODE-BBox-NomorUrut (terisi otomatis saat asal & box dipilih)</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit Pengelola / Pencipta Asal <span class="required">*</span></label>
+            <input type="text" class="form-control" id="unitPengelola" required placeholder="Contoh: Kantor Camat Komodo">
+            <p class="form-hint">Nama instansi/unit SAAT arsip dibuat, bukan nama sekarang</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Kurun Waktu (Tahun Pembuatan) <span class="required">*</span></label>
+            <input type="text" class="form-control" id="kurunWaktu" required placeholder="Contoh: 2004">
+            <p class="form-hint">Tahun arsip diciptakan/diterbitkan</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rangkap Ke <span class="required">*</span></label>
+            <input type="number" class="form-control" id="rangkapKe" min="1" value="1" required>
+            <p class="form-hint">Membedakan salinan sah dari duplikat (default: 1)</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Jumlah Lembar Fisik <span class="required">*</span></label>
+            <input type="number" class="form-control" id="jumlahLembar" min="1" value="1" required placeholder="Jumlah lembar kertas">
+            <p class="form-hint">Isi jumlah lembar dalam 1 berkas ini (dihitung pada dashboard)</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jumlah Berkas <span class="required">*</span></label>
+            <input type="number" class="form-control" id="jumlahBerkas" min="1" value="1" required>
+            <p class="form-hint">Default 1 berkas per entri formulir</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Kondisi Fisik <span class="required">*</span></label>
+            <select class="form-control" id="kondisiFisik" required>
+              <option value="Baik" selected>Baik</option>
+              <option value="Cukup">Cukup</option>
+              <option value="Rusak Ringan">Rusak Ringan</option>
+              <option value="Rusak Berat">Rusak Berat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lokasi Simpan Fisik <span class="required">*</span></label>
+            <input type="text" class="form-control" id="lokasiSimpan" required placeholder="Contoh: Depot Lt.1 - Rak A - Box 5">
+          </div>
+        </div>
+
+        <!-- Section 3: Uraian Isi -->
+        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">📄 3. Uraian & Deskripsi Isi</h3>
+        
+        <div class="form-group">
+          <label class="form-label">Uraian / Deskripsi Arsip <span class="required">*</span></label>
+          <textarea class="form-control" id="deskripsi" rows="3" required placeholder="Uraikan isi/perihal pokok arsip secara jelas dan lengkap"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Keterangan Tambahan</label>
+          <textarea class="form-control" id="keterangan" rows="2" placeholder="Catatan kondisi spesifik atau informasi pelengkap jika diperlukan"></textarea>
+        </div>
+
+        <!-- Section 4: Upload File & Waktu Unggah Otomatis -->
+        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">📤 4. Upload File Hasil Alih Media</h3>
+        
+        <div class="file-upload-area" id="upload-area">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">Klik atau seret file hasil alih media ke sini</div>
+          <div class="upload-hint">Format: TIFF, JPG, PNG, PDF — Maks. 10MB</div>
+          <input type="file" id="arsipFile" accept=".tiff,.tif,.jpg,.jpeg,.png,.pdf" style="display:none" onchange="onFileScanSelected('arsipFile','arsipFile-preview')">
+        </div>
+        <div id="arsipFile-preview"></div>
+
+        <!-- Waktu Unggah Otomatis & Watermark Status -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <div id="upload-time-badge-box" style="display:none;">
+            <span class="badge badge-success" style="font-size:12px; padding:6px 12px;">
+              🕒 Waktu Unggah: <strong id="waktuUnggahLabel">-</strong>
+            </span>
+            <input type="hidden" id="waktuUnggah">
+          </div>
+          
+          <div id="upload-watermark-badge-box" style="display:none;">
+            <span class="badge badge-primary" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:8px;">
+              🛡️ Watermark Digital Otomatis: <strong style="color:#60a5fa;">Terpasang</strong>
+              <button type="button" class="btn btn-gold btn-sm" onclick="openModalWatermarkPreview()" style="padding:2px 8px; font-size:11px; margin-left:4px;">
+                👁️ Pratinjau Watermark
+              </button>
+            </span>
+          </div>
+        </div>
+        <p class="form-hint mt-1">🔒 Cap watermark dinas Pemkab Manggarai Barat disematkan otomatis pada berkas akses alih media.</p>
+
+        <!-- Section 5: QA Checklist Standar ANRI 2021 -->
+        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">✅ 5. Checklist Kualitas (Standar Perka ANRI No. 2/2021)</h3>
+        <div class="card" style="background:var(--border-light, #f8fafc);border:1px solid var(--border, #e2e8f0);">
+          <div class="card-body" style="padding:14px 18px;">
+            <div id="qa-checklist">
+              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="qa-0" name="qa-checklist" checked>
+                <label for="qa-0" style="margin-bottom:0; cursor:pointer;">Kualitas Scan Baik (min. 300dpi untuk master pelestarian)</label>
+              </div>
+              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="qa-1" name="qa-checklist" checked>
+                <label for="qa-1" style="margin-bottom:0; cursor:pointer;">Data Sesuai (informasi fisik cocok persis dengan lembar scan digital)</label>
+              </div>
+              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="qa-2" name="qa-checklist" checked>
+                <label for="qa-2" style="margin-bottom:0; cursor:pointer;">Watermark Terpasang (tanda pengaman digital resmi dinas alih media)</label>
+              </div>
+              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="qa-3" name="qa-checklist" checked>
+                <label for="qa-3" style="margin-bottom:0; cursor:pointer;">Sudah Sesuai Standar (Peraturan Kepala ANRI Nomor 2 Tahun 2021)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div style="margin-top:28px; display:flex; gap:12px; justify-content:flex-end;">
+          <button type="button" class="btn btn-outline" onclick="resetForm()">🔄 Reset Form</button>
+          <button type="button" class="btn btn-primary btn-lg" id="btn-submit" onclick="submitArsip()">
+            💾 Simpan Arsip Alih Media
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PRATINJAU WATERMARK CANVAS -->
+  <div class="modal-overlay" id="modal-watermark-preview" style="display:none; align-items:flex-start; padding:20px 10px; overflow-y:auto;">
+    <div class="modal" style="max-width:760px; width:100%; margin:20px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+      <div class="modal-header" style="background:#1B2A4A; color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:18px;">🛡️</span>
+          <span class="modal-title" style="color:#fff; font-weight:700;">Pratinjau Watermark Visual Alih Media</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-watermark-preview')" style="color:#fff;">✕</button>
+      </div>
+      <div class="modal-body" style="padding:20px; background:#f8fafc; text-align:center;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:16px; display:inline-block; max-width:100%; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <canvas id="canvas-watermark-preview" style="max-width:100%; height:auto; border:1px solid #cbd5e1; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.1);"></canvas>
+        </div>
+        <div style="margin-top:16px; font-size:12px; color:var(--text-secondary); line-height:1.5;">
+          <strong>Teks Cap Watermark:</strong><br>
+          <span id="wm-modal-text" style="font-family:'Plus Jakarta Sans', Arial, sans-serif; background:#f1f5f9; padding:8px 14px; border-radius:6px; color:#334155; font-weight:700; display:inline-block; line-height:1.4;">
+            ARSIP HASIL ALIH MEDIA<br>
+            DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
+            KABUPATEN MANGGARAI BARAT
+          </span>
+          <div style="margin-top:6px; color:#059669; font-weight:600;">
+            ✓ Sesuai SOP Pelindungan Fisik & Otentisitas Arsip Statis Pemkab Manggarai Barat
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="background:#fff; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
+        <button type="button" class="btn btn-primary" onclick="closeModal('modal-watermark-preview')">Tutup Pratinjau</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function init_input_arsip() {
+  // 1. Sinkronisasi Nama Petugas dari Sesi Login
+  syncActiveStaffField();
+
+  // 2. Load kode asal arsip jika belum ter-render
+  var select = document.getElementById('kodeAsal');
+  if (select && select.options.length <= 1) {
+    google.script.run
+      .withSuccessHandler(function(response) {
+        if (response.success && response.data) {
+          response.data.forEach(function(item) {
+            var opt = document.createElement('option');
+            opt.value = item.kode;
+            opt.textContent = item.kode + ' — ' + item.nama;
+            opt.setAttribute('data-nama', item.nama);
+            select.appendChild(opt);
+          });
+
+          if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+            jQuery('#kodeAsal').select2({ placeholder: '— Cari / Pilih Asal Arsip —', width: '100%', dropdownAutoWidth: false })
+              .off('change.asalBox').on('change.asalBox', function() { onAsalBoxChange(); });
+          }
+        }
+      })
+      .getKodeAsalList();
+  } else if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    jQuery('#kodeAsal').select2({ placeholder: '— Cari / Pilih Asal Arsip —', width: '100%', dropdownAutoWidth: false })
+      .off('change.asalBox').on('change.asalBox', function() { onAsalBoxChange(); });
+  }
+
+  // 3. Init drag & drop
+  initDragDrop('upload-area', 'arsipFile');
+}
+
+function syncActiveStaffField() {
+  var staffNameInput = document.getElementById('stafNama');
+  var staffIdInput = document.getElementById('stafId');
+  if (!staffNameInput) return;
+
+  var user = null;
+  if (typeof getActiveUserFromSession === 'function') {
+    user = getActiveUserFromSession();
+  }
+  if (!user) {
+    try {
+      var raw = sessionStorage.getItem('siasta_user');
+      if (raw) user = JSON.parse(raw);
+    } catch (e) {}
+  }
+
+  if (user && user.nama) {
+    staffNameInput.value = user.nama + (user.jabatan ? ' (' + user.jabatan + ')' : '');
+    if (staffIdInput) staffIdInput.value = user.id || '';
+  } else {
+    staffNameInput.value = 'Petugas Alih Media SIASTA';
+  }
+}
+
+var _defaultWatermarkLines = [
+  'ARSIP HASIL ALIH MEDIA',
+  'DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH',
+  'KABUPATEN MANGGARAI BARAT'
+];
+
+function onFileScanSelected(inputId, previewId) {
+  handleFileUpload(inputId, previewId);
+
+  var fileInput = document.getElementById(inputId);
+  if (fileInput && fileInput.files && fileInput.files.length > 0) {
+    var file = fileInput.files[0];
+    var now = new Date();
+    var formattedTime = formatDateIndo(now) + ' ' + padNumber(now.getHours(), 2) + ':' + padNumber(now.getMinutes(), 2) + ':' + padNumber(now.getSeconds(), 2) + ' WITA';
+    
+    var timeBadge = document.getElementById('upload-time-badge-box');
+    var timeLabel = document.getElementById('waktuUnggahLabel');
+    var timeInput = document.getElementById('waktuUnggah');
+    var wmBadge = document.getElementById('upload-watermark-badge-box');
+    
+    if (timeBadge) timeBadge.style.display = 'block';
+    if (timeLabel) timeLabel.textContent = formattedTime;
+    if (timeInput) timeInput.value = now.toISOString();
+    if (wmBadge) wmBadge.style.display = 'block';
+
+    // Generate watermark canvas preview
+    generateWatermarkOnCanvas(file);
+  }
+}
+
+function generateWatermarkOnCanvas(file) {
+  var canvas = document.getElementById('canvas-watermark-preview');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  var wmText = _defaultWatermarkText;
+  var wmEl = document.getElementById('wm-modal-text');
+  if (wmEl) wmEl.textContent = wmText;
+
+  if (file.type.indexOf('image') !== -1) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        // Set canvas to reasonable preview dimensions maintaining aspect ratio
+        var maxW = 680;
+        var scale = Math.min(maxW / img.width, 1);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        // Draw image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Draw diagonal watermark
+        drawWatermarkOverlay(ctx, canvas.width, canvas.height);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // For PDF or documents, draw simulated A4 page
+    canvas.width = 595;
+    canvas.height = 700;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw document border & lines
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+    // Sample document header simulation
+    ctx.fillStyle = '#1B2A4A';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PEMERINTAH KABUPATEN MANGGARAI BARAT', canvas.width / 2, 60);
+    ctx.font = '12px sans-serif';
+    ctx.fillText('BERKAS DOKUMEN ARSIP STATIS DIGITALISASI', canvas.width / 2, 80);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(50, 110, canvas.width - 100, 8);
+    ctx.fillRect(50, 130, canvas.width - 160, 8);
+    ctx.fillRect(50, 150, canvas.width - 120, 8);
+    ctx.fillRect(50, 180, canvas.width - 100, 250);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'italic 11px sans-serif';
+    ctx.fillText('[ Berkas Dokumen ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB) ]', canvas.width / 2, 460);
+
+    // Draw watermark
+    drawWatermarkOverlay(ctx, canvas.width, canvas.height);
+  }
+}
+
+function drawWatermarkOverlay(ctx, width, height) {
+  ctx.save();
+  ctx.translate(width / 2, height / 2);
+  ctx.rotate(-38 * Math.PI / 180);
+
+  var lines = typeof _defaultWatermarkLines !== 'undefined' ? _defaultWatermarkLines : [
+    'ARSIP HASIL ALIH MEDIA',
+    'DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH',
+    'KABUPATEN MANGGARAI BARAT'
+  ];
+
+  // Ukuran font responsif mengikuti dimensi canvas
+  var fontSize = Math.max(Math.round(width / 24), 16);
+  var lineHeight = fontSize * 1.35;
+
+  ctx.font = 'bold ' + fontSize + 'px "Plus Jakarta Sans", Arial, Helvetica, sans-serif';
+  ctx.fillStyle = 'rgba(100, 116, 139, 0.22)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  var totalHeight = (lines.length - 1) * lineHeight;
+  var startY = -totalHeight / 2;
+
+  lines.forEach(function(line, idx) {
+    ctx.fillText(line, 0, startY + (idx * lineHeight));
+  });
+
+  ctx.restore();
+}
+
+function openModalWatermarkPreview() {
+  openModal('modal-watermark-preview');
+}
+
+function onAsalBoxChange() {
+  var kodeAsal = document.getElementById('kodeAsal').value;
+  var nomorBox = document.getElementById('nomorBox').value;
+  
+  if (kodeAsal && nomorBox) {
+    google.script.run
+      .withSuccessHandler(function(response) {
+        if (response && response.success) {
+          document.getElementById('kodeUnik').value = response.data.kodeUnik;
+        }
+      })
+      .previewKodeUnik(kodeAsal, nomorBox);
+  } else {
+    document.getElementById('kodeUnik').value = '';
+  }
+}
+
+function submitArsip() {
+  var required = [
+    { id: 'statusKeterbukaan', label: 'Status Keterbukaan' },
+    { id: 'jenisArsip', label: 'Jenis Arsip' },
+    { id: 'kategoriUrusan', label: 'Kategori Urusan' },
+    { id: 'kodeKlasifikasiAsli', label: 'Kode Klasifikasi Asli' },
+    { id: 'kodeAsal', label: 'Asal Arsip' },
+    { id: 'nomorBox', label: 'Nomor Box' },
+    { id: 'unitPengelola', label: 'Unit Pengelola / Pencipta Asal' },
+    { id: 'kurunWaktu', label: 'Kurun Waktu' },
+    { id: 'jumlahLembar', label: 'Jumlah Lembar Fisik' },
+    { id: 'kondisiFisik', label: 'Kondisi Fisik' },
+    { id: 'lokasiSimpan', label: 'Lokasi Simpan Fisik' },
+    { id: 'deskripsi', label: 'Uraian / Deskripsi Arsip' }
+  ];
+
+  for (var i = 0; i < required.length; i++) {
+    var el = document.getElementById(required[i].id);
+    if (!el || !el.value || !el.value.trim()) {
+      showSwalWarning('Kolom "' + required[i].label + '" wajib diisi.', 'Form Belum Lengkap');
+      if (el) el.focus();
+      return;
+    }
+  }
+
+  // File scan check
+  var fileInput = document.getElementById('arsipFile');
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    showSwalWarning('Silakan pilih berkas hasil scan alih media terlebih dahulu.', 'Berkas Belum Diunggah');
+    return;
+  }
+  
+  // Collect QA checklist
+  var qaChecklist = [];
+  var uncheckedCount = 0;
+  document.querySelectorAll('input[name="qa-checklist"]').forEach(function(cb) {
+    qaChecklist.push({
+      item: cb.nextElementSibling.textContent,
+      checked: cb.checked
+    });
+    if (!cb.checked) uncheckedCount++;
+  });
+
+  if (uncheckedCount > 0) {
+    showSwalConfirm(
+      'Verifikasi Standar Alih Media ANRI',
+      'Terdapat ' + uncheckedCount + ' butir checklist standar mutu yang belum dicentang. Tetap lanjutkan simpan arsip?',
+      'Ya, Tetap Simpan',
+      'Periksa Kembali'
+    ).then(function(confirmed) {
+      if (confirmed) {
+        processSaveArsip(qaChecklist);
+      }
+    });
+  } else {
+    processSaveArsip(qaChecklist);
+  }
+}
+
+function processSaveArsip(qaChecklist) {
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span> Menyimpan...';
+  
+  showProcessLoading('Menyimpan Data Arsip...', 'Mengunggah file ke Google Drive, menerapkan watermark, dan mencatat alih media...');
+
+  var kodeAsalSelect = document.getElementById('kodeAsal');
+  var asalNama = kodeAsalSelect.selectedOptions[0] ? (kodeAsalSelect.selectedOptions[0].getAttribute('data-nama') || '') : '';
+
+  var formData = {
+    statusKeterbukaan: document.getElementById('statusKeterbukaan').value,
+    jenisArsip: document.getElementById('jenisArsip').value,
+    kategoriUrusan: document.getElementById('kategoriUrusan').value,
+    kodeKlasifikasiAsli: document.getElementById('kodeKlasifikasiAsli').value.trim(),
+    nomorAsli: document.getElementById('nomorAsli').value.trim(),
+    kodeAsal: kodeAsalSelect.value,
+    asalArsip: asalNama,
+    nomorBox: document.getElementById('nomorBox').value,
+    kodeUnik: document.getElementById('kodeUnik').value.trim(),
+    unitPengelola: document.getElementById('unitPengelola').value.trim(),
+    kurunWaktu: document.getElementById('kurunWaktu').value.trim(),
+    kurunWaktuMulai: document.getElementById('kurunWaktu').value.trim(),
+    kurunWaktuAkhir: '',
+    rangkapKe: document.getElementById('rangkapKe').value || 1,
+    jumlahLembar: document.getElementById('jumlahLembar').value || 1,
+    jumlahBerkas: document.getElementById('jumlahBerkas').value || 1,
+    kondisiFisik: document.getElementById('kondisiFisik').value,
+    lokasiSimpan: document.getElementById('lokasiSimpan').value.trim(),
+    deskripsi: document.getElementById('deskripsi').value.trim(),
+    keterangan: document.getElementById('keterangan').value.trim(),
+    waktuUnggah: document.getElementById('waktuUnggah').value || new Date().toISOString(),
+    qaChecklist: qaChecklist,
+    activeUser: (typeof getActiveUserFromSession === 'function' ? getActiveUserFromSession() : null)
+  };
+  
+  readFileAsBase64('arsipFile', function(fileInfo) {
+    if (fileInfo) {
+      formData.fileData = fileInfo.data;
+      formData.fileName = fileInfo.name;
+      formData.fileMimeType = fileInfo.type;
+    }
+    
+    google.script.run
+      .withSuccessHandler(function(response) {
+        btn.disabled = false;
+        btn.innerHTML = '💾 Simpan Arsip Alih Media';
+        hideProcessLoading();
+        
+        if (response && response.success) {
+          showSwalSuccess(response.message || 'Arsip berhasil disimpan!', 'Berhasil Disimpan');
+          resetForm();
+          // Invalidate cache
+          if (typeof _pageHtmlCache !== 'undefined') {
+            delete _pageHtmlCache['daftar-arsip'];
+            delete _pageHtmlCache['dashboard'];
+          }
+        } else {
+          showSwalError((response ? response.message : '') || 'Gagal menyimpan arsip.', 'Gagal Menyimpan');
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = '💾 Simpan Arsip Alih Media';
+        hideProcessLoading();
+        showSwalError('Error: ' + err.message, 'Kesalahan Server');
+      })
+      .saveArsip(formData);
+  });
+}
+
+function resetForm() {
+  document.getElementById('form-arsip').reset();
+  document.getElementById('kodeUnik').value = '';
+  document.getElementById('arsipFile-preview').innerHTML = '';
+  
+  var timeBadge = document.getElementById('upload-time-badge-box');
+  if (timeBadge) timeBadge.style.display = 'none';
+  var timeInput = document.getElementById('waktuUnggah');
+  if (timeInput) timeInput.value = '';
+
+  if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    jQuery('#form-arsip .select2').val('').trigger('change');
+  }
+
+  syncActiveStaffField();
+}
+
+if (typeof init_input_arsip === 'function') init_input_arsip();
+</script>
