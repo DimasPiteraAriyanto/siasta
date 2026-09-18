@@ -397,11 +397,16 @@ function switchPengaturanTab(tabKey) {
     }
   });
 }
+window.switchPengaturanTab = switchPengaturanTab;
 
 function savePengaturan() {
-  var target = document.getElementById('set-target').value;
-  var watermark = document.getElementById('set-watermark').value;
-  var alamatKop = document.getElementById('set-alamat-kop').value;
+  var targetEl = document.getElementById('set-target');
+  var watermarkEl = document.getElementById('set-watermark');
+  var alamatKopEl = document.getElementById('set-alamat-kop');
+
+  var target = targetEl ? targetEl.value : 250;
+  var watermark = watermarkEl ? watermarkEl.value : '';
+  var alamatKop = alamatKopEl ? alamatKopEl.value : '';
   
   startProgressBar();
   showProcessLoading('Menyimpan Pengaturan...', 'Menyimpan konfigurasi profil dinas...');
@@ -434,22 +439,26 @@ function loadPejabatSettings() {
     .withSuccessHandler(function(resp) {
       if (resp && resp.success && resp.data) {
         var d = resp.data;
+        var setVal = function(id, val) {
+          var el = document.getElementById(id);
+          if (el && val !== undefined) el.value = val;
+        };
         if (d.kadis) {
-          if (d.kadis.nama) document.getElementById('ttd-kadis-nama').value = d.kadis.nama;
-          if (d.kadis.pangkat) document.getElementById('ttd-kadis-pangkat').value = d.kadis.pangkat;
-          if (d.kadis.nip) document.getElementById('ttd-kadis-nip').value = d.kadis.nip;
-          if (d.kadis.jabatan) document.getElementById('ttd-kadis-jabatan').value = d.kadis.jabatan;
+          setVal('ttd-kadis-nama', d.kadis.nama);
+          setVal('ttd-kadis-pangkat', d.kadis.pangkat);
+          setVal('ttd-kadis-nip', d.kadis.nip);
+          setVal('ttd-kadis-jabatan', d.kadis.jabatan);
         }
         if (d.kabid) {
-          if (d.kabid.nama) document.getElementById('ttd-kabid-nama').value = d.kabid.nama;
-          if (d.kabid.pangkat) document.getElementById('ttd-kabid-pangkat').value = d.kabid.pangkat;
-          if (d.kabid.nip) document.getElementById('ttd-kabid-nip').value = d.kabid.nip;
-          if (d.kabid.jabatan) document.getElementById('ttd-kabid-jabatan').value = d.kabid.jabatan;
+          setVal('ttd-kabid-nama', d.kabid.nama);
+          setVal('ttd-kabid-pangkat', d.kabid.pangkat);
+          setVal('ttd-kabid-nip', d.kabid.nip);
+          setVal('ttd-kabid-jabatan', d.kabid.jabatan);
         }
         if (d.pelaksana) {
-          if (d.pelaksana.nama) document.getElementById('ttd-pelaksana-nama').value = d.pelaksana.nama;
-          if (d.pelaksana.nip) document.getElementById('ttd-pelaksana-nip').value = d.pelaksana.nip;
-          if (d.pelaksana.jabatan) document.getElementById('ttd-pelaksana-jabatan').value = d.pelaksana.jabatan;
+          setVal('ttd-pelaksana-nama', d.pelaksana.nama);
+          setVal('ttd-pelaksana-nip', d.pelaksana.nip);
+          setVal('ttd-pelaksana-jabatan', d.pelaksana.jabatan);
         }
       }
     })
@@ -457,19 +466,23 @@ function loadPejabatSettings() {
 }
 
 function savePejabatSettings() {
+  var getVal = function(id) {
+    var el = document.getElementById(id);
+    return el ? el.value : '';
+  };
   var payload = {
-    kadisNama: document.getElementById('ttd-kadis-nama').value,
-    kadisPangkat: document.getElementById('ttd-kadis-pangkat').value,
-    kadisNip: document.getElementById('ttd-kadis-nip').value,
-    kadisJabatan: document.getElementById('ttd-kadis-jabatan').value,
-    kabidNama: document.getElementById('ttd-kabid-nama').value,
-    kabidPangkat: document.getElementById('ttd-kabid-pangkat').value,
-    kabidNip: document.getElementById('ttd-kabid-nip').value,
-    kabidJabatan: document.getElementById('ttd-kabid-jabatan').value,
-    pelaksanaNama: document.getElementById('ttd-pelaksana-nama').value,
-    pelaksanaNip: document.getElementById('ttd-pelaksana-nip').value,
-    pelaksanaJabatan: document.getElementById('ttd-pelaksana-jabatan').value,
-    alamatKop: document.getElementById('set-alamat-kop') ? document.getElementById('set-alamat-kop').value : ''
+    kadisNama: getVal('ttd-kadis-nama'),
+    kadisPangkat: getVal('ttd-kadis-pangkat'),
+    kadisNip: getVal('ttd-kadis-nip'),
+    kadisJabatan: getVal('ttd-kadis-jabatan'),
+    kabidNama: getVal('ttd-kabid-nama'),
+    kabidPangkat: getVal('ttd-kabid-pangkat'),
+    kabidNip: getVal('ttd-kabid-nip'),
+    kabidJabatan: getVal('ttd-kabid-jabatan'),
+    pelaksanaNama: getVal('ttd-pelaksana-nama'),
+    pelaksanaNip: getVal('ttd-pelaksana-nip'),
+    pelaksanaJabatan: getVal('ttd-pelaksana-jabatan'),
+    alamatKop: getVal('set-alamat-kop')
   };
 
   showProcessLoading('Menyimpan Data Pejabat...', 'Memperbarui nama dan NIP penandatangan dokumen dinas...');
@@ -576,6 +589,8 @@ function runSetup(funcName, arg) {
       runner[funcName]();
     }
   });
+}
+
 function triggerClearDummyData() {
   showSwalConfirm(
     'Hapus Seluruh Data Dummy?',

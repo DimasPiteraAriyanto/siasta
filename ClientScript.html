@@ -219,6 +219,29 @@ function navigateTo(page, param) {
     .getPageContent(page, param);
 }
 
+// Global Handler: Switch Tab Pengaturan Sistem
+window.switchPengaturanTab = function(tabKey) {
+  var tabs = ['profil', 'template', 'ttd', 'asal', 'tools'];
+  tabs.forEach(function(t) {
+    var pane = document.getElementById('tab-pane-' + t);
+    var btn = document.getElementById('tab-btn-' + t);
+    if (pane) pane.style.display = (t === tabKey) ? 'block' : 'none';
+    if (btn) {
+      if (t === tabKey) {
+        btn.classList.add('active');
+        btn.style.color = 'var(--primary)';
+        btn.style.fontWeight = '700';
+        btn.style.borderBottom = '3px solid var(--primary)';
+      } else {
+        btn.classList.remove('active');
+        btn.style.color = 'var(--text-muted)';
+        btn.style.fontWeight = '600';
+        btn.style.borderBottom = '3px solid transparent';
+      }
+    }
+  });
+};
+
 // ============ SELECT2 HELPER & GLOBAL SAFETY ============
 if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
   try {
