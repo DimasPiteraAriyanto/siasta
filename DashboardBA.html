@@ -192,7 +192,7 @@
         <!-- Toolbar Kontrol Pengesahan & Watermark -->
         <div style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:10px 20px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; font-size:12.5px;">
           <div style="display:flex; align-items:center; gap:16px;">
-            <span style="font-weight:700; color:#1e293b;">Opsi Pengesahan & Tampilan:</span>
+            <span style="font-weight:700; color:#1e293b;">Opsi Pengesahan:</span>
             <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-weight:600; color:#334155;">
               <input type="checkbox" id="toggle-ba-kadis" checked onchange="toggleBASignerBlock('kadis', this.checked)">
               Gunakan Blok Pengesahan Kadis (Mengetahui)
@@ -200,10 +200,6 @@
             <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-weight:600; color:#334155;">
               <input type="checkbox" id="toggle-ba-pelaksana" checked onchange="toggleBASignerBlock('pelaksana', this.checked)">
               Gunakan Blok Pelaksana Alih Media
-            </label>
-            <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-weight:600; color:#334155;">
-              <input type="checkbox" id="toggle-ba-watermark" checked onchange="toggleBAWatermark(this.checked)">
-              Watermark Resmi
             </label>
           </div>
           <div style="display:flex; gap:8px;">
@@ -216,17 +212,8 @@
           </div>
         </div>
 
-        <!-- Kertas A4 Wrapper (Dengan Watermark Resmi) -->
+        <!-- Kertas A4 Wrapper (Format Resmi Naskah Dinas Bersih) -->
         <div id="ba-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:210mm; min-height:297mm; padding:25mm 20mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:12pt; line-height:1.5;">
-          <!-- Cap Visual Watermark Resmi Pemkab Manggarai Barat -->
-          <div id="doc-ba-watermark" class="watermark-pdf-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-35deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:140%; white-space:nowrap;">
-            <div id="doc-ba-watermark-content" style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:26pt; font-weight:800; color:rgba(100, 116, 139, 0.18); letter-spacing:2.5px; line-height:1.35; text-transform:uppercase;">
-              ARSIP HASIL ALIH MEDIA<br>
-              DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
-              KABUPATEN MANGGARAI BARAT
-            </div>
-          </div>
-
           <div style="position:relative; z-index:1;">
           <!-- Kop Surat Resmi -->
           <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
@@ -648,30 +635,15 @@ function safeSetText(id, val) {
   if (el) el.textContent = (val !== undefined && val !== null) ? val : '';
 }
 
-function toggleBAWatermark(show) {
-  var wm = document.getElementById('doc-ba-watermark');
-  if (wm) wm.style.display = show ? 'block' : 'none';
-}
-
 function populateFormalBAModal(d) {
   if (!d) return;
   _currentFormalBAData = d;
   var cK = document.getElementById('toggle-ba-kadis');
   var cP = document.getElementById('toggle-ba-pelaksana');
-  var cW = document.getElementById('toggle-ba-watermark');
   if (cK) cK.checked = true;
   if (cP) cP.checked = true;
-  if (cW) cW.checked = true;
   toggleBASignerBlock('kadis', true);
   toggleBASignerBlock('pelaksana', true);
-  toggleBAWatermark(true);
-
-  if (d.watermarkLine1) {
-    var wmContent = document.getElementById('doc-ba-watermark-content');
-    if (wmContent) {
-      wmContent.innerHTML = d.watermarkLine1 + '<br>' + (d.watermarkLine2 || '') + '<br>' + (d.watermarkLine3 || '');
-    }
-  }
 
   var logoEl = document.getElementById('doc-logo-img');
   if (logoEl) logoEl.src = window._logoMabar || '';

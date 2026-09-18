@@ -7,13 +7,23 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 43 (Deployment @61)**
+- **Versi Terakhir**: **Versi 44 (Deployment @62)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 44 — Penghapusan Watermark pada Dokumen Berita Acara Alih Media
+- **Latar Belakang**: Menindaklanjuti permintaan pengguna agar cap watermark pada dokumen Berita Acara Alih Media dihilangkan sepenuhnya, sehingga dokumen Berita Acara tampil bersih dan murni sebagai naskah dinas resmi hukum pemerintahan tanpa latar belakang tulisan watermark.
+- **Modifikasi Berkas**:
+  1. `DashboardBA.html`:
+     - Menghapus layer markup `#doc-ba-watermark` dari kertas dokumen `#ba-print-sheet`.
+     - Menghapus checkbox kontrol watermark dari bilah toolbar pratinjau.
+     - Menghapus fungsi skrip `toggleBAWatermark(show)` dan kode inisialisasinya pada `populateFormalBAModal()`.
+
+---
 
 ### Versi 43 — Penambahan Watermark Resmi pada Dokumen Berita Acara & Rekapitulasi Alih Media
 - **Latar Belakang**: Menindaklanjuti instruksi penambahan cap watermark visual resmi pada dokumen Berita Acara Alih Media agar memiliki autentikasi lembaga yang sah dan selaras dengan standar dokumen kearsipan Kabupaten Manggarai Barat baik saat pratinjau maupun saat dicetak fisik/disimpan sebagai PDF.
