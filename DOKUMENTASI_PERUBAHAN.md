@@ -7,13 +7,25 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 39**
+- **Versi Terakhir**: **Versi 40**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 40 — Perbaikan Navigasi Tab Halaman Pengaturan Sistem
+- **Latar Belakang**: Memperbaiki kendala tombol tab pada halaman Pengaturan (*Profil Instansi, Template Dokumen, Tanda Tangan, Asal Arsip, Alat & Pengujian*) yang sebelumnya tidak merespons saat diklik akibat kesalahan penutupan kurung kurawal fungsi internal pada skrip frontend.
+- **Modifikasi Berkas**:
+  1. `Pengaturan.html`:
+     - Menutup kurung kurawal fungsi `runSetup` yang sebelumnya menyebabkan kegagalan kompilasi skrip lokal.
+     - Menyematkan `window.switchPengaturanTab = switchPengaturanTab` secara eksplisit pada scope global `window`.
+     - Menambahkan proteksi null-safety pada fungsi `loadPejabatSettings` dan `savePejabatSettings`.
+  2. `ClientScript.html`:
+     - Menyediakan fungsi global fallback `window.switchPengaturanTab` pada shell utama aplikasi agar seluruh tab navigasi pengaturan dapat selalu diakses dan diklik secara instan dalam kondisi apa pun.
+
+---
 
 ### Versi 39 — Penerapan 9 Butir Revisi SIASTA (Google Docs Revision Guide)
 - **Latar Belakang**: Mengimplementasikan seluruh 9 butir revisi dan penyempurnaan sistem yang tercantum pada dokumen panduan revisi SIASTA (`REVISI SIASTA — Untuk Diteruskan ke AI Programmer`).
