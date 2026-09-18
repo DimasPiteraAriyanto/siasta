@@ -449,6 +449,28 @@ function getDummyStaffList() {
       tanda_tangan_id: '',
       tanda_tangan_url: '',
       tanggal_dibuat: new Date()
+    },
+    {
+      id: 'STAF-005',
+      nama: 'Muhammad Dzaky Nathanegara, A.Md',
+      nip: '19980508 202506 1 004',
+      jabatan: 'Pengelola Kearsipan / Pelaksana Alih Media',
+      email: 'dzaky.nathanegara@manggaraibaratkab.go.id',
+      status: 'Aktif',
+      tanda_tangan_id: '',
+      tanda_tangan_url: '',
+      tanggal_dibuat: new Date()
+    },
+    {
+      id: 'STAF-006',
+      nama: 'Augustinus Rinus, S.Pd',
+      nip: '19720219 199903 1 008',
+      jabatan: 'Kepala Dinas Kearsipan dan Perpustakaan',
+      email: 'augustinus.rinus@manggaraibaratkab.go.id',
+      status: 'Aktif',
+      tanda_tangan_id: '',
+      tanda_tangan_url: '',
+      tanggal_dibuat: new Date()
     }
   ];
 }

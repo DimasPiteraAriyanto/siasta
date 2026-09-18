@@ -124,8 +124,12 @@ function uploadFile(base64Data, fileName, mimeType, folderPath) {
     var folder = getFolderByPath(folderPath);
     var file = folder.createFile(blob);
     
-    // Set sharing (anyone with link can view)
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // Set sharing jika diizinkan oleh domain Google Workspace
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (eShare) {
+      Logger.log('Notice: setSharing ANYONE_WITH_LINK not permitted by domain policy: ' + eShare.message);
+    }
     
     return {
       id: file.getId(),

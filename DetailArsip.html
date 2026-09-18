@@ -28,12 +28,27 @@
                   <? } ?>
                 </td>
               </tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jenis Arsip</td><td style="padding:8px 0;"><span class="badge badge-navy"><?= initialDetail.jenis_arsip || '-' ?></span></td></tr>
+              <? if (initialDetail.kategori_urusan) { ?>
+                <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kategori Urusan</td><td style="padding:8px 0;"><span class="badge badge-info"><?= initialDetail.kategori_urusan ?></span></td></tr>
+              <? } ?>
+              <? if (initialDetail.kode_klasifikasi_asli) { ?>
+                <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kode Klasifikasi Asli</td><td style="padding:8px 0;"><strong><?= initialDetail.kode_klasifikasi_asli ?></strong></td></tr>
+              <? } ?>
+              <? if (initialDetail.nomor_asli) { ?>
+                <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Nomor Asli / Ref</td><td style="padding:8px 0;"><?= initialDetail.nomor_asli ?></td></tr>
+              <? } ?>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Asal Arsip</td><td style="padding:8px 0;"><?= initialDetail.asal_arsip || '-' ?> (<?= initialDetail.kode_asal || '-' ?>)</td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Nomor Box</td><td style="padding:8px 0;"><?= initialDetail.nomor_box || '-' ?></td></tr>
-              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jenis Arsip</td><td style="padding:8px 0;"><span class="badge badge-navy"><?= initialDetail.jenis_arsip || '-' ?></span></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Deskripsi</td><td style="padding:8px 0;"><?= initialDetail.deskripsi || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Lembar</td><td style="padding:8px 0;"><?= initialDetail.jumlah_lembar || 0 ?> lembar</td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Berkas</td><td style="padding:8px 0;"><?= initialDetail.jumlah_berkas || 0 ?> berkas</td></tr>
+              <? if (initialDetail.rangkap_ke) { ?>
+                <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Rangkap Ke</td><td style="padding:8px 0;"><?= initialDetail.rangkap_ke ?></td></tr>
+              <? } ?>
+              <? if (initialDetail.kondisi_fisik) { ?>
+                <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kondisi Fisik</td><td style="padding:8px 0;"><?= initialDetail.kondisi_fisik ?></td></tr>
+              <? } ?>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;"><?= initialDetail.kurun_waktu_mulai || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Unit Pengelola</td><td style="padding:8px 0;"><?= initialDetail.unit_pengelola || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Lokasi Simpan</td><td style="padding:8px 0;"><?= initialDetail.lokasi_simpan || '-' ?></td></tr>

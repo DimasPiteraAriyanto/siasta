@@ -14,7 +14,8 @@
  * @returns {Object} {kodeUnik, nomorUrut}
  */
 function generateKodeUnik(kodeAsal, nomorBox) {
-  var boxFormatted = 'B' + padNumber(parseInt(nomorBox), 2);
+  var cleanBox = parseInt(String(nomorBox || '1').replace(/\D/g, '')) || 1;
+  var boxFormatted = 'B' + padNumber(cleanBox, 2);
   
   // Cari nomor urut terakhir untuk kombinasi asal + box ini
   var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
@@ -60,8 +61,9 @@ function saveArsip(data) {
     var user = getCurrentUser() || (data && data.activeUser ? data.activeUser : null) || { id: 'STAF-001', nama: 'Siprianus Mbemba', jabatan: 'Arsiparis Ahli Pertama' };
     
     // Generate kode unik
-    var kode = generateKodeUnik(data.kodeAsal, data.nomorBox);
-    var boxFormatted = 'B' + padNumber(parseInt(data.nomorBox), 2);
+    var cleanBox = parseInt(String(data.nomorBox || '1').replace(/\D/g, '')) || 1;
+    var boxFormatted = 'B' + padNumber(cleanBox, 2);
+    var kode = generateKodeUnik(data.kodeAsal, cleanBox);
     var kodeUnikFinal = (data.kodeUnik && data.kodeUnik.trim()) ? data.kodeUnik.trim() : kode.kodeUnik;
     
     // Upload file jika ada
@@ -518,21 +520,61 @@ function getDashboardStats() {
 }
 
 /**
- * Get kode asal arsip list (with ScriptCache)
+ * Get kode asal arsip list (with ScriptCache & Auto-Fallback)
  */
 function getKodeAsalList() {
+  var defaultAsal = [
+    { kode: 'KOM', nama: 'Kecamatan Komodo', deskripsi: 'Arsip dari Kecamatan Komodo', status: 'Aktif' },
+    { kode: 'LBJ', nama: 'Labuan Bajo', deskripsi: 'Arsip dari Labuan Bajo', status: 'Aktif' },
+    { kode: 'MAC', nama: 'Kecamatan Macang Pacar', deskripsi: 'Arsip dari Kec. Macang Pacar', status: 'Aktif' },
+    { kode: 'BOL', nama: 'Kecamatan Boleng', deskripsi: 'Arsip dari Kec. Boleng', status: 'Aktif' },
+    { kode: 'LEM', nama: 'Kecamatan Lembor', deskripsi: 'Arsip dari Kec. Lembor', status: 'Aktif' },
+    { kode: 'WEL', nama: 'Kecamatan Welak', deskripsi: 'Arsip dari Kec. Welak', status: 'Aktif' },
+    { kode: 'SAT', nama: 'Kecamatan Sano Nggoang', deskripsi: 'Arsip dari Kec. Sano Nggoang', status: 'Aktif' },
+    { kode: 'NDO', nama: 'Kecamatan Ndoso', deskripsi: 'Arsip dari Kec. Ndoso', status: 'Aktif' },
+    { kode: 'DKP', nama: 'Dinas Kearsipan & Perpustakaan', deskripsi: 'Arsip internal DKP', status: 'Aktif' },
+    { kode: 'UMM', nama: 'Umum/Lainnya', deskripsi: 'Arsip dari sumber lainnya', status: 'Aktif' }
+  ];
+
   try {
     var cached = getFromCache('CACHE_KODE_ASAL');
-    if (cached && cached.length > 0) {
+    if (cached && Array.isArray(cached) && cached.length > 0) {
       return jsonResponse(true, cached);
     }
     
     var data = readAllData(CONFIG.SHEETS.KODE_ASAL);
-    var active = data.filter(function(k) { return k.status === 'Aktif'; });
-    putInCache('CACHE_KODE_ASAL', active, 21600); // 6 jam
-    return jsonResponse(true, active);
+    var normalized = [];
+    
+    if (data && data.length > 0) {
+      data.forEach(function(row) {
+        var kode = row.kode || row.Kode || row.KODE || '';
+        var nama = row.nama || row.Nama || row['Nama Unit/Kecamatan'] || row['nama_unit'] || '';
+        var deskripsi = row.deskripsi || row.Deskripsi || '';
+        var status = row.status || row.Status || 'Aktif';
+        
+        if (kode && (String(status).toLowerCase() === 'aktif' || !status)) {
+          normalized.push({
+            kode: String(kode).trim().toUpperCase(),
+            nama: String(nama).trim() || String(kode).trim(),
+            deskripsi: deskripsi,
+            status: 'Aktif'
+          });
+        }
+      });
+    }
+    
+    // Jika data sheet kosong, pakai daftar default dan populate ke sheet jika belum ada
+    if (normalized.length === 0) {
+      normalized = defaultAsal;
+      try {
+        seedInitialData();
+      } catch (eSeed) {}
+    }
+    
+    putInCache('CACHE_KODE_ASAL', normalized, 21600); // 6 jam
+    return jsonResponse(true, normalized);
   } catch (e) {
-    return jsonResponse(false, null, 'Error: ' + e.message);
+    return jsonResponse(true, defaultAsal);
   }
 }
 

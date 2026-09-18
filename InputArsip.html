@@ -269,22 +269,42 @@ function init_input_arsip() {
 
   // 2. Load kode asal arsip jika belum ter-render
   var select = document.getElementById('kodeAsal');
+  var defaultFallbackAsal = [
+    { kode: 'KOM', nama: 'Kecamatan Komodo' },
+    { kode: 'LBJ', nama: 'Labuan Bajo' },
+    { kode: 'MAC', nama: 'Kecamatan Macang Pacar' },
+    { kode: 'BOL', nama: 'Kecamatan Boleng' },
+    { kode: 'LEM', nama: 'Kecamatan Lembor' },
+    { kode: 'WEL', nama: 'Kecamatan Welak' },
+    { kode: 'SAT', nama: 'Kecamatan Sano Nggoang' },
+    { kode: 'NDO', nama: 'Kecamatan Ndoso' },
+    { kode: 'DKP', nama: 'Dinas Kearsipan & Perpustakaan' },
+    { kode: 'UMM', nama: 'Umum/Lainnya' }
+  ];
+
+  function populateSelectOptions(items) {
+    if (!select || !items || items.length === 0) return;
+    if (select.options.length > 1) return;
+    items.forEach(function(item) {
+      var opt = document.createElement('option');
+      opt.value = item.kode;
+      opt.textContent = item.kode + ' — ' + item.nama;
+      opt.setAttribute('data-nama', item.nama);
+      select.appendChild(opt);
+    });
+    if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+      jQuery('#kodeAsal').select2({ placeholder: '— Cari / Pilih Asal Arsip —', width: '100%', dropdownAutoWidth: false })
+        .off('change.asalBox').on('change.asalBox', function() { onAsalBoxChange(); });
+    }
+  }
+
   if (select && select.options.length <= 1) {
+    populateSelectOptions(defaultFallbackAsal);
     google.script.run
       .withSuccessHandler(function(response) {
-        if (response.success && response.data) {
-          response.data.forEach(function(item) {
-            var opt = document.createElement('option');
-            opt.value = item.kode;
-            opt.textContent = item.kode + ' — ' + item.nama;
-            opt.setAttribute('data-nama', item.nama);
-            select.appendChild(opt);
-          });
-
-          if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
-            jQuery('#kodeAsal').select2({ placeholder: '— Cari / Pilih Asal Arsip —', width: '100%', dropdownAutoWidth: false })
-              .off('change.asalBox').on('change.asalBox', function() { onAsalBoxChange(); });
-          }
+        if (response && response.success && response.data && response.data.length > 0) {
+          select.innerHTML = '<option value="">— Cari / Pilih Asal Arsip —</option>';
+          populateSelectOptions(response.data);
         }
       })
       .getKodeAsalList();
@@ -326,6 +346,7 @@ var _defaultWatermarkLines = [
   'DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH',
   'KABUPATEN MANGGARAI BARAT'
 ];
+var _defaultWatermarkText = _defaultWatermarkLines.join('\n');
 
 function onFileScanSelected(inputId, previewId) {
   handleFileUpload(inputId, previewId);
@@ -449,6 +470,98 @@ function openModalWatermarkPreview() {
   openModal('modal-watermark-preview');
 }
 
+/**
+ * Terapkan cap visual watermark diagonal 3 baris resmi pada setiap halaman PDF (via pdf-lib)
+ * @param {string} base64Data - Base64 murni file PDF asli
+ * @returns {Promise<string|null>} - Base64 file PDF dengan watermark permanen
+ */
+async function watermarkPdfBase64(base64Data) {
+  if (!base64Data) return null;
+
+  // Pastikan PDFLib termuat
+  if (typeof PDFLib === 'undefined') {
+    await new Promise(function(resolve) {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
+  if (typeof PDFLib === 'undefined') {
+    console.warn('PDFLib not available, skipping PDF visual watermark');
+    return null;
+  }
+
+  try {
+    var raw = atob(base64Data);
+    var uint8Array = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) {
+      uint8Array[i] = raw.charCodeAt(i);
+    }
+
+    var PDFDocument = PDFLib.PDFDocument;
+    var rgb = PDFLib.rgb;
+    var degrees = PDFLib.degrees;
+    var StandardFonts = PDFLib.StandardFonts;
+
+    var pdfDoc = await PDFDocument.load(uint8Array);
+    var font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    var pages = pdfDoc.getPages();
+
+    var lines = [
+      'ARSIP HASIL ALIH MEDIA',
+      'DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH',
+      'KABUPATEN MANGGARAI BARAT'
+    ];
+
+    pages.forEach(function(page) {
+      var size = page.getSize();
+      var width = size.width;
+      var height = size.height;
+      var fontSize = Math.max(Math.round(width / 26), 14);
+      var lineHeight = fontSize * 1.35;
+      var angle = 45;
+
+      var centerX = width / 2;
+      var centerY = height / 2;
+      var totalHeight = (lines.length - 1) * lineHeight;
+
+      lines.forEach(function(line, idx) {
+        var textWidth = font.widthOfTextAtSize(line, fontSize);
+        var yOffset = (totalHeight / 2) - (idx * lineHeight);
+
+        var rad = (angle * Math.PI) / 180;
+        var dx = -yOffset * Math.sin(rad) - (textWidth / 2) * Math.cos(rad);
+        var dy = yOffset * Math.cos(rad) - (textWidth / 2) * Math.sin(rad);
+
+        page.drawText(line, {
+          x: centerX + dx,
+          y: centerY + dy,
+          size: fontSize,
+          font: font,
+          color: rgb(0.35, 0.42, 0.50), // Abu-abu elegan
+          opacity: 0.25,
+          rotate: degrees(angle)
+        });
+      });
+    });
+
+    var watermarkedBytes = await pdfDoc.save();
+    var binary = '';
+    var chunkSize = 8192;
+    for (var c = 0; c < watermarkedBytes.length; c += chunkSize) {
+      var chunk = watermarkedBytes.subarray(c, c + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+  } catch (err) {
+    console.error('Error applying PDF watermark:', err);
+    return null;
+  }
+}
+
 function onAsalBoxChange() {
   var kodeAsal = document.getElementById('kodeAsal').value;
   var nomorBox = document.getElementById('nomorBox').value;
@@ -561,22 +674,40 @@ function processSaveArsip(qaChecklist) {
     activeUser: (typeof getActiveUserFromSession === 'function' ? getActiveUserFromSession() : null)
   };
   
-  readFileAsBase64('arsipFile', function(fileInfo) {
+  readFileAsBase64('arsipFile', async function(fileInfo) {
     if (fileInfo) {
       formData.fileData = fileInfo.data;
       formData.fileName = fileInfo.name;
       formData.fileMimeType = fileInfo.type;
 
-      // Ambil hasil cap visual watermark sungguhan dari canvas (khusus berkas gambar)
-      var canvas = document.getElementById('canvas-watermark-preview');
-      if (canvas && fileInfo.type && fileInfo.type.indexOf('image') !== -1) {
-        try {
-          var wmUrl = canvas.toDataURL('image/jpeg', 0.92);
-          if (wmUrl && wmUrl.indexOf(',') !== -1) {
-            formData.fileAksesData = wmUrl.split(',')[1];
+      var isImage = fileInfo.type && fileInfo.type.indexOf('image') !== -1;
+      var isPdf = (fileInfo.type && fileInfo.type.indexOf('pdf') !== -1) || 
+                  (fileInfo.name && fileInfo.name.toLowerCase().endsWith('.pdf'));
+
+      // 1. Cap Visual Watermark Berkas Gambar (via Canvas)
+      if (isImage) {
+        var canvas = document.getElementById('canvas-watermark-preview');
+        if (canvas) {
+          try {
+            var wmUrl = canvas.toDataURL('image/jpeg', 0.92);
+            if (wmUrl && wmUrl.indexOf(',') !== -1) {
+              formData.fileAksesData = wmUrl.split(',')[1];
+            }
+          } catch (eCanvas) {
+            console.warn('Canvas watermark export error:', eCanvas);
           }
-        } catch (eCanvas) {
-          console.warn('Canvas watermark export error:', eCanvas);
+        }
+      }
+
+      // 2. Cap Visual Watermark Berkas Dokumen PDF (via pdf-lib)
+      if (isPdf) {
+        try {
+          var wmPdfBase64 = await watermarkPdfBase64(fileInfo.data);
+          if (wmPdfBase64) {
+            formData.fileAksesData = wmPdfBase64;
+          }
+        } catch (ePdf) {
+          console.warn('PDF-Lib watermark error:', ePdf);
         }
       }
     }

@@ -24,6 +24,152 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
+  // Support direct wipe dummy data across all spreadsheets
+  if (e && e.parameter && (e.parameter.action === 'wipe_all_dummy' || e.parameter.action === 'wipe')) {
+    var report = [];
+    var targetIds = [
+      '1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0',
+      (CONFIG && CONFIG.SPREADSHEET_ID) ? CONFIG.SPREADSHEET_ID : ''
+    ];
+    if (e.parameter.ssId) targetIds.push(e.parameter.ssId);
+    
+    try {
+      var actSs = SpreadsheetApp.getActiveSpreadsheet();
+      if (actSs) targetIds.push(actSs.getId());
+    } catch (eAct) {}
+
+    try {
+      var savedId = PropertiesService.getScriptProperties().getProperty('SIASTA_AUTO_SS_ID');
+      if (savedId) targetIds.push(savedId);
+    } catch (eProp) {}
+
+    var uniqueIds = [];
+    targetIds.forEach(function(id) {
+      if (id && uniqueIds.indexOf(id) === -1) uniqueIds.push(id);
+    });
+
+    uniqueIds.forEach(function(id) {
+      try {
+        var ss = SpreadsheetApp.openById(id);
+        var ssName = ss.getName();
+        var sheets = ss.getSheets();
+        var sheetNames = sheets.map(function(s) { return s.getName(); });
+        var cleared = [];
+
+        var sheetDetails = [];
+        var wipeNames = [
+          'master_arsip', 'DataArsip', 'data_arsip', 'arsip',
+          'berita_acara', 'BeritaAcara',
+          'log_aktivitas', 'LogAktivitas',
+          'log_akses', 'LogAkses',
+          'Sheet1'
+        ];
+
+        // Exclude reference & user sheets from wiping
+        var protectSheets = ['MasterStaff', 'master_staf', 'MasterSumberArsip', 'kode_asal_arsip', 'pengaturan', 'Login', 'Target', 'target_realisasi'];
+
+        sheets.forEach(function(sh) {
+          var name = sh.getName();
+          var lr = sh.getLastRow();
+          var lc = sh.getLastColumn();
+          var isWiped = false;
+          var deletedCount = 0;
+
+          if (protectSheets.indexOf(name) !== -1) {
+            // Do NOT wipe reference / staff sheets!
+            return;
+          }
+
+          var shouldWipe = wipeNames.indexOf(name) !== -1;
+          if (!shouldWipe && (name.toLowerCase().indexOf('arsip') !== -1 || name.toLowerCase().indexOf('berita') !== -1)) {
+            shouldWipe = true;
+          }
+
+          if (shouldWipe && lr > 1) {
+            deletedCount = lr - 1;
+            sh.deleteRows(2, deletedCount);
+            isWiped = true;
+            cleared.push(name + ' (' + deletedCount + ' baris dummy berhasil dihapus)');
+          } else if (shouldWipe) {
+            cleared.push(name + ' (sudah bersih / 0 baris)');
+          }
+
+          sheetDetails.push({
+            name: name,
+            originalRows: lr,
+            deletedRows: deletedCount,
+            finalRows: sh.getLastRow()
+          });
+        });
+
+        // Pastikan MasterSumberArsip dan kode_asal_arsip terisi data referensi unit
+        var defaultSumber = [
+          ['KOM', 'Kecamatan Komodo', 'Arsip dari Kecamatan Komodo', 'Aktif'],
+          ['LBJ', 'Labuan Bajo', 'Arsip dari Labuan Bajo', 'Aktif'],
+          ['MAC', 'Kecamatan Macang Pacar', 'Arsip dari Kec. Macang Pacar', 'Aktif'],
+          ['BOL', 'Kecamatan Boleng', 'Arsip dari Kec. Boleng', 'Aktif'],
+          ['LEM', 'Kecamatan Lembor', 'Arsip dari Kec. Lembor', 'Aktif'],
+          ['WEL', 'Kecamatan Welak', 'Arsip dari Kec. Welak', 'Aktif'],
+          ['SAT', 'Kecamatan Sano Nggoang', 'Arsip dari Kec. Sano Nggoang', 'Aktif'],
+          ['NDO', 'Kecamatan Ndoso', 'Arsip dari Kec. Ndoso', 'Aktif'],
+          ['DKP', 'Dinas Kearsipan & Perpustakaan', 'Arsip internal DKP', 'Aktif'],
+          ['UMM', 'Umum/Lainnya', 'Arsip dari sumber lainnya', 'Aktif']
+        ];
+
+        ['MasterSumberArsip', 'kode_asal_arsip'].forEach(function(sName) {
+          var sSheet = ss.getSheetByName(sName);
+          if (sSheet && sSheet.getLastRow() < 2) {
+            if (sSheet.getLastRow() === 0) {
+              sSheet.appendRow(['Kode', 'Nama Unit/Kecamatan', 'Deskripsi', 'Status']);
+            }
+            sSheet.getRange(2, 1, defaultSumber.length, defaultSumber[0].length).setValues(defaultSumber);
+            cleared.push(sName + ' (direfresh dengan 10 referensi unit)');
+          }
+        });
+
+        report.push({
+          ssId: id,
+          ssName: ssName,
+          status: 'SUCCESS',
+          cleared: cleared,
+          sheetDetails: sheetDetails
+        });
+      } catch (err) {
+        report.push({
+          ssId: id,
+          status: 'ERROR: ' + err.message
+        });
+      }
+    });
+
+    invalidateSheetCache();
+    clearCache('CACHE_DASHBOARD_STATS');
+
+    return ContentService.createTextOutput(JSON.stringify(report, null, 2))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Support direct clear dummy data via URL parameter ?action=clear_dummy
+  if (e && e.parameter && (e.parameter.action === 'clear_dummy' || e.parameter.action === 'clean')) {
+    var clearRes = clearAllDummyDataExceptUsers();
+    return ContentService.createTextOutput(JSON.stringify(clearRes, null, 2))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Support check database row count status via URL parameter ?action=check_status
+  if (e && e.parameter && e.parameter.action === 'check_status') {
+    var arsipCount = (readAllData(CONFIG.SHEETS.MASTER_ARSIP) || []).length;
+    var stafCount = (readAllData(CONFIG.SHEETS.MASTER_STAF) || []).length;
+    var baCount = (readAllData(CONFIG.SHEETS.BERITA_ACARA) || []).length;
+    var logCount = (readAllData(CONFIG.SHEETS.LOG_AKTIVITAS) || []).length;
+    return ContentService.createTextOutput(JSON.stringify({
+      arsipCount: arsipCount,
+      stafCount: stafCount,
+      baCount: baCount,
+      logCount: logCount
+    }, null, 2)).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Support direct CRUD & output test suite via URL parameter ?action=test_crud
   if (e && e.parameter && (e.parameter.action === 'test_crud' || e.parameter.action === 'test')) {
     var testSuite = runFullCRUDTestSuite();
@@ -42,6 +188,7 @@ function doGet(e) {
   // Sinkronkan seluruh header database agar kolom selalu siap
   try {
     syncAllDatabaseHeaders();
+    clearCache('CACHE_KODE_ASAL');
   } catch (syncErr) {
     Logger.log('Sync headers error: ' + syncErr.message);
   }

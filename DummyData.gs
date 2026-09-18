@@ -1112,10 +1112,14 @@ function clearAllDummyDataExceptUsers() {
     // Inisialisasi 1 log pencatatan sistem baru
     logActivity('SYSTEM_RESET', 'Database', 'Pembersihan data dummy berhasil. Sistem SIASTA siap digunakan untuk pencatatan arsip riil.');
 
-    // 5. Invalidate runtime & script cache
+    // 5. Pastikan master_staf, kode_asal, dan pengaturan tetap terisi di sheet
+    seedInitialData();
+
+    // 6. Invalidate runtime & script cache
     invalidateSheetCache();
     clearCache('CACHE_DASHBOARD_STATS');
     clearCache('CACHE_KODE_ASAL');
+    clearCache('CACHE_STAFF_LIST');
 
     return jsonResponse(true, {
       clearedSheets: clearedSheets,

@@ -7,13 +7,32 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 40**
+- **Versi Terakhir**: **Versi 41 (Deployment @56)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 41 — Watermark Visual Otomatis Berkas PDF (pdf-lib) & Perbaikan Alur Input Arsip
+- **Latar Belakang**: Memenuhi instruksi agar setiap berkas arsip yang diunggah (baik Gambar maupun Dokumen PDF) otomatis memiliki cap watermark visual permanen resmi, serta mengatasi kendala dropdown Asal Arsip kosong dan menyelaraskan field rincian metadata arsip.
+- **Modifikasi Berkas**:
+  1. `Layout.html` & `InputArsip.html`:
+     - **Integrasi `pdf-lib`**: Menyematkan pustaka `pdf-lib` via CDN dan fungsi `watermarkPdfBase64`. Setiap berkas PDF yang diunggah otomatis dibuka dan dibubuhi stempel watermark teks diagonal 3 baris resmi pada seluruh halamannya secara transparan.
+     - **Pemisahan Berkas Google Drive Otomatis**: Berkas PDF asli tanpa watermark disimpan ke folder `Arsip Digital / Pelestarian`, sedangkan salinan PDF ber-watermark permanen disimpan ke folder `Arsip Digital / Akses` (`akses_[nama_file]`).
+     - **Eliminasi Bug Canvas Watermark**: Mendefinisikan `_defaultWatermarkText` dan menambahkan proteksi instan pada pratinjau canvas.
+  2. `ArsipService.gs`:
+     - **Auto-Fallback & Normalisasi Asal Arsip (`getKodeAsalList`)**: Menangani variasi penamaan kolom huruf besar/kecil (`Kode`, `Nama`, dll.) dan menyediakan fallback 10 unit/wilayah resmi Pemkab Manggarai Barat jika sheet referensi kosong.
+     - **Sanitasi Nomor Box**: Menjamin parsing nomor box (`String(nomorBox).replace(/\D/g, '')`) selalu valid sekalipun ada format prefix huruf.
+  3. `DetailArsip.html`:
+     - **Kelengkapan Kolom Metadata**: Menambahkan 5 field (*Kode Klasifikasi Asli, Nomor Asli/Referensi, Kategori Urusan, Kondisi Fisik, dan Rangkap Ke*) pada tabel informasi awal server pre-render agar data arsip langsung terlihat lengkap saat dibuka.
+  4. `DriveService.gs`:
+     - **Proteksi Sharing Google Workspace**: Membungkus `file.setSharing` dalam blok `try-catch` agar tidak gagal jika domain organisasi membatasi hak akses link publik.
+  5. `DaftarArsip.html`:
+     - **Sinkronisasi ID Modal Rekapitulasi**: Menyelaraskan target ID elemen periode dan tbody tabel rekapitulasi cetak dinas.
+
+---
 
 ### Versi 40 — Perbaikan Navigasi Tab Halaman Pengaturan Sistem
 - **Latar Belakang**: Memperbaiki kendala tombol tab pada halaman Pengaturan (*Profil Instansi, Template Dokumen, Tanda Tangan, Asal Arsip, Alat & Pengujian*) yang sebelumnya tidak merespons saat diklik akibat kesalahan penutupan kurung kurawal fungsi internal pada skrip frontend.
