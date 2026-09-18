@@ -422,6 +422,9 @@ function getBeritaAcaraFormalDetail(params) {
       pelaksanaTtd: (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : ''),
       tipe: tipe,
       tipeLabel: tipe === 'per_staf' ? 'Per Staf (' + pelaksana.nama + ')' : 'Gabungan (Seluruh Tim Alih Media)',
+      watermarkLine1: (CONFIG.WATERMARK && CONFIG.WATERMARK.LINE1) ? CONFIG.WATERMARK.LINE1 : 'ARSIP HASIL ALIH MEDIA',
+      watermarkLine2: (CONFIG.WATERMARK && CONFIG.WATERMARK.LINE2) ? CONFIG.WATERMARK.LINE2 : 'DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH',
+      watermarkLine3: (CONFIG.WATERMARK && CONFIG.WATERMARK.LINE3) ? CONFIG.WATERMARK.LINE3 : 'KABUPATEN MANGGARAI BARAT',
       arsipList: filteredArsip
     };
     

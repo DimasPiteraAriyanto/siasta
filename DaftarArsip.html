@@ -223,6 +223,10 @@
               <input type="checkbox" id="toggle-rekap-pelaksana" checked onchange="toggleRekapSignerBlock('pelaksana', this.checked)">
               Gunakan Blok Pelaksana Alih Media
             </label>
+            <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-weight:600; color:#334155;">
+              <input type="checkbox" id="toggle-rekap-watermark" checked onchange="toggleRekapWatermark(this.checked)">
+              Watermark Resmi
+            </label>
           </div>
           <button type="button" class="btn btn-sm btn-gold" onclick="printRekapDoc()" style="display:flex; align-items:center; gap:5px;">
             🖨️ Cetak Dokumen
@@ -230,6 +234,15 @@
         </div>
 
         <div id="rekap-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:280mm; min-height:210mm; padding:20mm 18mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:11pt; line-height:1.4;">
+          <!-- Cap Visual Watermark Resmi Pemkab Manggarai Barat (A4 Landscape) -->
+          <div id="doc-rekap-watermark" class="watermark-pdf-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-25deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:140%; white-space:nowrap;">
+            <div id="doc-rekap-watermark-content" style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:24pt; font-weight:800; color:rgba(100, 116, 139, 0.16); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
+              ARSIP HASIL ALIH MEDIA<br>
+              DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
+              KABUPATEN MANGGARAI BARAT
+            </div>
+          </div>
+
           <div style="position:relative; z-index:1;">
           <!-- Kop Surat Resmi -->
           <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
@@ -702,6 +715,10 @@ function populateRekapPrintModal(d) {
   document.getElementById('rekap-doc-alamat-kop').textContent = pe.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT';
   document.getElementById('rekap-doc-periode').textContent = d.periodeLabel || 'Tahun 2026';
   document.getElementById('rekap-doc-tgl-surat').textContent = d.tanggalCetak || '';
+  
+  var cW = document.getElementById('toggle-rekap-watermark');
+  if (cW) cW.checked = true;
+  toggleRekapWatermark(true);
 
   // Render Rows
   var tbody = document.getElementById('rekap-doc-tbody');
@@ -754,6 +771,11 @@ function populateRekapPrintModal(d) {
       }
     }
   }
+}
+
+function toggleRekapWatermark(show) {
+  var wm = document.getElementById('doc-rekap-watermark');
+  if (wm) wm.style.display = show ? 'block' : 'none';
 }
 
 function toggleRekapSignerBlock(signer, isChecked) {

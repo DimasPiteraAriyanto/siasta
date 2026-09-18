@@ -7,13 +7,29 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 42 (Deployment @60)**
+- **Versi Terakhir**: **Versi 43 (Deployment @61)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 43 — Penambahan Watermark Resmi pada Dokumen Berita Acara & Rekapitulasi Alih Media
+- **Latar Belakang**: Menindaklanjuti instruksi penambahan cap watermark visual resmi pada dokumen Berita Acara Alih Media agar memiliki autentikasi lembaga yang sah dan selaras dengan standar dokumen kearsipan Kabupaten Manggarai Barat baik saat pratinjau maupun saat dicetak fisik/disimpan sebagai PDF.
+- **Modifikasi Berkas**:
+  1. `DashboardBA.html`:
+     - Menyematkan layer cap watermark digital diagonal (`#doc-ba-watermark`) tepat di tengah kertas dokumen A4 Berita Acara:
+       `ARSIP HASIL ALIH MEDIA` / `DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH` / `KABUPATEN MANGGARAI BARAT`.
+     - Menambahkan kontrol checkbox `Watermark Resmi` pada toolbar pratinjau Berita Acara (aktif secara default), beserta fungsi kendali instan `toggleBAWatermark(show)`.
+  2. `DaftarArsip.html`:
+     - Menyematkan layer cap watermark digital diagonal (`#doc-rekap-watermark`) pada lembar cetak Rekapitulasi Hasil Alih Media (A4 Landscape) dan menambahkan checkbox toggle kendali pada toolbar rekapitulasi.
+  3. `BeritaAcaraService.gs`:
+     - Mengirimkan data konfigurasi teks watermark resmi 3 baris (`watermarkLine1`, `watermarkLine2`, `watermarkLine3`) dari backend ke fungsi pratinjau frontend.
+  4. `Styles.html`:
+     - Menyesuaikan aturan `@media print` untuk wadah `#siasta-print-section` menjadi `position: relative !important; overflow: hidden !important;`, sehingga layer watermark diagonal tetap terpusat di dalam batas lembar cetak A4 dan otomatis tercetak dengan pewarnaan transparan resmi (`-webkit-print-color-adjust: exact !important`).
+
+---
 
 ### Versi 42 — Perbaikan Fitur Cetak Berita Acara & Rekapitulasi (Universal Direct Print Engine)
 - **Latar Belakang**: Menuntaskan kendala pada proses pencetakan Berita Acara dan Rekapitulasi Alih Media di mana dialog print browser muncul namun halaman pratinjau cetak kosong/tidak muncul apa-apa ("saat dicetak tidak muncul apa apa"), serta error saat penerbitan Berita Acara baru.
