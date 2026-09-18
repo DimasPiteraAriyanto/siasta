@@ -3,7 +3,10 @@
   <div class="card" style="max-width:960px;">
     <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <span class="card-title">📝 Formulir Input Alih Media Arsip Baru</span>
-      <span class="badge badge-info" style="font-size:12px;">Sesuai Peraturan Kepala ANRI Nomor 2 Tahun 2021</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button type="button" class="btn btn-gold btn-sm" onclick="autoFillSampleInput()" style="font-size:12px;">🧪 Isi Contoh Data Riil</button>
+        <span class="badge badge-info" style="font-size:12px;">☁️ Sinkron Google Drive & ANRI 2021</span>
+      </div>
     </div>
     <div class="card-body">
       <form id="form-arsip" onsubmit="return false;">
@@ -163,9 +166,9 @@
         <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">📤 4. Upload File Hasil Alih Media</h3>
         
         <div class="file-upload-area" id="upload-area">
-          <div class="upload-icon">📁</div>
+          <div class="upload-icon">☁️</div>
           <div class="upload-text">Klik atau seret file hasil alih media ke sini</div>
-          <div class="upload-hint">Format: TIFF, JPG, PNG, PDF — Maks. 10MB</div>
+          <div class="upload-hint">Format: PDF, TIFF, JPG, PNG — File otomatis diunggah ke Google Drive (Pelestarian & Akses)</div>
           <input type="file" id="arsipFile" accept=".tiff,.tif,.jpg,.jpeg,.png,.pdf" style="display:none" onchange="onFileScanSelected('arsipFile','arsipFile-preview')">
         </div>
         <div id="arsipFile-preview"></div>
@@ -608,6 +611,36 @@ function resetForm() {
   }
 
   syncActiveStaffField();
+}
+
+function autoFillSampleInput() {
+  document.getElementById('statusKeterbukaan').value = 'Terbuka';
+  document.getElementById('jenisArsip').value = 'Tekstual';
+  document.getElementById('kategoriUrusan').value = 'Pemerintahan';
+  document.getElementById('kodeKlasifikasiAsli').value = '045.2';
+  document.getElementById('nomorAsli').value = '180/HK/2004';
+  
+  var asalSel = document.getElementById('kodeAsal');
+  if (asalSel && asalSel.options.length > 1) {
+    asalSel.selectedIndex = 1;
+    if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+      jQuery(asalSel).trigger('change');
+    }
+  }
+  document.getElementById('nomorBox').value = '1';
+  onAsalBoxChange();
+  
+  document.getElementById('unitPengelola').value = 'Bagian Tata Pemerintahan Setda';
+  document.getElementById('kurunWaktu').value = '2004';
+  document.getElementById('rangkapKe').value = '1';
+  document.getElementById('jumlahLembar').value = '16';
+  document.getElementById('jumlahBerkas').value = '1';
+  document.getElementById('kondisiFisik').value = 'Baik';
+  document.getElementById('lokasiSimpan').value = 'Depot Arsip A, Lemari 01, Rak 02, Box 1';
+  document.getElementById('deskripsi').value = 'Keputusan Bupati Manggarai Barat Nomor 45/HK/2004 tentang Penetapan Batas Wilayah Administrasi Kecamatan Komodo';
+  document.getElementById('keterangan').value = 'Naskah dinas autentik kondisi fisik baik, siap dialihmediakan ke Google Drive';
+  
+  showToast('Contoh data riil berhasil diisikan ke formulir!', 'info');
 }
 
 if (typeof init_input_arsip === 'function') init_input_arsip();

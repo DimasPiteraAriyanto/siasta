@@ -14,10 +14,20 @@ function createFolderStructure() {
     var rootFolder;
     
     if (CONFIG.DRIVE_FOLDER_ID) {
-      rootFolder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
-    } else {
-      // Create root folder
-      rootFolder = DriveApp.createFolder('SIASTA');
+      try {
+        rootFolder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+      } catch (e) {
+        rootFolder = null;
+      }
+    }
+    
+    if (!rootFolder) {
+      var existing = DriveApp.getFoldersByName('SIASTA');
+      if (existing.hasNext()) {
+        rootFolder = existing.next();
+      } else {
+        rootFolder = DriveApp.createFolder('SIASTA');
+      }
       Logger.log('Root Folder ID: ' + rootFolder.getId());
     }
     
@@ -66,12 +76,33 @@ function getOrCreateSubfolder(parentFolder, folderName) {
  * @returns {Folder}
  */
 function getFolderByPath(path) {
-  var rootFolder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+  var rootFolder = null;
+  if (CONFIG.DRIVE_FOLDER_ID) {
+    try {
+      rootFolder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+    } catch (e) {
+      Logger.log('Peringatan: Gagal getFolderById ' + CONFIG.DRIVE_FOLDER_ID + ': ' + e.message);
+      rootFolder = null;
+    }
+  }
+  
+  // Fallback otomatis jika DRIVE_FOLDER_ID belum diset atau tidak valid
+  if (!rootFolder) {
+    var existingFolders = DriveApp.getFoldersByName('SIASTA');
+    if (existingFolders.hasNext()) {
+      rootFolder = existingFolders.next();
+    } else {
+      rootFolder = DriveApp.createFolder('SIASTA');
+    }
+  }
+
   var parts = path.split('/');
   var currentFolder = rootFolder;
   
   for (var i = 0; i < parts.length; i++) {
-    currentFolder = getOrCreateSubfolder(currentFolder, parts[i]);
+    if (parts[i]) {
+      currentFolder = getOrCreateSubfolder(currentFolder, parts[i]);
+    }
   }
   
   return currentFolder;

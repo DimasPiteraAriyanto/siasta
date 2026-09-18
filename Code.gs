@@ -39,15 +39,11 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.TEXT);
   }
 
-  // Auto-seed data dummy jika database master arsip masih kosong & sinkronkan headers
+  // Sinkronkan seluruh header database agar kolom selalu siap
   try {
     syncAllDatabaseHeaders();
-    var checkArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
-    if (!checkArsip || checkArsip.length === 0) {
-      seedFullDummyData(false);
-    }
-  } catch (seedErr) {
-    Logger.log('Auto-seed check error: ' + seedErr.message);
+  } catch (syncErr) {
+    Logger.log('Sync headers error: ' + syncErr.message);
   }
 
   var user = getCurrentUser();

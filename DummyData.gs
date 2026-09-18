@@ -1066,3 +1066,171 @@ function seedFullDummyData(force) {
     return jsonResponse(false, null, 'Gagal membuat data dummy: ' + e.message);
   }
 }
+
+/**
+ * Hapus seluruh data dummy pada SIASTA, KECUALI master user (staf)
+ * - master_arsip: baris data dihapus (header baris 1 dipertahankan)
+ * - berita_acara: baris data dihapus (header baris 1 dipertahankan)
+ * - log_aktivitas: baris data dihapus & diset 1 log inisialisasi bersih
+ * - log_akses: baris data dihapus
+ * - master_staf: DIPERTAHANKAN
+ * - kode_asal_arsip: DIPERTAHANKAN
+ * - pengaturan: DIPERTAHANKAN
+ */
+function clearAllDummyDataExceptUsers() {
+  try {
+    var clearedSheets = [];
+
+    // 1. Bersihkan master_arsip
+    var arsipSheet = getSheet(CONFIG.SHEETS.MASTER_ARSIP);
+    if (arsipSheet && arsipSheet.getLastRow() > 1) {
+      arsipSheet.deleteRows(2, arsipSheet.getLastRow() - 1);
+      clearedSheets.push('master_arsip');
+    }
+
+    // 2. Bersihkan berita_acara
+    var baSheet = getSheet(CONFIG.SHEETS.BERITA_ACARA);
+    if (baSheet && baSheet.getLastRow() > 1) {
+      baSheet.deleteRows(2, baSheet.getLastRow() - 1);
+      clearedSheets.push('berita_acara');
+    }
+
+    // 3. Bersihkan log_aktivitas & buat 1 log inisialisasi sistem
+    var logSheet = getSheet(CONFIG.SHEETS.LOG_AKTIVITAS);
+    if (logSheet && logSheet.getLastRow() > 1) {
+      logSheet.deleteRows(2, logSheet.getLastRow() - 1);
+      clearedSheets.push('log_aktivitas');
+    }
+
+    // 4. Bersihkan log_akses
+    var aksesSheet = getSheet(CONFIG.SHEETS.LOG_AKSES);
+    if (aksesSheet && aksesSheet.getLastRow() > 1) {
+      aksesSheet.deleteRows(2, aksesSheet.getLastRow() - 1);
+      clearedSheets.push('log_akses');
+    }
+
+    // Inisialisasi 1 log pencatatan sistem baru
+    logActivity('SYSTEM_RESET', 'Database', 'Pembersihan data dummy berhasil. Sistem SIASTA siap digunakan untuk pencatatan arsip riil.');
+
+    // 5. Invalidate runtime & script cache
+    invalidateSheetCache();
+    clearCache('CACHE_DASHBOARD_STATS');
+    clearCache('CACHE_KODE_ASAL');
+
+    return jsonResponse(true, {
+      clearedSheets: clearedSheets,
+      status: 'Clean'
+    }, 'Seluruh data dummy (arsip, berita acara, log) berhasil dihapus! Data user dan master referensi tetap aman dipertahankan.');
+  } catch (e) {
+    return jsonResponse(false, null, 'Gagal menghapus data dummy: ' + e.message);
+  }
+}
+
+/**
+ * Implementasi input contoh arsip nyata yang tersimpan ke Google Drive
+ * Mengunggah file dokumen alih media ke Google Drive (Pelestarian & Akses)
+ * dan menerapkan 1 spesimen TTD dummy pelaksana.
+ */
+function inputSampleArsipToDrive(params) {
+  try {
+    params = params || {};
+    var activeUser = params.activeUser || getCurrentUser() || {
+      id: 'STAF-001',
+      nama: 'Muhammad Dzaky Nathanegara, A.Md',
+      jabatan: 'Pengelola Kearsipan'
+    };
+
+    var kodeAsal = params.kodeAsal || 'KOM';
+    var nomorBox = params.nomorBox || '1';
+    var boxFormatted = 'B' + padNumber(parseInt(nomorBox), 2);
+    var kode = generateKodeUnik(kodeAsal, nomorBox);
+    var kodeUnikFinal = params.kodeUnik || kode.kodeUnik;
+
+    // Buat file dokumen alih media perdana di Google Drive
+    var sampleDocText = 
+      "PEMERINTAH KABUPATEN MANGGARAI BARAT\n" +
+      "DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH\n" +
+      "=========================================================\n" +
+      "DOKUMEN HASIL ALIH MEDIA ARSIP STATIS\n" +
+      "Kode Unik: " + kodeUnikFinal + "\n" +
+      "Deskripsi: " + (params.deskripsi || "Keputusan Bupati Manggarai Barat tentang Penetapan Batas Wilayah Administrasi Kecamatan Komodo") + "\n" +
+      "Kurun Waktu: " + (params.kurunWaktu || "2004") + "\n" +
+      "Asal Arsip: " + (params.asalArsip || "Kecamatan Komodo") + "\n" +
+      "Unit Pengolah: " + (params.unitPengelola || "Bagian Tata Pemerintahan Setda") + "\n" +
+      "Pelaksana Alih Media: " + activeUser.nama + "\n" +
+      "Tanggal Alih Media: " + formatDateIndo(new Date()) + "\n" +
+      "Status Keterbukaan: Terbuka\n" +
+      "=========================================================\n" +
+      "[ARSIP HASIL ALIH MEDIA — DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH KABUPATEN MANGGARAI BARAT]\n";
+
+    var docBlob = Utilities.newBlob(sampleDocText, 'text/plain', kodeUnikFinal + '_alih_media.txt');
+    var base64Sample = Utilities.base64Encode(docBlob.getBytes());
+
+    // Upload ke Google Drive via uploadArsipFile
+    var fileResult = uploadArsipFile(
+      base64Sample,
+      kodeUnikFinal + '_alih_media.txt',
+      'text/plain',
+      kodeAsal,
+      boxFormatted
+    );
+
+    // Apply watermark metadata
+    if (fileResult.pelestarian) applyWatermark(fileResult.pelestarian.id);
+    if (fileResult.akses) applyWatermark(fileResult.akses.id);
+
+    // Simpan data ke sheet master_arsip
+    var arsipData = {
+      id: generateId('ARS'),
+      kode_unik: kodeUnikFinal,
+      status_keterbukaan: params.statusKeterbukaan || 'Terbuka',
+      asal_arsip: params.asalArsip || 'Kecamatan Komodo',
+      kode_asal: kodeAsal,
+      nomor_box: boxFormatted,
+      nomor_urut: padNumber(kode.nomorUrut, 3),
+      deskripsi: params.deskripsi || 'Keputusan Bupati Manggarai Barat tentang Penetapan Batas Wilayah Administrasi Kecamatan Komodo',
+      jenis_arsip: params.jenisArsip || 'Tekstual',
+      kategori_urusan: params.kategoriUrusan || 'Pemerintahan',
+      kode_klasifikasi_asli: params.kodeKlasifikasiAsli || '045.2',
+      nomor_asli: params.nomorAsli || '180/HK/2004',
+      jumlah_lembar: parseInt(params.jumlahLembar) || 16,
+      jumlah_berkas: parseInt(params.jumlahBerkas) || 1,
+      rangkap_ke: 1,
+      kondisi_fisik: 'Baik',
+      kurun_waktu_mulai: params.kurunWaktu || '2004',
+      kurun_waktu_akhir: '',
+      unit_pengelola: params.unitPengelola || 'Bagian Tata Pemerintahan Setda',
+      lokasi_simpan: 'Depot Arsip A, Rak B-01, Box 1',
+      keterangan: 'File digital tersimpan aman di Google Drive folder Pelestarian & Akses.',
+      file_pelestarian_id: fileResult.pelestarian ? fileResult.pelestarian.id : '',
+      file_akses_id: fileResult.akses ? fileResult.akses.id : '',
+      file_pelestarian_url: fileResult.pelestarian ? fileResult.pelestarian.viewUrl : '',
+      file_akses_url: fileResult.akses ? fileResult.akses.viewUrl : '',
+      waktu_unggah: new Date().toISOString(),
+      qa_checklist: JSON.stringify([
+        { item: 'Resolusi sesuai standar (min. 300dpi)', checked: true },
+        { item: 'Format file sesuai standar ANRI', checked: true },
+        { item: 'Seluruh fisik arsip tercakup lengkap', checked: true },
+        { item: 'Hasil alih media terbaca jelas', checked: true }
+      ]),
+      watermark_applied: 'Ya',
+      staf_id: activeUser.id || 'STAF-001',
+      staf_nama: activeUser.nama || 'Muhammad Dzaky Nathanegara, A.Md',
+      tanggal_input: new Date(),
+      tanggal_update: new Date(),
+      status: 'Aktif'
+    };
+
+    appendData(CONFIG.SHEETS.MASTER_ARSIP, arsipData);
+    logActivity('INPUT_ARSIP', 'Arsip', 'Input arsip riil via Google Drive: ' + kodeUnikFinal);
+    clearCache('CACHE_DASHBOARD_STATS');
+
+    return jsonResponse(true, {
+      arsip: arsipData,
+      driveFiles: fileResult
+    }, 'Arsip ' + kodeUnikFinal + ' berhasil diinput dan berkas tersimpan langsung di Google Drive!');
+  } catch (e) {
+    return jsonResponse(false, null, 'Gagal input arsip ke Drive: ' + e.message);
+  }
+}
+

@@ -147,13 +147,7 @@ function saveArsip(data) {
 function getArsipList(params) {
   try {
     params = params || {};
-    var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
-    
-    // Auto-seed data dummy jika database master arsip masih kosong
-    if (!allArsip || allArsip.length === 0) {
-      seedFullDummyData(false);
-      allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
-    }
+    var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP) || [];
     
     // Filter out deleted
     allArsip = allArsip.filter(function(a) { return a.status !== 'Dihapus'; });
@@ -330,14 +324,8 @@ function getDashboardStats() {
       return jsonResponse(true, cached);
     }
 
-    var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
+    var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP) || [];
     allArsip = allArsip.filter(function(a) { return a.status !== 'Dihapus'; });
-    
-    // Auto-seed data dummy jika database master arsip masih kosong
-    if (allArsip.length === 0) {
-      seedFullDummyData(false);
-      allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP).filter(function(a) { return a.status !== 'Dihapus'; });
-    }
     
     var now = new Date();
     var currentYear = (CONFIG.APP && CONFIG.APP.TAHUN) ? parseInt(CONFIG.APP.TAHUN) : now.getFullYear();
@@ -968,12 +956,16 @@ function getRekapitulasiArsipExport(params) {
     params = params || {};
     var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
     var pejabatRes = getPejabatConfig();
+    var defaultTtd = (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : '');
     var pejabat = pejabatRes && pejabatRes.data ? pejabatRes.data : {
       kadis: (CONFIG.PEJABAT && CONFIG.PEJABAT.KADIS) ? CONFIG.PEJABAT.KADIS : {},
       kabid: (CONFIG.PEJABAT && CONFIG.PEJABAT.KABID) ? CONFIG.PEJABAT.KABID : {},
-      pelaksana: { nama: 'Muhammad Dzaky Nathanegara, A.Md', nip: '19980508 202506 1 004', jabatan: 'Pengelola Kearsipan' },
+      pelaksana: { nama: 'Muhammad Dzaky Nathanegara, A.Md', nip: '19980508 202506 1 004', jabatan: 'Pengelola Kearsipan', ttd: defaultTtd },
       alamatKop: (CONFIG.PEJABAT && CONFIG.PEJABAT.ALAMAT_KOP) ? CONFIG.PEJABAT.ALAMAT_KOP : 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT'
     };
+    if (pejabat.pelaksana && !pejabat.pelaksana.ttd) {
+      pejabat.pelaksana.ttd = defaultTtd;
+    }
 
     var periodeType = params.periodeType || 'all'; // 'all', 'tahun', 'bulan'
     var targetTahun = params.tahun ? parseInt(params.tahun) : 2026;

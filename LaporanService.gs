@@ -134,13 +134,7 @@ function generateLaporanData(params) {
 function getTargetRealisasi(tahun) {
   try {
     tahun = tahun || (CONFIG.APP && CONFIG.APP.TAHUN ? CONFIG.APP.TAHUN : 2026);
-    var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
-    
-    // Auto-seed data dummy jika database master arsip masih kosong
-    if (!allArsip || allArsip.length === 0) {
-      seedFullDummyData(false);
-      allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
-    }
+    var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP) || [];
     
     allArsip = allArsip.filter(function(a) {
       var d = a.tanggal_input ? new Date(a.tanggal_input) : null;

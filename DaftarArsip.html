@@ -290,7 +290,9 @@
             <div style="width:48%; text-align:center;">
               <div>Labuan Bajo, <span id="rekap-doc-tgl-surat">18 September 2026</span></div>
               <div style="font-weight:bold; margin-top:2px;" id="rekap-doc-pelaksana-jabatan">Pelaksana Alih Media,</div>
-              <div style="height:70px;"></div>
+              <div style="height:70px; display:flex; align-items:center; justify-content:center;">
+                <img id="rekap-doc-pelaksana-ttd-img" src="" alt="TTD Pelaksana" style="max-height:65px; max-width:150px; object-fit:contain; display:none;">
+              </div>
               <div style="font-weight:bold; text-decoration:underline;" id="rekap-doc-pelaksana-nama">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
               <div>Pengelola Kearsipan</div>
               <div>NIP. <span id="rekap-doc-pelaksana-nip">19980508 202506 1 004</span></div>
@@ -733,6 +735,16 @@ function populateRekapPrintModal(d) {
   if (pe.pelaksana) {
     document.getElementById('rekap-doc-pelaksana-nama').textContent = (pe.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md').toUpperCase();
     document.getElementById('rekap-doc-pelaksana-nip').textContent = pe.pelaksana.nip || '19980508 202506 1 004';
+    var ttdImg = document.getElementById('rekap-doc-pelaksana-ttd-img');
+    var ttdSrc = pe.pelaksana.ttd || window._dummyTtd || '';
+    if (ttdImg) {
+      if (ttdSrc) {
+        ttdImg.src = ttdSrc;
+        ttdImg.style.display = 'block';
+      } else {
+        ttdImg.style.display = 'none';
+      }
+    }
   }
 }
 

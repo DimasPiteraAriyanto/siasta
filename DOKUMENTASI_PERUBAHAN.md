@@ -7,13 +7,36 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 37**
+- **Versi Terakhir**: **Versi 38**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 38 — Pembersihan Data Dummy (Kecuali User), Integrasi Google Drive Aktif, & 1 TTD Dummy
+- **Latar Belakang**: Memenuhi instruksi pengguna untuk mengosongkan seluruh data dummy arsip/BA/log tanpa menghapus data user, mengaktifkan alur penyimpanan berkas Google Drive untuk arsip yang diinput, serta menyematkan tepat 1 spesimen tanda tangan (TTD) dummy resmi.
+- **Modifikasi Berkas**:
+  1. `DummyData.gs`:
+     - Menambahkan fungsi `clearAllDummyDataExceptUsers()`: mengosongkan baris data pada `master_arsip`, `berita_acara`, `log_aktivitas`, dan `log_akses` (header baris 1 tetap utuh), serta mempertahankan akun staf/user (`master_staf`) dan master kode OPD (`kode_asal_arsip`).
+     - Menambahkan fungsi `inputSampleArsipToDrive()`: uji coba otomatis input 1 arsip riil dengan pengunggahan dokumen ke folder Google Drive dan pencatatan tautannya.
+  2. `Code.gs`, `BeritaAcaraService.gs`, `ArsipService.gs`, & `LaporanService.gs`:
+     - **Penonaktifan Auto-Seed Liar**: Menghapus seluruh pemanggilan otomatis `seedFullDummyData(false)`. Saat database kosong, sistem menampilkan status bersih (empty state) tanpa memunculkan data palsu secara tiba-tiba.
+  3. `DriveService.gs`:
+     - Menambahkan proteksi dan auto-fallback pada `getFolderByPath` dan `createFolderStructure`: jika ID folder Google Drive belum diisi manual, sistem secara otomatis mencari atau membuat folder `SIASTA` di Google Drive pengguna.
+  4. `Config.gs` & `ClientScript.html`:
+     - Menyematkan aset Base64/SVG data URI untuk **1 Tanda Tangan (TTD) Dummy Resmi Pelaksana** bertinta biru transparan (`CONFIG.PEJABAT.PELAKSANA.TTD` / `CONFIG.DUMMY_TTD` dan `window._dummyTtd`).
+  5. `DashboardBA.html` & `DaftarArsip.html`:
+     - Menyematkan gambar TTD dummy pada kolom tanda tangan **Pelaksana Alih Media (Muhammad Dzaky Nathanegara, A.Md)** pada naskah cetak Berita Acara dan Rekapitulasi Alih Media A4 Landscape. Kolom Kepala Dinas dan Kabid tetap berupa ruang kosong untuk tanda tangan basah fisik.
+  6. `Pengaturan.html`:
+     - Menambahkan tombol aksi `🧹 Hapus Seluruh Data Dummy (Kecuali User)` dan `📥 Uji Input 1 Arsip ke Google Drive` di Tab 5 (Alat & Pengujian).
+     - Menampilkan kartu pratinjau spesimen 1 TTD dummy pelaksana di Tab 3 (Tanda Tangan).
+  7. `InputArsip.html`:
+     - Menambahkan tombol `🧪 Isi Contoh Data Riil` untuk pengujian instan.
+     - Memperjelas penanda bahwa setiap berkas yang diunggah otomatis tersimpan ke Google Drive (Pelestarian & Akses).
+
+---
 
 ### Versi 37 — Perbaikan Format Tanggal Cetak Berita Acara (Eliminasi Nilai NaN)
 - **Latar Belakang**: Pada teks paragraf pembuka naskah Berita Acara cetak, format tanggal numerik di dalam kurung sebelumnya sempat menampilkan `(18-NaN-2026)` karena indeks bulan numerik belum terpetakan ke objek respon frontend.

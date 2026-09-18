@@ -282,7 +282,9 @@
             <div style="width:46%; text-align:center;">
               <div>Labuan Bajo, <span id="doc-tgl-surat">18 September 2026</span></div>
               <div style="font-weight:bold; margin-top:2px;" id="doc-pelaksana-title">Pelaksana Alih Media,</div>
-              <div style="height:75px;"></div>
+              <div style="height:75px; display:flex; align-items:center; justify-content:center;">
+                <img id="doc-pelaksana-ttd-img" src="" alt="TTD Pelaksana" style="max-height:70px; max-width:160px; object-fit:contain; display:none;">
+              </div>
               <div style="font-weight:bold; text-decoration:underline;" id="doc-pelaksana-nama">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
               <div id="doc-pelaksana-jabatan">Pengelola Kearsipan</div>
               <div>NIP. <span id="doc-pelaksana-nip">19980508 202506 1 004</span></div>
@@ -648,6 +650,17 @@ function populateFormalBAModal(d) {
       document.getElementById('doc-pelaksana-title').textContent = 'Koordinator Pelaksana Alih Media,';
     } else {
       document.getElementById('doc-pelaksana-title').textContent = 'Pelaksana Alih Media,';
+    }
+
+    var ttdImg = document.getElementById('doc-pelaksana-ttd-img');
+    var ttdSrc = d.pelaksanaTtd || (d.pelaksana && d.pelaksana.ttd) || window._dummyTtd || '';
+    if (ttdImg) {
+      if (ttdSrc) {
+        ttdImg.src = ttdSrc;
+        ttdImg.style.display = 'block';
+      } else {
+        ttdImg.style.display = 'none';
+      }
     }
   }
 }

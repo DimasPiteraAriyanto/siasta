@@ -13,12 +13,8 @@ function getBeritaAcaraDashboard() {
     var allBA = readAllData(CONFIG.SHEETS.BERITA_ACARA);
     var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
     
-    // Auto-seed data dummy jika database master arsip masih kosong
-    if (!allArsip || allArsip.length === 0) {
-      seedFullDummyData(false);
-      allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
-      allBA = readAllData(CONFIG.SHEETS.BERITA_ACARA);
-    }
+    allArsip = allArsip || [];
+    allBA = allBA || [];
     
     var allStaf = readAllData(CONFIG.SHEETS.MASTER_STAF).filter(function(s) { return s.status === 'Aktif'; });
     
@@ -360,6 +356,7 @@ function getBeritaAcaraFormalDetail(params) {
       },
       alamatKop: (CONFIG.PEJABAT && CONFIG.PEJABAT.ALAMAT_KOP) ? CONFIG.PEJABAT.ALAMAT_KOP : 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT',
       pelaksana: pelaksana,
+      pelaksanaTtd: (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : ''),
       tipe: tipe,
       tipeLabel: tipe === 'per_staf' ? 'Per Staf (' + pelaksana.nama + ')' : 'Gabungan (Seluruh Tim Alih Media)',
       arsipList: filteredArsip
