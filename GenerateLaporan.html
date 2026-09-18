@@ -37,6 +37,54 @@
             <option value="">Semua Staf</option>
           </select>
         </div>
+
+        <!-- Panel Konfigurasi Pengesahan & Tanda Tangan -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:16px;">
+          <div style="font-weight:700; color:#1e293b; font-size:13px; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>✍️</span> Opsi Pengesahan Dokumen Laporan
+          </div>
+
+          <!-- Signer 1: Mengetahui -->
+          <div style="border-bottom:1px dashed #cbd5e1; padding-bottom:10px; margin-bottom:10px;">
+            <label style="display:flex; align-items:center; gap:8px; font-weight:700; color:#0f172a; font-size:12.5px; cursor:pointer; margin-bottom:6px;">
+              <input type="checkbox" id="lap-toggle-signer-1" checked onchange="updateLaporanSignerInputs()">
+              Gunakan Blok Pengesahan Ini (Signer 1 - Mengetahui)
+            </label>
+            <div id="lap-signer-1-inputs" style="padding-left:22px;">
+              <div class="form-group" style="margin-bottom:6px;">
+                <label class="form-label" style="font-size:11px;">Pilih Pejabat (Mengetahui)</label>
+                <select class="form-control" id="lap-select-signer-1" onchange="syncSigner1Details()" style="font-size:12px; padding:6px 10px;">
+                  <!-- Dinamis -->
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:11px;">Jabatan Pengesah</label>
+                <input type="text" class="form-control" id="lap-title-signer-1" value="Kepala Dinas Kearsipan dan Perpustakaan" style="font-size:12px; padding:6px 10px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Signer 2: Pelaksana -->
+          <div>
+            <label style="display:flex; align-items:center; gap:8px; font-weight:700; color:#0f172a; font-size:12.5px; cursor:pointer; margin-bottom:6px;">
+              <input type="checkbox" id="lap-toggle-signer-2" checked onchange="updateLaporanSignerInputs()">
+              Gunakan Blok Pengesahan Ini (Signer 2 - Pelaksana Alih Media)
+            </label>
+            <div id="lap-signer-2-inputs" style="padding-left:22px;">
+              <div class="form-group" style="margin-bottom:6px;">
+                <label class="form-label" style="font-size:11px;">Pilih Petugas / Pelaksana</label>
+                <select class="form-control" id="lap-select-signer-2" onchange="syncSigner2Details()" style="font-size:12px; padding:6px 10px;">
+                  <!-- Dinamis -->
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:11px;">Jabatan Pelaksana</label>
+                <input type="text" class="form-control" id="lap-title-signer-2" value="Pelaksana Alih Media," style="font-size:12px; padding:6px 10px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button class="btn btn-primary btn-lg" id="btn-generate-lap" onclick="generateLaporan()" style="width:100%;justify-content:center;">
           📊 Generate Laporan
         </button>
@@ -71,7 +119,8 @@
     <div class="card-header">
       <span class="card-title">📄 Preview Laporan</span>
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-sm btn-outline" onclick="printElement('lap-preview-content')">🖨️ Cetak</button>
+        <button class="btn btn-sm btn-outline" id="btn-save-lap-gdoc" onclick="saveLaporanToGoogleDocs()">📄 Simpan sebagai Google Docs</button>
+        <button class="btn btn-sm btn-gold" onclick="printElement('lap-preview-content')">🖨️ Cetak</button>
       </div>
     </div>
     <div class="card-body" id="lap-preview-content">
@@ -81,12 +130,17 @@
 </div>
 
 <script>
+var _lapStaffList = [];
+var _activeSigner1Data = null;
+var _activeSigner2Data = null;
+var _lastGeneratedLaporanData = null;
+var _lastGeneratedLaporanParams = null;
+
 function init_generate_laporan() {
   document.getElementById('lap-tahun').value = new Date().getFullYear();
   
-  // Pastikan tidak ada instans Select2 lama yang menempel
   if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
-    jQuery('#lap-tipe, #lap-bulan, #lap-staf').each(function() {
+    jQuery('#lap-tipe, #lap-bulan, #lap-staf, #lap-select-signer-1, #lap-select-signer-2').each(function() {
       var $el = jQuery(this);
       if ($el.hasClass('select2-hidden-accessible')) {
         $el.select2('destroy');
@@ -96,24 +150,94 @@ function init_generate_laporan() {
 
   google.script.run
     .withSuccessHandler(function(response) {
-      if (response.success) {
+      if (response && response.success && response.data) {
+        _lapStaffList = response.data;
+        
         var select = document.getElementById('lap-staf');
-        // Kosongkan opsi staf dinamis kecuali opsi pertama "Semua Staf"
         while (select.options.length > 1) {
           select.remove(1);
         }
-        response.data.forEach(function(s) {
+
+        var sel1 = document.getElementById('lap-select-signer-1');
+        var sel2 = document.getElementById('lap-select-signer-2');
+        sel1.innerHTML = '';
+        sel2.innerHTML = '';
+
+        _lapStaffList.forEach(function(s) {
+          // Opsi staf filter
           var opt = document.createElement('option');
           opt.value = s.id;
           opt.textContent = s.nama;
           select.appendChild(opt);
+
+          // Opsi Signer 1
+          var opt1 = document.createElement('option');
+          opt1.value = s.id;
+          opt1.textContent = s.nama + ' (' + (s.jabatan || 'Staf') + ')';
+          sel1.appendChild(opt1);
+
+          // Opsi Signer 2
+          var opt2 = document.createElement('option');
+          opt2.value = s.id;
+          opt2.textContent = s.nama + ' (' + (s.jabatan || 'Staf') + ')';
+          sel2.appendChild(opt2);
         });
+
+        // Set default selection: Kadis/Kabid for Signer 1, Dzaky/Pelaksana for Signer 2
+        for (var i = 0; i < _lapStaffList.length; i++) {
+          var name = (_lapStaffList[i].nama || '').toLowerCase();
+          var jab = (_lapStaffList[i].jabatan || '').toLowerCase();
+          if (name.indexOf('augustinus') !== -1 || jab.indexOf('kepala dinas') !== -1 || jab.indexOf('kabid') !== -1) {
+            sel1.selectedIndex = i;
+            break;
+          }
+        }
+        for (var j = 0; j < _lapStaffList.length; j++) {
+          var name2 = (_lapStaffList[j].nama || '').toLowerCase();
+          var jab2 = (_lapStaffList[j].jabatan || '').toLowerCase();
+          if (name2.indexOf('dzaky') !== -1 || jab2.indexOf('pelaksana') !== -1 || jab2.indexOf('pengelola') !== -1) {
+            sel2.selectedIndex = j;
+            break;
+          }
+        }
+
+        syncSigner1Details();
+        syncSigner2Details();
       }
     })
     .withFailureHandler(function(err) {
       showToast('Gagal memuat staf: ' + err.message, 'error');
     })
     .getStaffList();
+}
+
+function updateLaporanSignerInputs() {
+  var s1Checked = document.getElementById('lap-toggle-signer-1').checked;
+  var s2Checked = document.getElementById('lap-toggle-signer-2').checked;
+  document.getElementById('lap-signer-1-inputs').style.display = s1Checked ? 'block' : 'none';
+  document.getElementById('lap-signer-2-inputs').style.display = s2Checked ? 'block' : 'none';
+
+  if (_lastGeneratedLaporanData) {
+    renderLaporanPreview(_lastGeneratedLaporanData);
+  }
+}
+
+function syncSigner1Details() {
+  var id = document.getElementById('lap-select-signer-1').value;
+  _activeSigner1Data = _lapStaffList.find(function(s) { return s.id === id; }) || null;
+  if (_activeSigner1Data && document.getElementById('lap-title-signer-1').value.trim() === '') {
+    document.getElementById('lap-title-signer-1').value = _activeSigner1Data.jabatan || 'Kepala Dinas Kearsipan dan Perpustakaan';
+  }
+  if (_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData);
+}
+
+function syncSigner2Details() {
+  var id = document.getElementById('lap-select-signer-2').value;
+  _activeSigner2Data = _lapStaffList.find(function(s) { return s.id === id; }) || null;
+  if (_activeSigner2Data && document.getElementById('lap-title-signer-2').value.trim() === '') {
+    document.getElementById('lap-title-signer-2').value = _activeSigner2Data.jabatan || 'Pelaksana Alih Media,';
+  }
+  if (_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData);
 }
 
 function generateLaporan() {
@@ -123,6 +247,7 @@ function generateLaporan() {
     tahun: document.getElementById('lap-tahun').value,
     stafId: document.getElementById('lap-staf').value
   };
+  _lastGeneratedLaporanParams = params;
   
   var btn = document.getElementById('btn-generate-lap');
   btn.disabled = true;
@@ -133,12 +258,13 @@ function generateLaporan() {
       btn.disabled = false;
       btn.innerHTML = '📊 Generate Laporan';
       
-      if (response.success) {
+      if (response && response.success && response.data) {
+        _lastGeneratedLaporanData = response.data;
         renderLaporanPreview(response.data);
         document.getElementById('lap-preview-card').style.display = 'block';
         showToast('Laporan berhasil di-generate!', 'success');
       } else {
-        showToast(response.message, 'error');
+        showToast((response && response.message) || 'Gagal generate laporan.', 'error');
       }
     })
     .withFailureHandler(function(err) {
@@ -149,72 +275,186 @@ function generateLaporan() {
     .generateLaporanData(params);
 }
 
+// Render Laporan Preview (Bebas Watermark CSS Palsu)
 function renderLaporanPreview(data) {
   var isInternal = data.tipe === 'internal';
-  var html = '<div class="doc-preview" style="position:relative; overflow:hidden; background:#fff; padding:25px 30px;">
-    <!-- Watermark Dokumen Resmi -->
-    <div class="watermark-pdf-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-35deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:130%; white-space:nowrap;">
-      <div style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:28pt; font-weight:800; color:rgba(100, 116, 139, 0.16); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
-        ARSIP HASIL ALIH MEDIA<br>
-        DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
-        KABUPATEN MANGGARAI BARAT
-      </div>
-    </div>
-    <div style="position:relative; z-index:1;">
-      <div class="doc-header" style="text-align:center; position:relative; padding-bottom:12px; margin-bottom:18px; border-bottom:none;">
-        <div style="position:absolute; left:5px; top:0; width:65px; display:flex; align-items:center; justify-content:center;">
-          <img src="' + (window._logoMabar || '') + '" alt="Logo Pemkab Manggarai Barat" style="width:60px; height:auto; object-fit:contain;">
-        </div>
-        <div style="margin-left:70px;">
-          <div style="font-size:12pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
-          <div style="font-size:14pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
-          <div style="font-size:9.5pt; font-style:italic; margin-top:3px;">Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT</div>
-        </div>
-        <div style="border-bottom:3px solid #000; margin-top:12px;"></div>
-        <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
-      </div>
-      <div style="text-align:center; margin-bottom:16px;">
-        <div class="doc-title" style="font-size:13pt; font-weight:bold; text-decoration:underline;">LAPORAN ' + (isInternal ? 'INTERNAL' : 'EKSTERNAL') + '</div>
-        <div style="font-size:11pt; font-weight:600; margin-top:2px;">KEGIATAN ALIH MEDIA ARSIP STATIS</div>
-        <div style="font-size:10.5pt; margin-top:2px;">Periode: ' + data.periode + '</div>
-      </div>';
+  var html = '<div class="doc-preview" style="position:relative; overflow:hidden; background:#fff; padding:25px 30px; font-family:\'Times New Roman\', Times, serif; color:#000;">' +
+    '<div style="position:relative; z-index:1;">' +
+      '<div class="doc-header" style="text-align:center; position:relative; padding-bottom:12px; margin-bottom:18px; border-bottom:none;">' +
+        '<div style="position:absolute; left:5px; top:0; width:65px; display:flex; align-items:center; justify-content:center;">' +
+          '<img src="' + (window._logoMabar || '') + '" alt="Logo Pemkab Manggarai Barat" style="width:60px; height:auto; object-fit:contain;">' +
+        '</div>' +
+        '<div style="margin-left:70px;">' +
+          '<div style="font-size:12pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>' +
+          '<div style="font-size:14pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>' +
+          '<div style="font-size:9.5pt; font-style:italic; margin-top:3px;">Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT</div>' +
+        '</div>' +
+        '<div style="border-bottom:3px solid #000; margin-top:12px;"></div>' +
+        '<div style="border-bottom:1px solid #000; margin-top:2px;"></div>' +
+      '</div>' +
+      '<div style="text-align:center; margin-bottom:16px;">' +
+        '<div class="doc-title" style="font-size:13pt; font-weight:bold; text-decoration:underline;">LAPORAN ' + (isInternal ? 'INTERNAL' : 'EKSTERNAL') + '</div>' +
+        '<div style="font-size:11pt; font-weight:600; margin-top:2px;">KEGIATAN ALIH MEDIA ARSIP STATIS</div>' +
+        '<div style="font-size:10.5pt; margin-top:2px;">Periode: ' + data.periode + '</div>' +
+      '</div>';
   
   // Summary
-  html += '<h3 style="margin:16px 0 8px;font-size:14px;">I. Ringkasan</h3>' +
-    '<table><tr><th style="width:200px;">Uraian</th><th>Keterangan</th></tr>' +
-    '<tr><td>Total Arsip</td><td><strong>' + data.totalArsip + '</strong> arsip</td></tr>' +
-    '<tr><td>Total Lembar</td><td>' + data.totalLembar + ' lembar</td></tr>' +
-    '<tr><td>Total Berkas</td><td>' + data.totalBerkas + ' berkas</td></tr>' +
-    '<tr><td>Tanggal Generate</td><td>' + data.tanggalGenerate + '</td></tr></table>';
+  html += '<h3 style="margin:16px 0 8px; font-size:12pt; font-weight:bold;">I. Ringkasan Pelaksanaan</h3>' +
+    '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:10.5pt;">' +
+    '<tr><th style="width:220px; border:1px solid #333; padding:5px 8px; text-align:left; background:#f1f5f9;">Uraian</th><th style="border:1px solid #333; padding:5px 8px; text-align:left; background:#f1f5f9;">Keterangan</th></tr>' +
+    '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Arsip Dialihmediakan</td><td style="border:1px solid #333; padding:5px 8px;"><strong>' + data.totalArsip + '</strong> item arsip</td></tr>' +
+    '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Lembar</td><td style="border:1px solid #333; padding:5px 8px;">' + data.totalLembar + ' lembar</td></tr>' +
+    '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Berkas</td><td style="border:1px solid #333; padding:5px 8px;">' + data.totalBerkas + ' berkas</td></tr>' +
+    '<tr><td style="border:1px solid #333; padding:5px 8px;">Tanggal Laporan</td><td style="border:1px solid #333; padding:5px 8px;">' + data.tanggalGenerate + '</td></tr></table>';
   
   // Arsip detail table
   if (data.arsipDetail && data.arsipDetail.length > 0) {
-    html += '<h3 style="margin:20px 0 8px;font-size:14px;">II. Daftar Arsip</h3><table><thead><tr>' +
-      '<th>No</th><th>Kode</th><th>Deskripsi</th><th>Jenis</th>';
-    if (isInternal) html += '<th>Staf</th><th>Lokasi</th>';
-    html += '<th>Status</th></tr></thead><tbody>';
+    html += '<h3 style="margin:20px 0 8px; font-size:12pt; font-weight:bold;">II. Daftar Arsip Statis</h3>' +
+      '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:9.5pt;"><thead><tr style="background:#f1f5f9;">' +
+      '<th style="border:1px solid #333; padding:5px; width:30px; text-align:center;">No</th>' +
+      '<th style="border:1px solid #333; padding:5px; width:100px;">Kode Unik</th>' +
+      '<th style="border:1px solid #333; padding:5px;">Uraian Informasi Arsip</th>' +
+      '<th style="border:1px solid #333; padding:5px; width:70px;">Jenis</th>';
+    if (isInternal) html += '<th style="border:1px solid #333; padding:5px; width:110px;">Staf Pelaksana</th><th style="border:1px solid #333; padding:5px; width:80px;">Lokasi</th>';
+    html += '<th style="border:1px solid #333; padding:5px; width:70px;">Status</th></tr></thead><tbody>';
     
     data.arsipDetail.forEach(function(a) {
-      html += '<tr><td>' + a.no + '</td><td>' + a.kode_unik + '</td>' +
-        '<td style="max-width:200px;">' + (a.deskripsi || '-') + '</td><td>' + (a.jenis_arsip || '-') + '</td>';
-      if (isInternal) html += '<td>' + (a.staf_nama || '-') + '</td><td>' + (a.lokasi_simpan || '-') + '</td>';
-      html += '<td>' + (a.status_keterbukaan || '-') + '</td></tr>';
+      html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + a.no + '</td>' +
+        '<td style="border:1px solid #333; padding:4px;">' + a.kode_unik + '</td>' +
+        '<td style="border:1px solid #333; padding:4px;">' + (a.deskripsi || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px;">' + (a.jenis_arsip || '-') + '</td>';
+      if (isInternal) html += '<td style="border:1px solid #333; padding:4px;">' + (a.staf_nama || '-') + '</td><td style="border:1px solid #333; padding:4px;">' + (a.lokasi_simpan || '-') + '</td>';
+      html += '<td style="border:1px solid #333; padding:4px; text-align:center;">' + (a.status_keterbukaan || '-') + '</td></tr>';
     });
     html += '</tbody></table>';
   }
   
   // Staf breakdown (internal only)
-  if (isInternal && data.stafBreakdown) {
-    html += '<h3 style="margin:20px 0 8px;font-size:14px;">III. Breakdown Per Staf</h3><table>' +
-      '<tr><th>Nama Staf</th><th>Jumlah Arsip</th></tr>';
-    data.stafBreakdown.forEach(function(s) {
-      html += '<tr><td>' + s.nama + '</td><td>' + s.jumlah + '</td></tr>';
+  if (isInternal && data.stafBreakdown && data.stafBreakdown.length > 0) {
+    html += '<h3 style="margin:20px 0 8px; font-size:12pt; font-weight:bold;">III. Rekapitulasi Pelaksana Alih Media</h3>' +
+      '<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10pt;">' +
+      '<tr style="background:#f1f5f9;"><th style="border:1px solid #333; padding:5px; width:35px; text-align:center;">No</th><th style="border:1px solid #333; padding:5px; text-align:left;">Nama Staf / Petugas</th><th style="border:1px solid #333; padding:5px; width:120px; text-align:center;">Jumlah Arsip</th></tr>';
+    data.stafBreakdown.forEach(function(s, idx) {
+      html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + (idx + 1) + '</td><td style="border:1px solid #333; padding:4px;">' + s.nama + '</td><td style="border:1px solid #333; padding:4px; text-align:center;">' + s.jumlah + ' item</td></tr>';
     });
     html += '</table>';
   }
   
+  // Blok Tanda Tangan: Master Checkbox Sembunyi Total
+  var useS1 = document.getElementById('lap-toggle-signer-1') ? document.getElementById('lap-toggle-signer-1').checked : true;
+  var useS2 = document.getElementById('lap-toggle-signer-2') ? document.getElementById('lap-toggle-signer-2').checked : true;
+
+  if (useS1 || useS2) {
+    html += '<div id="lap-ttd-row" style="display:flex; justify-content:space-between; margin-top:35px; font-size:11pt; page-break-inside:avoid;">';
+    
+    // Kolom Signer 1 (Mengetahui)
+    if (useS1) {
+      var s1Title = document.getElementById('lap-title-signer-1').value || 'Kepala Dinas Kearsipan dan Perpustakaan';
+      var s1Nama = _activeSigner1Data ? _activeSigner1Data.nama : 'AUGUSTINUS RINUS, S.Pd';
+      var s1Pangkat = _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina Utama Muda') : 'Pembina Utama Muda';
+      var s1Nip = _activeSigner1Data ? (_activeSigner1Data.nip || '-') : '19720219 199903 1 008';
+      
+      html += '<div id="lap-col-signer-1" style="width:46%; text-align:center;">' +
+        '<div>Mengetahui,</div>' +
+        '<div style="font-weight:bold; margin-top:2px;">' + s1Title + '<br>Kabupaten Manggarai Barat</div>' +
+        '<div style="height:70px;"></div>' +
+        '<div style="font-weight:bold; text-decoration:underline;">' + s1Nama + '</div>' +
+        '<div>' + s1Pangkat + '</div>' +
+        '<div>NIP. ' + s1Nip + '</div>' +
+        '</div>';
+    } else {
+      html += '<div style="width:46%;"></div>';
+    }
+
+    // Kolom Signer 2 (Pelaksana Alih Media)
+    if (useS2) {
+      var s2Title = document.getElementById('lap-title-signer-2').value || 'Pelaksana Alih Media,';
+      var s2Nama = _activeSigner2Data ? _activeSigner2Data.nama : 'MUHAMMAD DZAKY NATHANEGARA, A.Md';
+      var s2Jabatan = _activeSigner2Data ? (_activeSigner2Data.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan';
+      var s2Nip = _activeSigner2Data ? (_activeSigner2Data.nip || '-') : '19980508 202506 1 004';
+
+      html += '<div id="lap-col-signer-2" style="width:46%; text-align:center;">' +
+        '<div>Labuan Bajo, ' + (data.tanggalGenerate || '') + '</div>' +
+        '<div style="font-weight:bold; margin-top:2px;">' + s2Title + '</div>' +
+        '<div style="height:70px; display:flex; align-items:center; justify-content:center;">' +
+        (window._dummyTtd ? '<img src="' + window._dummyTtd + '" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">' : '') +
+        '</div>' +
+        '<div style="font-weight:bold; text-decoration:underline;">' + s2Nama + '</div>' +
+        '<div>' + s2Jabatan + '</div>' +
+        '<div>NIP. ' + s2Nip + '</div>' +
+        '</div>';
+    } else {
+      html += '<div style="width:46%;"></div>';
+    }
+
+    html += '</div>';
+  }
+
   html += '</div></div>';
   document.getElementById('lap-preview-content').innerHTML = html;
+}
+
+// Opsi Simpan Laporan ke Google Docs Asli (DocumentApp)
+function saveLaporanToGoogleDocs() {
+  if (!_lastGeneratedLaporanData || !_lastGeneratedLaporanParams) {
+    showToast('Harap generate laporan terlebih dahulu.', 'warning');
+    return;
+  }
+
+  var useS1 = document.getElementById('lap-toggle-signer-1').checked;
+  var useS2 = document.getElementById('lap-toggle-signer-2').checked;
+
+  var exportParams = Object.assign({}, _lastGeneratedLaporanParams, {
+    useSigner1: useS1,
+    signer1Title: document.getElementById('lap-title-signer-1').value,
+    signer1Nama: _activeSigner1Data ? _activeSigner1Data.nama : 'AUGUSTINUS RINUS, S.Pd',
+    signer1Pangkat: _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina Utama Muda') : 'Pembina Utama Muda',
+    signer1Nip: _activeSigner1Data ? (_activeSigner1Data.nip || '-') : '19720219 199903 1 008',
+
+    useSigner2: useS2,
+    signer2Title: document.getElementById('lap-title-signer-2').value,
+    signer2Nama: _activeSigner2Data ? _activeSigner2Data.nama : 'MUHAMMAD DZAKY NATHANEGARA, A.Md',
+    signer2Jabatan: _activeSigner2Data ? (_activeSigner2Data.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan',
+    signer2Nip: _activeSigner2Data ? (_activeSigner2Data.nip || '-') : '19980508 202506 1 004'
+  });
+
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'Menyusun Dokumen...',
+      text: 'Membuat file Google Docs dan menyimpan ke Google Drive...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: function() {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      if (resp && resp.success && resp.data && resp.data.url) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Disimpan ke Google Drive!',
+            html: '<p style="font-size:13.5px;">Dokumen Google Docs Laporan telah dibuat di folder <strong>Laporan</strong>.</p>' +
+                  '<div style="margin-top:14px;"><a href="' + resp.data.url + '" target="_blank" class="btn btn-primary" style="text-decoration:none; padding:8px 16px; border-radius:6px; font-weight:600;">📂 Buka Dokumen di Tab Baru</a></div>',
+            showConfirmButton: true,
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#1B2A4A'
+          });
+        } else {
+          window.open(resp.data.url, '_blank');
+        }
+      } else {
+        showToast((resp && resp.message) || 'Gagal membuat Google Docs.', 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      showToast('Error: ' + err.message, 'error');
+    })
+    .exportLaporanToGoogleDoc(exportParams);
 }
 
 if (typeof init_generate_laporan === 'function') init_generate_laporan();

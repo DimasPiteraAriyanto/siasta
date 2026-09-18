@@ -151,19 +151,20 @@ function uploadFile(base64Data, fileName, mimeType, folderPath) {
  * @param {string} nomorBox - Nomor box (B01, B02, dll)
  * @returns {Object} {pelestarian: {...}, akses: {...}}
  */
-function uploadArsipFile(base64Data, fileName, mimeType, kodeAsal, nomorBox) {
+function uploadArsipFile(base64Data, fileName, mimeType, kodeAsal, nomorBox, aksesBase64Data) {
   try {
-    // Upload ke folder Pelestarian
+    // Upload ke folder Pelestarian (master asli)
     var pelestarianPath = CONFIG.DRIVE_FOLDERS.ARSIP_DIGITAL + '/' +
                           CONFIG.DRIVE_FOLDERS.PELESTARIAN + '/' +
                           kodeAsal + '/' + nomorBox;
     var pelestarianFile = uploadFile(base64Data, fileName, mimeType, pelestarianPath);
     
-    // Upload copy ke folder Akses (bisa di-compress nanti)
+    // Upload copy ber-watermark visual ke folder Akses
+    var dataForAkses = aksesBase64Data || base64Data;
     var aksesPath = CONFIG.DRIVE_FOLDERS.ARSIP_DIGITAL + '/' +
                     CONFIG.DRIVE_FOLDERS.AKSES + '/' +
                     kodeAsal + '/' + nomorBox;
-    var aksesFile = uploadFile(base64Data, 'akses_' + fileName, mimeType, aksesPath);
+    var aksesFile = uploadFile(dataForAkses, 'akses_' + fileName, mimeType, aksesPath);
     
     return {
       pelestarian: pelestarianFile,

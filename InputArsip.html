@@ -566,6 +566,19 @@ function processSaveArsip(qaChecklist) {
       formData.fileData = fileInfo.data;
       formData.fileName = fileInfo.name;
       formData.fileMimeType = fileInfo.type;
+
+      // Ambil hasil cap visual watermark sungguhan dari canvas (khusus berkas gambar)
+      var canvas = document.getElementById('canvas-watermark-preview');
+      if (canvas && fileInfo.type && fileInfo.type.indexOf('image') !== -1) {
+        try {
+          var wmUrl = canvas.toDataURL('image/jpeg', 0.92);
+          if (wmUrl && wmUrl.indexOf(',') !== -1) {
+            formData.fileAksesData = wmUrl.split(',')[1];
+          }
+        } catch (eCanvas) {
+          console.warn('Canvas watermark export error:', eCanvas);
+        }
+      }
     }
     
     google.script.run

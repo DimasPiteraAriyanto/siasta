@@ -199,102 +199,53 @@
     </div>
   </div>
 
-  <!-- TAB 3: TANDA TANGAN (KADIS, KABID, PELAKSANA) -->
+  <!-- TAB 3: TANDA TANGAN & PEJABAT RESMI -->
   <div id="tab-pane-ttd" class="tab-pane" style="display:none;">
     <div class="card" style="margin-bottom:24px;">
       <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span class="card-title" style="font-size:16px; font-weight:700;">✍️ Data Pejabat Penandatangan Dokumen Dinas</span>
-          <div style="font-size:12px; color:var(--text-muted);">Data ini dicetak otomatis pada Berita Acara Alih Media dan Formulir Laporan Rekapitulasi.</div>
+          <span class="card-title" style="font-size:16px; font-weight:700;">✍️ Spesimen Tanda Tangan & Pejabat Penandatangan</span>
+          <div style="font-size:12px; color:var(--text-muted);">Informasi penandatanganan dokumen kedinasan SIASTA.</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="savePejabatSettings()">💾 Simpan Pejabat</button>
+        <button class="btn btn-primary btn-sm" onclick="navigateTo('kelola-staf')">👥 Buka Kelola Staf</button>
       </div>
       <div class="card-body">
-        <form id="form-pejabat" onsubmit="event.preventDefault(); savePejabatSettings();">
-          <!-- Kepala Dinas -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:20px;">
-            <div style="font-weight:700; color:var(--primary); font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-              <span>👔</span> 1. Kepala Dinas (Penandatangan Berita Acara - Mengetahui)
-            </div>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Nama Lengkap & Gelar</label>
-                <input type="text" class="form-control" id="ttd-kadis-nama" value="Augustinus Rinus, S.Pd" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Pangkat / Golongan Ruang</label>
-                <input type="text" class="form-control" id="ttd-kadis-pangkat" value="Pembina Utama Muda" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">NIP (Nomor Induk Pegawai)</label>
-                <input type="text" class="form-control" id="ttd-kadis-nip" value="19720219 199903 1 008" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Jabatan Struktural</label>
-                <input type="text" class="form-control" id="ttd-kadis-jabatan" value="Kepala Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat" required>
-              </div>
-            </div>
+        
+        <!-- Penjelasan Terpusat Single Source of Truth -->
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:16px; margin-bottom:20px; display:flex; gap:14px; align-items:flex-start;">
+          <span style="font-size:24px;">ℹ️</span>
+          <div style="font-size:13px; color:#1e3a8a; line-height:1.6;">
+            <strong>Data Penandatangan Terpusat di Kelola Staf</strong><br>
+            Seluruh dokumen dinas (Berita Acara, Laporan Internal/Eksternal, dan Rekapitulasi Alih Media) kini mengambil data penandatangan secara dinamis langsung dari master data staf (sheet <code>master_staf</code>).<br>
+            Untuk memperbarui Nama Lengkap, Gelar, NIP, Pangkat/Golongan, maupun Jabatan pejabat (Kepala Dinas, Kepala Bidang, maupun Petugas Pelaksana), silakan kelola langsung melalui menu <strong>Kelola Staf</strong>.
           </div>
+        </div>
 
-          <!-- Kepala Bidang -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:20px;">
-            <div style="font-weight:700; color:var(--gold); font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-              <span>📁</span> 2. Kepala Bidang (Mengetahui Rekapitulasi Alih Media & Laporan)
-            </div>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Nama Lengkap & Gelar</label>
-                <input type="text" class="form-control" id="ttd-kabid-nama" value="Stefanus Rahmat, S.Sos" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Pangkat / Golongan Ruang</label>
-                <input type="text" class="form-control" id="ttd-kabid-pangkat" value="Pembina / IV a" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">NIP (Nomor Induk Pegawai)</label>
-                <input type="text" class="form-control" id="ttd-kabid-nip" value="19850215 201001 1 018" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Jabatan</label>
-                <input type="text" class="form-control" id="ttd-kabid-jabatan" value="Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip" required>
-              </div>
-            </div>
+        <!-- Spesimen 1 TTD Dummy Resmi Pelaksana -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:20px; margin-bottom:16px;">
+          <div style="font-weight:700; color:var(--primary); font-size:15px; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+            <span>✒️</span> Spesimen 1 Tanda Tangan (TTD) Digital Pelaksana Alih Media
           </div>
+          <p style="font-size:12.5px; color:#64748b; margin-bottom:16px;">
+            Spesimen tanda tangan digital resmi bertinta biru ini disematkan secara otomatis pada kolom Pelaksana Alih Media pada dokumen Berita Acara dan Rekapitulasi Alih Media.
+          </p>
+          <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:8px; padding:20px; text-align:center;">
+            <div style="height:75px; display:flex; align-items:center; justify-content:center;">
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 100' width='280' height='100'><path d='M25,65 C40,25 55,20 65,45 C75,70 60,85 80,60 C100,35 120,40 135,55 C150,70 160,35 175,50 C190,65 210,40 225,55 C235,65 245,55 260,50 M35,80 C95,72 170,75 255,70' fill='none' stroke='%231a4fa0' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>" style="max-height:70px; max-width:200px; object-fit:contain;" alt="Spesimen TTD Pelaksana">
+            </div>
+            <div style="font-weight:700; color:#1e293b; margin-top:8px;">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
+            <div style="font-size:12px; color:#64748b;">Pengelola Kearsipan / Pelaksana Alih Media</div>
+            <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">NIP. 19980508 202506 1 004</div>
+          </div>
+        </div>
 
-          <!-- Pelaksana Default -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:20px;">
-            <div style="font-weight:700; color:#2ecc71; font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-              <span>👤</span> 3. Koordinator / Pelaksana Utama Alih Media
-            </div>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">Nama Lengkap & Gelar</label>
-                <input type="text" class="form-control" id="ttd-pelaksana-nama" value="Muhammad Dzaky Nathanegara, A.Md" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight:600;">NIP</label>
-                <input type="text" class="form-control" id="ttd-pelaksana-nip" value="19980508 202506 1 004" required>
-              </div>
-              <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label" style="font-weight:600;">Jabatan Pelaksana</label>
-                <input type="text" class="form-control" id="ttd-pelaksana-jabatan" value="Pengelola Kearsipan" required>
-              </div>
-              <div class="form-group" style="grid-column: span 2; background:#fff; border:1px dashed #cbd5e1; border-radius:8px; padding:14px; text-align:center;">
-                <label class="form-label" style="font-weight:700; color:var(--primary); margin-bottom:6px; display:block;">✍️ Spesimen 1 Tanda Tangan (TTD) Dummy Pelaksana:</label>
-                <div style="height:65px; display:flex; align-items:center; justify-content:center;">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 100' width='280' height='100'><path d='M25,65 C40,25 55,20 65,45 C75,70 60,85 80,60 C100,35 120,40 135,55 C150,70 160,35 175,50 C190,65 210,40 225,55 C235,65 245,55 260,50 M35,80 C95,72 170,75 255,70' fill='none' stroke='%231a4fa0' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>" style="max-height:60px; max-width:180px; object-fit:contain;" alt="Spesimen TTD Pelaksana">
-                </div>
-                <div class="form-hint" style="margin-top:4px;">Tanda tangan bertinta biru ini otomatis dicetak pada lembar Berita Acara dan Rekapitulasi Alih Media.</div>
-              </div>
-            </div>
-          </div>
+        <!-- Tombol Aksi Cepat -->
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn btn-outline" onclick="navigateTo('kelola-staf')">
+            👥 Buka Kelola Staf & Pejabat
+          </button>
+        </div>
 
-          <div style="display:flex; justify-content:flex-end;">
-            <button type="button" class="btn btn-primary" onclick="savePejabatSettings()">
-              💾 Simpan Perubahan Pejabat Penandatangan
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>

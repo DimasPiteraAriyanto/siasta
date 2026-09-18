@@ -392,3 +392,167 @@ function deleteBeritaAcara(baId) {
     return jsonResponse(false, null, 'Error deleteBeritaAcara: ' + e.message);
   }
 }
+
+/**
+ * Export Berita Acara ke Google Docs (DocumentApp)
+ * @param {Object} payload
+ * @returns {Object} jsonResponse with doc URL
+ */
+function exportBAToGoogleDoc(payload) {
+  try {
+    if (!payload) return jsonResponse(false, null, 'Payload Berita Acara kosong.');
+    
+    var docName = 'Berita Acara Alih Media - ' + (payload.nomorBA ? payload.nomorBA.replace(/[/\\?%*:|"<>]/g, '_') : ('Tahun_' + (payload.tahunAngka || 2026)));
+    var doc = DocumentApp.create(docName);
+    var body = doc.getBody();
+    
+    // Page setup (A4 Portrait, margin)
+    body.setPageWidth(595.28);
+    body.setPageHeight(841.89);
+    body.setMarginTop(54);
+    body.setMarginBottom(54);
+    body.setMarginLeft(54);
+    body.setMarginRight(54);
+    
+    // 1. Kop Surat
+    var p1 = body.appendParagraph('PEMERINTAH KABUPATEN MANGGARAI BARAT');
+    p1.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    p1.setFontFamily('Times New Roman').setFontSize(13).setBold(true);
+    
+    var p2 = body.appendParagraph('DINAS KEARSIPAN DAN PERPUSTAKAAN');
+    p2.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    p2.setFontFamily('Times New Roman').setFontSize(15).setBold(true);
+    
+    var p3 = body.appendParagraph(payload.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT');
+    p3.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    p3.setFontFamily('Times New Roman').setFontSize(9.5).setItalic(true);
+    
+    var pDivider = body.appendParagraph('____________________________________________________________________');
+    pDivider.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    pDivider.setFontFamily('Times New Roman').setFontSize(10).setBold(true);
+    
+    body.appendParagraph('');
+    
+    // 2. Judul
+    var pJudul = body.appendParagraph('BERITA ACARA ALIH MEDIA ARSIP');
+    pJudul.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    pJudul.setFontFamily('Times New Roman').setFontSize(13).setBold(true).setUnderline(true);
+    
+    var pNomor = body.appendParagraph('Nomor: ' + (payload.nomorBA || '....................................................'));
+    pNomor.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    pNomor.setFontFamily('Times New Roman').setFontSize(11);
+    
+    body.appendParagraph('');
+    
+    // 3. Paragraf Pembuka
+    var pBuka = body.appendParagraph(
+      'Pada hari ini, ' + (payload.hariNama || 'Kamis') + ', tanggal ' + (payload.tanggalTerbilang || 'delapan belas') + 
+      ' bulan ' + (payload.bulanNama || 'Desember') + ' tahun ' + (payload.tahunTerbilang || 'dua ribu dua puluh lima') + 
+      ' (' + (payload.tanggalAngkaLengkap || '18-12-2025') + '), bertempat di Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat, ' +
+      'kami yang bertanda tangan di bawah ini telah melaksanakan kegiatan alih media arsip dengan keterangan sebagai berikut:'
+    );
+    pBuka.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+    pBuka.setFontFamily('Times New Roman').setFontSize(11.5).setLineSpacing(1.3);
+    
+    // 4. Tabel Rincian
+    var tableData = [
+      ['Jenis Kegiatan', ':', 'Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)'],
+      ['Jenis Arsip', ':', payload.jenisArsip || 'Arsip Statis berupa berkas administrasi pemerintahan periode tahun 1983-2000'],
+      ['Jumlah Arsip', ':', (payload.jumlahArsip || '0') + ' (' + (payload.jumlahArsipTerbilang || 'nol') + ') item arsip'],
+      ['Asal Arsip', ':', payload.asalArsip || 'Box 5 Kecamatan Komodo'],
+      ['Dasar Pelaksanaan', ':', payload.dasarPelaksanaan || 'Peraturan Bupati Manggarai Barat Nomor 31 Tahun 2024 tentang Pedoman Alih Media Arsip di Lingkungan Pemerintah Daerah Kabupaten Manggarai Barat']
+    ];
+    
+    var table = body.appendTable(tableData);
+    table.setBorderWidth(0);
+    for (var r = 0; r < tableData.length; r++) {
+      var row = table.getRow(r);
+      row.getCell(0).setWidth(130).getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(11);
+      row.getCell(1).setWidth(15).getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(11);
+      row.getCell(2).setWidth(340).getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(11);
+    }
+    
+    body.appendParagraph('');
+    
+    // 5. Klausul Penutup
+    var pTutup = body.appendParagraph(
+      'Demikian Berita Acara Alih Media Arsip ini dibuat dengan sesungguhnya rangkap 2 (dua) untuk dipergunakan sebagaimana mestinya dan memiliki kekuatan hukum yang sah sesuai ketentuan Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala Arsip Nasional Republik Indonesia Nomor 9 Tahun 2018 tentang Pedoman Pemeliharaan Arsip Dinamis.'
+    );
+    pTutup.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+    pTutup.setFontFamily('Times New Roman').setFontSize(11.5).setLineSpacing(1.3);
+    
+    body.appendParagraph('');
+    
+    // 6. Tanda Tangan (2 Kolom Tabel Tanpa Border)
+    var useKadis = payload.useKadis !== false;
+    var usePelaksana = payload.usePelaksana !== false;
+    
+    if (useKadis || usePelaksana) {
+      var ttdTable = body.appendTable();
+      ttdTable.setBorderWidth(0);
+      var ttdRow = ttdTable.appendTableRow();
+      
+      // Kolom Kadis (Kiri)
+      var cellKadis = ttdRow.appendTableCell();
+      cellKadis.setWidth(240);
+      if (useKadis) {
+        var pK1 = cellKadis.getChild(0).asParagraph();
+        pK1.setText('Mengetahui,').setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11);
+        var pK2 = cellKadis.appendParagraph('Kepala Dinas Kearsipan dan Perpustakaan\nKabupaten Manggarai Barat');
+        pK2.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true);
+        cellKadis.appendParagraph('\n\n\n');
+        var pK3 = cellKadis.appendParagraph(payload.kadis ? (payload.kadis.NAMA || 'AUGUSTINUS RINUS, S.Pd') : 'AUGUSTINUS RINUS, S.Pd');
+        pK3.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true).setUnderline(true);
+        var pK4 = cellKadis.appendParagraph(payload.kadis ? (payload.kadis.PANGKAT || 'Pembina Utama Muda') : 'Pembina Utama Muda');
+        pK4.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+        var pK5 = cellKadis.appendParagraph('NIP. ' + (payload.kadis ? (payload.kadis.NIP || '19720219 199903 1 008') : '19720219 199903 1 008'));
+        pK5.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+      } else {
+        cellKadis.getChild(0).asParagraph().setText('');
+      }
+      
+      // Kolom Pelaksana (Kanan)
+      var cellPelaksana = ttdRow.appendTableCell();
+      cellPelaksana.setWidth(245);
+      if (usePelaksana) {
+        var tglSurat = 'Labuan Bajo, ' + (payload.tanggalAngka || '18') + ' ' + (payload.bulanNama || 'Desember') + ' ' + (payload.tahunAngka || '2025');
+        var pP1 = cellPelaksana.getChild(0).asParagraph();
+        pP1.setText(tglSurat).setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11);
+        var pP2 = cellPelaksana.appendParagraph((payload.tipe === 'gabungan' ? 'Koordinator Pelaksana Alih Media,' : 'Pelaksana Alih Media,'));
+        pP2.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true);
+        cellPelaksana.appendParagraph('\n\n\n');
+        var pP3 = cellPelaksana.appendParagraph(payload.pelaksana ? (payload.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md') : 'MUHAMMAD DZAKY NATHANEGARA, A.Md');
+        pP3.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true).setUnderline(true);
+        var pP4 = cellPelaksana.appendParagraph(payload.pelaksana ? (payload.pelaksana.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan');
+        pP4.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+        var pP5 = cellPelaksana.appendParagraph('NIP. ' + (payload.pelaksana ? (payload.pelaksana.nip || '19980508 202506 1 004') : '19980508 202506 1 004'));
+        pP5.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+      } else {
+        cellPelaksana.getChild(0).asParagraph().setText('');
+      }
+    }
+    
+    doc.saveAndClose();
+    
+    // Pindahkan ke folder Berita Acara di Google Drive
+    var file = DriveApp.getFileById(doc.getId());
+    var targetFolder = getFolderByPath(CONFIG.DRIVE_FOLDERS.BERITA_ACARA);
+    if (targetFolder) {
+      targetFolder.addFile(file);
+      try {
+        DriveApp.getRootFolder().removeFile(file);
+      } catch (eRemove) {}
+    }
+    
+    logActivity('EXPORT_BA_GDOC', 'BeritaAcara', 'Export Berita Acara ke Google Docs: ' + docName);
+    
+    return jsonResponse(true, {
+      id: doc.getId(),
+      url: doc.getUrl(),
+      name: docName
+    }, 'Dokumen Google Docs Berita Acara berhasil dibuat.');
+  } catch (e) {
+    Logger.log('exportBAToGoogleDoc error: ' + e.message);
+    return jsonResponse(false, null, 'Gagal membuat Google Docs: ' + e.message);
+  }
+}

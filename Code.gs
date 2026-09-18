@@ -191,27 +191,87 @@ function getAppUrl() {
 }
 
 /**
- * Setup awal SIASTA
- * Jalankan fungsi ini PERTAMA KALI setelah deploy
+ * =========================================================================
+ * JALANKAN_SETUP_SEKALI_SAJA
+ * =========================================================================
+ * FUNGSI SETUP UTAMA UNTUK AKUN BARU (MIGRASI / DEPLOYMENT BARU)
+ * 
+ * Sekali klik tombol "Run" di Apps Script akun baru, fungsi ini otomatis:
+ * 1. Memeriksa/membuat Spreadsheet Database dengan 8 Sheet dan kolom header lengkap.
+ * 2. Mengisi data awal (master staf, kode asal arsip, pengaturan dinas, target tahunan).
+ * 3. Membuat struktur folder lengkap di Google Drive (SIASTA, Pelestarian, Akses, Berita Acara, Laporan).
+ * 4. Menyimpan ID spreadsheet & root folder ke Script Properties.
+ * 5. Menampilkan panduan dan ringkasan ID di Logger.log.
+ * =========================================================================
+ */
+function JALANKAN_SETUP_SEKALI_SAJA() {
+  Logger.log('=====================================================');
+  Logger.log('🚀 MEMULAI SETUP OTOMATIS SIASTA UNTUK AKUN GOOGLE BARU');
+  Logger.log('=====================================================');
+  
+  var statusReport = [];
+  
+  try {
+    // 1. Spreadsheet & Inisialisasi Seluruh Sheets (8 Sheet)
+    var ss = getSpreadsheet();
+    var ssId = ss.getId();
+    statusReport.push('✅ Spreadsheet Database aktif (ID: ' + ssId + ')');
+    Logger.log('1. Memeriksa database spreadsheet: ' + ss.getName() + ' (' + ssId + ')');
+    
+    var sheetsRes = initializeAllSheets();
+    statusReport.push('✅ ' + sheetsRes);
+    Logger.log('2. Inisialisasi 8 Sheets & Kolom Header: SELESAI');
+    
+    // 2. Seeding Data Awal (Akun Staf, Kode Asal, Pengaturan Dinas, Target)
+    var seedRes = seedInitialData();
+    statusReport.push('✅ ' + seedRes);
+    Logger.log('3. Seeding Data Awal (Staf, Kode Asal, Pengaturan, Target): SELESAI');
+    
+    // 3. Hierarki Google Drive Folder
+    var folderRes = createFolderStructure();
+    statusReport.push('✅ Struktur Folder Google Drive: ' + (folderRes.success ? 'Berhasil Dibuat' : 'Tersedia'));
+    Logger.log('4. Struktur Folder Google Drive: ' + JSON.stringify(folderRes));
+    
+    // 4. Pastikan ID tersimpan di Script Properties
+    var props = PropertiesService.getScriptProperties();
+    props.setProperty('SPREADSHEET_ID', ssId);
+    props.setProperty('SIASTA_AUTO_SS_ID', ssId);
+    if (folderRes && folderRes.rootFolderId) {
+      props.setProperty('DRIVE_FOLDER_ID', folderRes.rootFolderId);
+    }
+    
+    // 5. Invalidate runtime cache
+    invalidateSheetCache();
+    clearCache('CACHE_DASHBOARD_STATS');
+    
+    Logger.log('=====================================================');
+    Logger.log('🎉 SETUP SIASTA SELESAI 100% SUKSES!');
+    Logger.log('=====================================================');
+    Logger.log('📋 DETAIL IDENTITAS SISTEM:');
+    Logger.log('• Spreadsheet ID : ' + ssId);
+    Logger.log('• Spreadsheet URL: ' + ss.getUrl());
+    Logger.log('• Folder Drive ID: ' + (folderRes.rootFolderId || 'SIASTA di Drive Saya'));
+    Logger.log('=====================================================');
+    Logger.log('👉 CATATAN AKUN BARU:');
+    Logger.log('Jika berpindah file Apps Script ke akun baru, Anda bisa');
+    Logger.log('memperbarui CONFIG.SPREADSHEET_ID di Config.gs dengan ID di atas.');
+    Logger.log('=====================================================');
+    
+    return jsonResponse(true, {
+      spreadsheetId: ssId,
+      spreadsheetUrl: ss.getUrl(),
+      rootFolderId: folderRes.rootFolderId || '',
+      report: statusReport
+    }, 'Setup SIASTA berhasil selesai! Semua sheet dan folder Drive telah siap digunakan.');
+  } catch (err) {
+    Logger.log('❌ ERROR SETUP SIASTA: ' + err.message);
+    return jsonResponse(false, null, 'Gagal menjalankan setup SIASTA: ' + err.message);
+  }
+}
+
+/**
+ * Alias fungsi setup untuk kompatibilitas
  */
 function setupSIASTA() {
-  Logger.log('=== SETUP SIASTA ===');
-  
-  // 1. Initialize semua sheets
-  var sheetsResult = initializeAllSheets();
-  Logger.log('Sheets: ' + sheetsResult);
-  
-  // 2. Seed data awal
-  var seedResult = seedInitialData();
-  Logger.log('Seed: ' + seedResult);
-  
-  // 3. Create folder structure
-  var folderResult = createFolderStructure();
-  Logger.log('Folders: ' + JSON.stringify(folderResult));
-  
-  Logger.log('=== SETUP SELESAI ===');
-  Logger.log('PENTING: Copy Root Folder ID ke CONFIG.DRIVE_FOLDER_ID di Config.gs');
-  Logger.log('PENTING: Copy Spreadsheet ID ke CONFIG.SPREADSHEET_ID di Config.gs');
-  
-  return 'Setup SIASTA selesai! Cek log untuk detail.';
+  return JALANKAN_SETUP_SEKALI_SAJA();
 }

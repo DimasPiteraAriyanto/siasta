@@ -569,39 +569,65 @@
       <p style="font-size:12px; color:#64748B; margin-top:4px;">Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat</p>
     </div>
 
-    <!-- Single Step Form Login -->
-    <form id="form-login" onsubmit="handleLoginSubmit(event)">
-      <div class="form-item">
-        <label class="form-label" for="input-username">Username / NIP Petugas <span class="required">*</span></label>
-        <div class="input-box">
-          <span class="input-icon">👤</span>
-          <input type="text" class="form-input" id="input-username" placeholder="Masukkan username atau NIP petugas" autocomplete="username" required>
+    <!-- 2-Step In-Page Form Login (Tanpa Pindah Halaman) -->
+    <form id="form-login" onsubmit="event.preventDefault();">
+      
+      <!-- STEP 1: Username & Password -->
+      <div id="step-1-container">
+        <div class="form-item">
+          <label class="form-label" for="input-username">Username / NIP Petugas <span class="required">*</span></label>
+          <div class="input-box">
+            <span class="input-icon">👤</span>
+            <input type="text" class="form-input" id="input-username" placeholder="Masukkan username atau NIP petugas" autocomplete="username" required>
+          </div>
+        </div>
+
+        <div class="form-item">
+          <label class="form-label" for="input-password">Password <span class="required">*</span></label>
+          <div class="input-box">
+            <span class="input-icon">🔒</span>
+            <input type="password" class="form-input" id="input-password" placeholder="Masukkan password" autocomplete="current-password" required>
+            <button type="button" class="btn-eye" onclick="togglePassword()" title="Lihat Password">👁️</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-submit" id="btn-step-1-next" onclick="handleStep1Submit(event)" style="margin-top:14px;">
+          Lanjutkan & Verifikasi ➔
+        </button>
+      </div>
+
+      <!-- STEP 2: Pilih Pegawai / Staf (Muncul di halaman yang sama) -->
+      <div id="step-2-container" style="display:none; animation: cardAppear 0.35s ease-out;">
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div style="font-size:11px; color:#64748B; font-weight:600; text-transform:uppercase;">Akun Terverifikasi</div>
+            <div id="step-2-user-badge" style="font-size:13.5px; font-weight:700; color:#1B2A4A;">-</div>
+          </div>
+          <button type="button" onclick="backToStep1()" style="background:none; border:none; color:#2563EB; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline;">
+            Ubah
+          </button>
+        </div>
+
+        <div class="form-item" id="staff-select-wrapper">
+          <label class="form-label" for="select-staff">Pilih Identitas Pegawai / Staf <span class="required">*</span></label>
+          <div class="input-box">
+            <span class="input-icon">🏷️</span>
+            <select class="form-input" id="select-staff" style="cursor:pointer; background:#fff;">
+              <option value="">— Pilih Pegawai Alih Media —</option>
+            </select>
+          </div>
+          <p style="font-size:11px; color:#64748B; margin-top:5px;">Nama pegawai akan dicatat resmi pada riwayat alih media dan berita acara.</p>
+        </div>
+
+        <button type="button" class="btn-submit" id="btn-login-submit" onclick="handleStep2Submit(event)" style="margin-top:14px;">
+          🚀 Masuk ke Dashboard SIASTA
+        </button>
+
+        <div class="link-back" style="margin-top:14px; text-align:center;">
+          <a href="javascript:void(0)" onclick="backToStep1()">← Kembali ke Input Password</a>
         </div>
       </div>
 
-      <div class="form-item">
-        <label class="form-label" for="input-password">Password <span class="required">*</span></label>
-        <div class="input-box">
-          <span class="input-icon">🔒</span>
-          <input type="password" class="form-input" id="input-password" placeholder="Masukkan password" autocomplete="current-password" required>
-          <button type="button" class="btn-eye" onclick="togglePassword()" title="Lihat Password">👁️</button>
-        </div>
-      </div>
-
-      <div class="form-item" id="staff-select-wrapper">
-        <label class="form-label" for="select-staff">Profil Petugas (Pilih Identitas Staf)</label>
-        <div class="input-box">
-          <span class="input-icon">🏷️</span>
-          <select class="form-input" id="select-staff" style="cursor:pointer; background:#fff;">
-            <option value="">— Otomatis Cocokkan dari Akun / NIP —</option>
-          </select>
-        </div>
-        <p style="font-size:11px; color:#94A3B8; margin-top:4px;">Nama petugas alih media akan terisi otomatis saat input arsip.</p>
-      </div>
-
-      <button type="submit" class="btn-submit" id="btn-login-submit" style="margin-top:12px;">
-        🚀 Masuk ke Dashboard SIASTA
-      </button>
     </form>
 
     <!-- Footer Information -->
@@ -643,7 +669,26 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       var userInput = document.getElementById('input-username');
+      var passInput = document.getElementById('input-password');
+      var staffSel = document.getElementById('select-staff');
+
       if (userInput) userInput.focus();
+
+      if (userInput) {
+        userInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); handleStep1Submit(e); }
+        });
+      }
+      if (passInput) {
+        passInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); handleStep1Submit(e); }
+        });
+      }
+      if (staffSel) {
+        staffSel.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); handleStep2Submit(e); }
+        });
+      }
 
       populateStaffSelect(staffListData);
       loadStaffFromScript();
@@ -679,11 +724,10 @@
       p.type = (p.type === 'password') ? 'text' : 'password';
     }
 
-    function handleLoginSubmit(e) {
+    function handleStep1Submit(e) {
       if (e) e.preventDefault();
       var user = document.getElementById('input-username').value.trim();
       var pass = document.getElementById('input-password').value;
-      var staffId = document.getElementById('select-staff').value;
 
       if (!user) {
         if (typeof Swal !== 'undefined') {
@@ -715,13 +759,68 @@
         return;
       }
 
+      // Update badge identitas di Step 2
+      var badge = document.getElementById('step-2-user-badge');
+      if (badge) {
+        badge.textContent = user;
+      }
+
+      // Cocokkan otomatis pegawai jika ada NIP / ID yang sama
+      var sel = document.getElementById('select-staff');
+      if (sel && sel.options) {
+        for (var i = 0; i < sel.options.length; i++) {
+          var optText = sel.options[i].text.toLowerCase();
+          var optVal = (sel.options[i].value || '').toLowerCase();
+          var uLower = user.toLowerCase();
+          if (optVal === uLower || optText.indexOf(uLower) !== -1) {
+            sel.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      // Transisi di halaman yang sama tanpa reload/pindah halaman
+      document.getElementById('step-1-container').style.display = 'none';
+      var step2 = document.getElementById('step-2-container');
+      step2.style.display = 'block';
+      if (sel) sel.focus();
+    }
+
+    function backToStep1() {
+      document.getElementById('step-2-container').style.display = 'none';
+      document.getElementById('step-1-container').style.display = 'block';
+      document.getElementById('input-password').focus();
+    }
+
+    function handleStep2Submit(e) {
+      if (e) e.preventDefault();
+      var user = document.getElementById('input-username').value.trim();
+      var pass = document.getElementById('input-password').value;
+      var staffId = document.getElementById('select-staff').value;
+
+      if (!staffId) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Pilih Pegawai',
+            text: 'Harap pilih identitas profil pegawai Anda pada dropdown.',
+            confirmButtonColor: '#1B2A4A'
+          });
+        } else {
+          showToast('Harap pilih pegawai alih media.', 'warning');
+        }
+        document.getElementById('select-staff').focus();
+        return;
+      }
+
       var btn = document.getElementById('btn-login-submit');
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
+      btn.innerHTML = '<span class="spinner"></span> Memproses Masuk...';
 
+      // WAJIB: Popup Loading SweetAlert showLoading() sampai proses selesai
       if (typeof Swal !== 'undefined') {
         Swal.fire({
-          title: 'Memverifikasi Kredensial...',
+          title: 'Memproses Masuk...',
           text: 'Menghubungkan ke sistem autentikasi SIASTA...',
           allowOutsideClick: false,
           allowEscapeKey: false,
@@ -742,7 +841,7 @@
                   title: 'Login Berhasil!',
                   text: 'Selamat datang, ' + (res.data ? res.data.nama : 'Petugas') + '!',
                   showConfirmButton: false,
-                  timer: 1400
+                  timer: 1300
                 });
               } else {
                 showToast('Selamat datang, ' + (res.data ? res.data.nama : 'Petugas') + '!', 'success');

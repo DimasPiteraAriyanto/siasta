@@ -7,13 +7,46 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 38**
+- **Versi Terakhir**: **Versi 39**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 39 — Penerapan 9 Butir Revisi SIASTA (Google Docs Revision Guide)
+- **Latar Belakang**: Mengimplementasikan seluruh 9 butir revisi dan penyempurnaan sistem yang tercantum pada dokumen panduan revisi SIASTA (`REVISI SIASTA — Untuk Diteruskan ke AI Programmer`).
+- **Modifikasi Berkas**:
+  1. `Login.html`:
+     - **In-Page 2-Step Authentication**: Form login beralih mulus dari langkah 1 (input identitas/username) ke langkah 2 (input PIN/password) dalam satu halaman dinamis tanpa reload atau perpindahan URL eksternal.
+     - **State & Feedback**: Dilengkapi modal loading interaktif `Swal.showLoading()`, penanganan keyboard Enter yang presisi, dan tombol kembali ("Kembali ke Input Identitas") yang mengembalikan tampilan ke langkah 1 secara instan.
+  2. `DashboardBA.html` & `DaftarArsip.html`:
+     - **Cetak Dokumen Anti-Popup Blocker**: Menggantikan mekanisme cetak lama dengan teknik hidden `<iframe>` (`printElement()`) yang memuat naskah dan memicu `window.print()` secara mandiri tanpa terblokir oleh fitur popup-blocker browser.
+     - **Toolbar Switch Penandatangan**: Menambahkan tombol switch interaktif untuk menampilkan/menyembunyikan blok tanda tangan Kepala Dinas/Kabid maupun Pelaksana secara independen sebelum dicetak.
+  3. `GenerateLaporan.html`:
+     - **Toggle Pengesahan Laporan Fleksibel**: Panel konfigurasi laporan kini menyediakan master checkbox ("Gunakan Blok Pengesahan Ini") untuk Penandatangan 1 dan Penandatangan 2 secara terpisah. Jika dimatikan, seluruh blok tanda tangan terkait (termasuk "Mengetahui,", tanggal Labuan Bajo, nama pejabat, NIP, serta ruang kosongnya) benar-benar lenyap dari naskah cetak dan ekspor.
+     - **Integrasi Pilihan Staf**: Pilihan penandatangan terhubung langsung dengan data staf aktif dari `master_staf`.
+  4. `Config.gs` & `ClientScript.html`:
+     - **Penampungan Logo Kop Manggarai Barat**: Struktur penampungan Base64 logo Manggarai Barat pada `CONFIG.LOGO_MABAR` dan `window._logoMabar` telah disiapkan dan disematkan secara konsisten ke seluruh kop naskah dinas cetak maupun generator dokumen.
+  5. `InputArsip.html`, `DriveService.gs`, `ArsipService.gs`, `DashboardBA.html`, `DaftarArsip.html`, & `GenerateLaporan.html`:
+     - **Watermark Riil Hanya Pada File Input**: Menghapus seluruh elemen watermark CSS overlay (`<div class="watermark-pdf-overlay">`) dari naskah cetak Berita Acara, Rekapitulasi, dan Laporan.
+     - **Stempel Watermark Visual Canvas**: Pada halaman Input Arsip, saat pengguna mengunggah foto berkas, stempel watermark resmi ("ARSIP STATIS DINAS KEARSIPAN KAB. MANGGARAI BARAT - HAK AKSES TERBATAS") langsung dibubuhkan secara permanen pada canvas gambar, lalu berkas bertanda air tersebut disimpan ke folder Google Drive `Arsip Digital/Akses/` bersamaan dengan berkas asli di `Arsip Digital/Pelestarian/`.
+  6. `Pengaturan.html`:
+     - **Unifikasi Pejabat Penandatangan ke Kelola Staf**: Menghilangkan form input teks manual pejabat tanda tangan di Tab 3 Pengaturan yang sebelumnya menduplikasi data. Sumber data pejabat kini 100% bersumber tunggal dari `master_staf`. Tab 3 kini menampilkan kartu spesimen TTD dummy tinta biru resmi pelaksana serta shortcut cepat menuju menu Kelola Staf.
+  7. `Code.gs`:
+     - **Fungsi Setup Mandiri `JALANKAN_SETUP_SEKALI_SAJA()`**: Disediakan fungsi setup sekali jalan di Apps Script (`JALANKAN_SETUP_SEKALI_SAJA()` / `setupSIASTA()`) yang menginisialisasi ke-8 sheet database dengan header lengkap, menginput akun staf awal, mengisi master kode OPD, dan membangun folder Google Drive `SIASTA/Arsip Digital/` secara otomatis.
+  8. `BeritaAcaraService.gs`, `LaporanService.gs`, `DashboardBA.html`, & `GenerateLaporan.html`:
+     - **Ekspor Dokumen ke Google Docs Asli (Native Docs)**:
+       - Menambahkan fungsi `exportBAToGoogleDoc()` dan `exportLaporanToGoogleDoc()` menggunakan `DocumentApp`.
+       - Naskah Berita Acara dan Laporan Rekapitulasi dapat langsung diekspor dan disimpan ke folder Google Drive masing-masing (`Berita Acara/` dan `Laporan/`) dengan format naskah dinas, penomoran, kop surat, dan tabel rapi.
+       - Menyediakan tombol `📄 Simpan sebagai Google Docs` di antarmuka frontend dengan notifikasi konfirmasi dan tautan langsung untuk membuka dokumen yang berhasil dibuat.
+  9. `ArsipService.gs` & `Dashboard.html`:
+     - **Grafik Dashboard Semua Tahun**:
+       - `getDashboardStats()` kini mengagregasi data arsip seluruh tahun (`yearlyData`) dari sheet `master_arsip`.
+       - Menambahkan tab filter `Semua Tahun` pada kartu grafik alih media di Dashboard utama, memungkinkan pengguna memantau akumulasi total berkas dan lembar arsip dari tahun ke tahun.
+
+---
 
 ### Versi 38 — Pembersihan Data Dummy (Kecuali User), Integrasi Google Drive Aktif, & 1 TTD Dummy
 - **Latar Belakang**: Memenuhi instruksi pengguna untuk mengosongkan seluruh data dummy arsip/BA/log tanpa menghapus data user, mengaktifkan alur penyimpanan berkas Google Drive untuk arsip yang diinput, serta menyematkan tepat 1 spesimen tanda tangan (TTD) dummy resmi.

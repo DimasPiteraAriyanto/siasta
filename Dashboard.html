@@ -76,6 +76,7 @@
           <button type="button" class="btn-period" id="btn-period-day" onclick="switchChartFilter('day')">Per Hari</button>
           <button type="button" class="btn-period" id="btn-period-week" onclick="switchChartFilter('week')">Per Minggu</button>
           <button type="button" class="btn-period active" id="btn-period-month" onclick="switchChartFilter('month')">Per Bulan</button>
+          <button type="button" class="btn-period" id="btn-period-all-years" onclick="switchChartFilter('all-years')">Semua Tahun</button>
         </div>
       </div>
       <div class="card-body">
@@ -235,7 +236,7 @@ function init_dashboard() {
 
 function switchChartFilter(period) {
   _currentChartPeriod = period;
-  ['day', 'week', 'month'].forEach(function(p) {
+  ['day', 'week', 'month', 'all-years'].forEach(function(p) {
     var b = document.getElementById('btn-period-' + p);
     if (b) {
       if (p === period) b.classList.add('active');
@@ -259,6 +260,9 @@ function renderDynamicChart(period) {
     } else if (period === 'week') {
       dataset = _dashboardCacheData.weeklyData || [];
       if (subLabel) subLabel.textContent = 'Menampilkan grafik mingguan 8 minggu terakhir';
+    } else if (period === 'all-years') {
+      dataset = _dashboardCacheData.yearlyData || [];
+      if (subLabel) subLabel.textContent = 'Menampilkan akumulasi alih media arsip seluruh tahun';
     } else {
       dataset = _dashboardCacheData.monthlyData || [];
       if (subLabel) subLabel.textContent = 'Menampilkan grafik bulanan tahun berjalan';

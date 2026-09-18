@@ -189,16 +189,31 @@
       </div>
       
       <div class="modal-body" style="padding:0; background:#e2e8f0;">
-        <!-- Kertas A4 Wrapper -->
-        <div id="ba-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:210mm; min-height:297mm; padding:25mm 20mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:12pt; line-height:1.5;">
-          <!-- Watermark Dokumen Resmi (Format Contoh Alih Media Pemkab Manggarai Barat) -->
-          <div class="watermark-pdf-overlay" style="position:absolute; top:52%; left:50%; transform:translate(-50%, -50%) rotate(-38deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:130%; white-space:nowrap;">
-            <div style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:32pt; font-weight:800; color:rgba(100, 116, 139, 0.18); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
-              ARSIP HASIL ALIH MEDIA<br>
-              DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
-              KABUPATEN MANGGARAI BARAT
-            </div>
+        <!-- Toolbar Kontrol Pengesahan & Watermark -->
+        <div style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:10px 20px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; font-size:12.5px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <span style="font-weight:700; color:#1e293b;">Opsi Pengesahan:</span>
+            <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-weight:600; color:#334155;">
+              <input type="checkbox" id="toggle-ba-kadis" checked onchange="toggleBASignerBlock('kadis', this.checked)">
+              Gunakan Blok Pengesahan Kadis (Mengetahui)
+            </label>
+            <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-weight:600; color:#334155;">
+              <input type="checkbox" id="toggle-ba-pelaksana" checked onchange="toggleBASignerBlock('pelaksana', this.checked)">
+              Gunakan Blok Pelaksana Alih Media
+            </label>
           </div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-save-ba-gdoc" onclick="saveFormalBAToGoogleDocs()" style="display:flex; align-items:center; gap:5px;">
+              📄 Simpan sebagai Google Docs
+            </button>
+            <button type="button" class="btn btn-sm btn-gold" onclick="printFormalBA()" style="display:flex; align-items:center; gap:5px;">
+              🖨️ Cetak Dokumen
+            </button>
+          </div>
+        </div>
+
+        <!-- Kertas A4 Wrapper (Bebas Watermark CSS Palsu) -->
+        <div id="ba-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:210mm; min-height:297mm; padding:25mm 20mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:12pt; line-height:1.5;">
           <div style="position:relative; z-index:1;">
           <!-- Kop Surat Resmi -->
           <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
@@ -220,43 +235,44 @@
             <div style="font-size:11pt; margin-top:4px;">Nomor: <span id="doc-nomor-ba">....................................................</span></div>
           </div>
 
-          <!-- Paragraf Pembuka -->
-          <div style="text-align:justify; margin-bottom:14px; text-indent:36px;">
-            Pada hari ini, <strong id="doc-hari">Senin</strong> tanggal <strong id="doc-tgl-terbilang">Delapan Belas</strong> bulan <strong id="doc-bulan">September</strong> tahun <strong id="doc-thn-terbilang">Dua Ribu Dua Puluh Enam</strong> (<span id="doc-tgl-angka">18-09-2026</span>), bertempat di <span id="doc-tempat">Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat</span>, kami yang bertanda tangan di bawah ini telah melaksanakan kegiatan alih media arsip sebagai berikut:
+          <!-- Kalimat Pembuka -->
+          <div style="text-align:justify; margin-bottom:16px; text-indent:36px;">
+            Pada hari ini, <strong id="doc-hari">Kamis</strong>, tanggal <span id="doc-tgl-terbilang">delapan belas</span> bulan <span id="doc-bln-nama">Desember</span> tahun <span id="doc-thn-terbilang">dua ribu dua puluh lima</span> (<span id="doc-tgl-angka">18-12-2025</span>), bertempat di Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat, kami yang bertanda tangan di bawah ini telah melaksanakan kegiatan alih media arsip dengan keterangan sebagai berikut:
           </div>
 
-          <!-- Butir-butir Rincian -->
-          <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:11.5pt;">
-            <tr style="vertical-align:top;">
-              <td style="width:28px; padding:3px 0;">1.</td>
-              <td style="width:170px; padding:3px 0;">Jenis Kegiatan</td>
-              <td style="width:14px; padding:3px 0;">:</td>
-              <td style="padding:3px 0;" id="doc-jenis-kegiatan">Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)</td>
-            </tr>
-            <tr style="vertical-align:top;">
-              <td style="padding:3px 0;">2.</td>
-              <td style="padding:3px 0;">Jenis Arsip</td>
-              <td style="padding:3px 0;">:</td>
-              <td style="padding:3px 0;" id="doc-jenis-arsip">Arsip Statis</td>
-            </tr>
-            <tr style="vertical-align:top;">
-              <td style="padding:3px 0;">3.</td>
-              <td style="padding:3px 0;">Jumlah Arsip</td>
-              <td style="padding:3px 0;">:</td>
-              <td style="padding:3px 0;">
-                <strong id="doc-jumlah-arsip">0</strong> (<span id="doc-jumlah-terbilang">Nol</span>) berkas berkas / <span id="doc-total-lembar">0</span> lembar
+          <!-- Rincian Parameter Tabel -->
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12pt;">
+            <tr>
+              <td style="width:28%; vertical-align:top; padding:3px 0;">Jenis Kegiatan</td>
+              <td style="width:3%; vertical-align:top; padding:3px 0;">:</td>
+              <td style="vertical-align:top; padding:3px 0;">
+                Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)
               </td>
             </tr>
-            <tr style="vertical-align:top;">
-              <td style="padding:3px 0;">4.</td>
-              <td style="padding:3px 0;">Asal Arsip</td>
-              <td style="padding:3px 0;">:</td>
-              <td style="padding:3px 0;" id="doc-asal-arsip">Pemerintah Kabupaten Manggarai Barat</td>
+            <tr>
+              <td style="vertical-align:top; padding:3px 0;">Jenis Arsip</td>
+              <td style="vertical-align:top; padding:3px 0;">:</td>
+              <td style="vertical-align:top; padding:3px 0;" id="doc-jenis-arsip-desc">
+                Arsip Statis berupa berkas administrasi pemerintahan (antara lain Fisik Pamong Praja, Sambutan Pejabat, dan dokumen terkait lainnya) periode tahun 1983-2000, sebagaimana rincian pada Daftar Arsip Hasil Alih Media Tahun <span class="doc-tahun-span">2026</span> terlampir
+              </td>
             </tr>
-            <tr style="vertical-align:top;">
-              <td style="padding:3px 0;">5.</td>
-              <td style="padding:3px 0;">Dasar Pelaksanaan</td>
-              <td style="padding:3px 0;">:</td>
+            <tr>
+              <td style="vertical-align:top; padding:3px 0;">Jumlah Arsip</td>
+              <td style="vertical-align:top; padding:3px 0;">:</td>
+              <td style="vertical-align:top; padding:3px 0;">
+                <strong id="doc-jml-angka">0</strong> (<span id="doc-jml-terbilang">nol</span>) item arsip
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align:top; padding:3px 0;">Asal Arsip</td>
+              <td style="vertical-align:top; padding:3px 0;">:</td>
+              <td style="vertical-align:top; padding:3px 0;" id="doc-asal-arsip-desc">
+                Box 5 Kecamatan Komodo
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align:top; padding:3px 0;">Dasar Pelaksanaan</td>
+              <td style="vertical-align:top; padding:3px 0;">:</td>
               <td style="padding:3px 0;" id="doc-dasar-hukum">
                 Peraturan Bupati Manggarai Barat Nomor 31 Tahun 2024 tentang Pedoman Alih Media Arsip di Lingkungan Pemerintah Daerah Kabupaten Manggarai Barat
               </td>
@@ -268,9 +284,9 @@
             Demikian Berita Acara Alih Media Arsip ini dibuat dengan sesungguhnya rangkap 2 (dua) untuk dipergunakan sebagaimana mestinya dan memiliki kekuatan hukum yang sah sesuai ketentuan Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala Arsip Nasional Republik Indonesia Nomor 9 Tahun 2018 tentang Pedoman Pemeliharaan Arsip Dinamis.
           </div>
 
-          <!-- Tanda Tangan Format 2 Kolom -->
-          <div style="display:flex; justify-content:space-between; margin-top:30px; font-size:11.5pt;">
-            <div style="width:46%; text-align:center;">
+          <!-- Tanda Tangan Format 2 Kolom (Dengan Id Blok Terpisah) -->
+          <div id="doc-ttd-container" style="display:flex; justify-content:space-between; margin-top:30px; font-size:11.5pt;">
+            <div id="doc-block-kadis" style="width:46%; text-align:center;">
               <div>Mengetahui,</div>
               <div style="font-weight:bold; margin-top:2px;">Kepala Dinas Kearsipan dan Perpustakaan<br>Kabupaten Manggarai Barat</div>
               <div style="height:75px;"></div>
@@ -279,7 +295,7 @@
               <div>NIP. <span id="doc-kadis-nip">19720219 199903 1 008</span></div>
             </div>
 
-            <div style="width:46%; text-align:center;">
+            <div id="doc-block-pelaksana" style="width:46%; text-align:center;">
               <div>Labuan Bajo, <span id="doc-tgl-surat">18 September 2026</span></div>
               <div style="font-weight:bold; margin-top:2px;" id="doc-pelaksana-title">Pelaksana Alih Media,</div>
               <div style="height:75px; display:flex; align-items:center; justify-content:center;">
@@ -297,6 +313,7 @@
         </div>
         <div style="display:flex; gap:8px;">
           <button type="button" class="btn btn-outline" onclick="closeModal('modal-ba-formal')">Tutup</button>
+          <button type="button" class="btn btn-outline" onclick="saveFormalBAToGoogleDocs()">📄 Simpan sebagai Google Docs</button>
           <button type="button" class="btn btn-primary" onclick="printFormalBA()">🖨️ Cetak Dokumen</button>
         </div>
       </div>
@@ -609,6 +626,14 @@ function previewFormalBAMonth(bulan) {
 }
 
 function populateFormalBAModal(d) {
+  _currentFormalBAData = d;
+  var cK = document.getElementById('toggle-ba-kadis');
+  var cP = document.getElementById('toggle-ba-pelaksana');
+  if (cK) cK.checked = true;
+  if (cP) cP.checked = true;
+  toggleBASignerBlock('kadis', true);
+  toggleBASignerBlock('pelaksana', true);
+
   var logoEl = document.getElementById('doc-logo-img');
   if (logoEl) logoEl.src = window._logoMabar || '';
   document.getElementById('doc-alamat-kop').textContent = d.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT';
@@ -665,26 +690,119 @@ function populateFormalBAModal(d) {
   }
 }
 
+var _currentFormalBAData = null;
+
+function toggleBASignerBlock(signer, isChecked) {
+  if (signer === 'kadis') {
+    var bKadis = document.getElementById('doc-block-kadis');
+    if (bKadis) bKadis.style.display = isChecked ? 'block' : 'none';
+  } else if (signer === 'pelaksana') {
+    var bPelaksana = document.getElementById('doc-block-pelaksana');
+    if (bPelaksana) bPelaksana.style.display = isChecked ? 'block' : 'none';
+  }
+
+  var cKadis = document.getElementById('toggle-ba-kadis');
+  var cPelaksana = document.getElementById('toggle-ba-pelaksana');
+  var ttdContainer = document.getElementById('doc-ttd-container');
+  if (ttdContainer && cKadis && cPelaksana) {
+    if (!cKadis.checked && !cPelaksana.checked) {
+      ttdContainer.style.display = 'none';
+    } else {
+      ttdContainer.style.display = 'flex';
+    }
+  }
+}
+
+// ANTI POPUP-BLOCKER PRINT VIA HIDDEN IFRAME
 function printFormalBA() {
   var sheet = document.getElementById('ba-print-sheet');
   if (!sheet) return;
 
-  var printWindow = window.open('', '_blank');
-  printWindow.document.write('<!DOCTYPE html><html><head><title>Cetak Berita Acara Alih Media</title>');
-  printWindow.document.write('<style>');
-  printWindow.document.write('@page { size: A4 portrait; margin: 20mm 18mm; }');
-  printWindow.document.write('body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; font-size: 12pt; line-height: 1.5; }');
-  printWindow.document.write('table { border-collapse: collapse; }');
-  printWindow.document.write('@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .watermark-pdf-overlay { display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }');
-  printWindow.document.write('</style></head><body>');
-  printWindow.document.write(sheet.innerHTML);
-  printWindow.document.write('</body></html>');
-  printWindow.document.close();
-  printWindow.focus();
+  var printFrame = document.getElementById('siasta-print-frame');
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'siasta-print-frame';
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
+    printFrame.style.zIndex = '-1';
+    document.body.appendChild(printFrame);
+  }
+
+  var doc = printFrame.contentWindow.document;
+  doc.open();
+  doc.write('<!DOCTYPE html><html><head><title>Cetak Berita Acara Alih Media</title>');
+  doc.write('<style>');
+  doc.write('@page { size: A4 portrait; margin: 15mm 18mm; }');
+  doc.write('body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; font-size: 12pt; line-height: 1.5; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }');
+  doc.write('table { width: 100%; border-collapse: collapse; }');
+  doc.write('img { max-width: 100%; }');
+  doc.write('@media print { body { margin: 0; } }');
+  doc.write('</style></head><body>');
+  doc.write(sheet.innerHTML);
+  doc.write('</body></html>');
+  doc.close();
+
   setTimeout(function() {
-    printWindow.print();
-    printWindow.close();
-  }, 350);
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+  }, 250);
+}
+
+function saveFormalBAToGoogleDocs() {
+  if (!_currentFormalBAData) {
+    showSwalError('Data Berita Acara belum dimuat.');
+    return;
+  }
+
+  var cKadis = document.getElementById('toggle-ba-kadis');
+  var cPelaksana = document.getElementById('toggle-ba-pelaksana');
+
+  var payload = Object.assign({}, _currentFormalBAData, {
+    useKadis: cKadis ? cKadis.checked : true,
+    usePelaksana: cPelaksana ? cPelaksana.checked : true
+  });
+
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'Membuat Google Docs...',
+      text: 'Menyusun naskah dinas resmi dan menyimpan ke Google Drive...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: function() {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      if (resp && resp.success && resp.data && resp.data.url) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Disimpan ke Google Drive!',
+            html: '<p style="font-size:13.5px;">Dokumen Google Docs resmi telah dibuat di folder <strong>Berita Acara</strong>.</p>' +
+                  '<div style="margin-top:14px;"><a href="' + resp.data.url + '" target="_blank" class="btn btn-primary" style="text-decoration:none; padding:8px 16px; border-radius:6px; font-weight:600;">📂 Buka Dokumen di Tab Baru</a></div>',
+            showConfirmButton: true,
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#1B2A4A'
+          });
+        } else {
+          window.open(resp.data.url, '_blank');
+        }
+      } else {
+        showSwalError((resp && resp.message) || 'Gagal membuat Google Docs.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      showSwalError('Gagal: ' + err.message);
+    })
+    .exportBAToGoogleDoc(payload);
 }
 
 function getNamaBulanClient(idx) {

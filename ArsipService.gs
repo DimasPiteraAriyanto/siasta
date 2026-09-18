@@ -72,7 +72,8 @@ function saveArsip(data) {
         kodeUnikFinal + '_' + data.fileName,
         data.fileMimeType,
         data.kodeAsal,
-        boxFormatted
+        boxFormatted,
+        data.fileAksesData
       );
       
       // Apply watermark
@@ -320,7 +321,7 @@ function updateArsip(arsipId, data) {
 function getDashboardStats() {
   try {
     var cached = getFromCache('CACHE_DASHBOARD_STATS');
-    if (cached && typeof cached === 'object' && cached.totalBerkas !== undefined && cached.monthlyData && cached.monthlyData.length > 0) {
+    if (cached && typeof cached === 'object' && cached.totalBerkas !== undefined && cached.monthlyData && cached.monthlyData.length > 0 && cached.yearlyData) {
       return jsonResponse(true, cached);
     }
 
@@ -441,6 +442,39 @@ function getDashboardStats() {
       });
     }
 
+    // 5b. Data Grafik: Semua Tahun (Akumulasi Berkas & Lembar per Tahun)
+    var yearlyMap = {};
+    allArsip.forEach(function(a) {
+      var d = a.tanggal_input ? parseDate(a.tanggal_input) : null;
+      var y = (d && !isNaN(d.getTime())) ? d.getFullYear() : null;
+      if (!y && a.tahun) {
+        var parsedY = parseInt(a.tahun);
+        if (!isNaN(parsedY) && parsedY >= 1900 && parsedY <= 2100) y = parsedY;
+      }
+      if (!y) y = currentYear;
+
+      if (!yearlyMap[y]) {
+        yearlyMap[y] = { jumlah: 0, lembar: 0 };
+      }
+      yearlyMap[y].jumlah++;
+      yearlyMap[y].lembar += (parseInt(a.jumlah_lembar) || 0);
+    });
+
+    var sortedYears = Object.keys(yearlyMap).map(function(k) { return parseInt(k); }).sort(function(a, b) { return a - b; });
+    if (sortedYears.length === 0) {
+      sortedYears = [currentYear];
+      yearlyMap[currentYear] = { jumlah: 0, lembar: 0 };
+    }
+
+    var yearlyData = sortedYears.map(function(y) {
+      return {
+        label: String(y),
+        namaLengkap: 'Tahun ' + y,
+        jumlah: yearlyMap[y].jumlah,
+        lembar: yearlyMap[y].lembar
+      };
+    });
+
     // 6. Per staf stats
     var stafStats = {};
     allArsip.forEach(function(a) {
@@ -470,6 +504,7 @@ function getDashboardStats() {
       monthlyData: monthlyData,
       weeklyData: weeklyData,
       dailyData: dailyData,
+      yearlyData: yearlyData,
       stafStats: stafStats,
       currentPeriod: getCurrentPeriod()
     };
