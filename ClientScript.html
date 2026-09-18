@@ -741,43 +741,61 @@ function initDragDrop(areaId, inputId) {
   });
 }
 
-// ============ PRINT HELPER (ANTI-POPUP BLOCKER) ============
-function printElement(elementId) {
-  var content = document.getElementById(elementId).innerHTML;
-  var printFrame = document.getElementById('siasta-print-frame');
-  if (!printFrame) {
-    printFrame = document.createElement('iframe');
-    printFrame.id = 'siasta-print-frame';
-    printFrame.style.position = 'fixed';
-    printFrame.style.right = '0';
-    printFrame.style.bottom = '0';
-    printFrame.style.width = '0';
-    printFrame.style.height = '0';
-    printFrame.style.border = '0';
-    printFrame.style.zIndex = '-1';
-    document.body.appendChild(printFrame);
+// ============ UNIVERSAL PRINT ENGINE (SIASTA PRINT) ============
+function siastaPrint(target, options) {
+  options = options || {};
+  var el = typeof target === 'string' ? document.getElementById(target) : target;
+  if (!el) {
+    if (typeof showSwalError === 'function') {
+      showSwalError('Elemen yang akan dicetak tidak ditemukan.');
+    } else {
+      alert('Elemen yang akan dicetak tidak ditemukan.');
+    }
+    return;
   }
-  
-  var doc = printFrame.contentWindow.document;
-  doc.open();
-  doc.write('<html><head><title>SIASTA - Cetak</title>');
-  doc.write('<style>');
-  doc.write('body{font-family:Arial,sans-serif;padding:20px;font-size:12px;line-height:1.6;color:#000;position:relative;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}');
-  doc.write('table{width:100%;border-collapse:collapse;margin:10px 0;}');
-  doc.write('th,td{border:1px solid #333;padding:6px 8px;text-align:left;}');
-  doc.write('th{background:#1B2A4A;color:white;font-weight:bold;}');
-  doc.write('h1,h2,h3{margin:10px 0;}');
-  doc.write('.doc-header{text-align:center;border-bottom:2px solid #1B2A4A;padding-bottom:10px;margin-bottom:16px;}');
-  doc.write('@media print { body { margin: 0; padding: 10mm; } }');
-  doc.write('</style></head><body>');
-  doc.write(content);
-  doc.write('</body></html>');
-  doc.close();
-  
+
+  // 1. Bersihkan stage print lama jika ada
+  var oldSection = document.getElementById('siasta-print-section');
+  if (oldSection) oldSection.remove();
+  var oldStyle = document.getElementById('siasta-dynamic-print-style');
+  if (oldStyle) oldStyle.remove();
+
+  // 2. Setup orientasi dan margin A4
+  var orientation = options.orientation === 'landscape' ? 'landscape' : 'portrait';
+  var margin = options.margin || (orientation === 'landscape' ? '12mm 10mm' : '15mm 18mm');
+
+  var styleTag = document.createElement('style');
+  styleTag.id = 'siasta-dynamic-print-style';
+  styleTag.textContent = '@media print { @page { size: A4 ' + orientation + '; margin: ' + margin + '; } }';
+  document.head.appendChild(styleTag);
+
+  // 3. Buat wrapper khusus cetak langsung di root body
+  var printSection = document.createElement('div');
+  printSection.id = 'siasta-print-section';
+  printSection.className = 'siasta-print-section ' + (options.className || '');
+  printSection.innerHTML = el.innerHTML;
+  document.body.appendChild(printSection);
+
+  // 4. Aktifkan kelas print mode pada body
+  document.body.classList.add('siasta-is-printing');
+
+  // 5. Panggil window.print()
   setTimeout(function() {
-    printFrame.contentWindow.focus();
-    printFrame.contentWindow.print();
-  }, 250);
+    window.print();
+    // 6. Cleanup setelah dialog print selesai / dibatalkan
+    setTimeout(function() {
+      document.body.classList.remove('siasta-is-printing');
+      var ps = document.getElementById('siasta-print-section');
+      if (ps) ps.remove();
+      var st = document.getElementById('siasta-dynamic-print-style');
+      if (st) st.remove();
+    }, 1000);
+  }, 150);
+}
+
+function printElement(elementId, options) {
+  options = options || {};
+  siastaPrint(elementId, options);
 }
 
 // ============ CONFIRM DIALOG ============

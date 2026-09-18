@@ -777,44 +777,17 @@ function toggleRekapSignerBlock(signer, isChecked) {
   }
 }
 
-// ANTI POPUP-BLOCKER PRINT VIA HIDDEN IFRAME (A4 LANDSCAPE)
+// CETAK DOKUMEN REKAPITULASI RESMI (A4 LANDSCAPE)
 function printRekapDoc() {
-  var sheet = document.getElementById('rekap-print-sheet');
-  if (!sheet) return;
-
-  var printFrame = document.getElementById('siasta-print-frame');
-  if (!printFrame) {
-    printFrame = document.createElement('iframe');
-    printFrame.id = 'siasta-print-frame';
-    printFrame.style.position = 'fixed';
-    printFrame.style.right = '0';
-    printFrame.style.bottom = '0';
-    printFrame.style.width = '0';
-    printFrame.style.height = '0';
-    printFrame.style.border = '0';
-    printFrame.style.zIndex = '-1';
-    document.body.appendChild(printFrame);
+  if (typeof siastaPrint === 'function') {
+    siastaPrint('rekap-print-sheet', {
+      orientation: 'landscape',
+      margin: '12mm 10mm',
+      className: 'siasta-print-section-rekap'
+    });
+  } else {
+    window.print();
   }
-
-  var doc = printFrame.contentWindow.document;
-  doc.open();
-  doc.write('<!DOCTYPE html><html><head><title>Daftar Arsip Hasil Alih Media</title>');
-  doc.write('<style>');
-  doc.write('@page { size: A4 landscape; margin: 12mm 10mm; }');
-  doc.write('body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; font-size: 9.5pt; line-height: 1.3; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }');
-  doc.write('table { border-collapse: collapse; width: 100%; }');
-  doc.write('th, td { border: 1px solid #000; }');
-  doc.write('img { max-width: 100%; }');
-  doc.write('@media print { body { margin: 0; } }');
-  doc.write('</style></head><body>');
-  doc.write(sheet.innerHTML);
-  doc.write('</body></html>');
-  doc.close();
-
-  setTimeout(function() {
-    printFrame.contentWindow.focus();
-    printFrame.contentWindow.print();
-  }, 250);
 }
 
 if (typeof init_daftar_arsip === 'function') init_daftar_arsip();

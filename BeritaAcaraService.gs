@@ -197,31 +197,84 @@ function getBeritaAcaraGabungan(bulan, tahun) {
  */
 function generateBeritaAcara(data) {
   try {
-    var user = getCurrentUser() || (data && data.activeUser ? data.activeUser : null) || { id: 'STAF-001', nama: 'Siprianus Mbemba', jabatan: 'Arsiparis Ahli Pertama' };
+    data = data || {};
+    var bulanInt = parseInt(data.bulan);
+    if (isNaN(bulanInt) || bulanInt < 0 || bulanInt > 11) {
+      bulanInt = new Date().getMonth();
+    }
+    var tahunInt = parseInt(data.tahun) || new Date().getFullYear();
+    var tipe = data.tipe === 'per_staf' ? 'per_staf' : 'gabungan';
+
+    // Resolusi staf pelaksana
+    var stafIdFinal = (data.stafId && data.stafId !== 'ALL') ? data.stafId : (tipe === 'per_staf' ? 'STAF-005' : 'ALL');
+    var stafNamaFinal = data.stafNama || (tipe === 'per_staf' ? 'Muhammad Dzaky Nathanegara, A.Md' : 'Seluruh Staf Tim Alih Media');
     
+    // Jika tipe per_staf dan nama belum lengkap atau masih ALL, coba ambil dari master_staf
+    if (tipe === 'per_staf' && stafIdFinal !== 'ALL') {
+      try {
+        var stafRecord = findOneByColumn(CONFIG.SHEETS.MASTER_STAF, 'id', stafIdFinal);
+        if (stafRecord && stafRecord.nama) {
+          stafNamaFinal = stafRecord.nama;
+        }
+      } catch (errStaf) {}
+    }
+
+    // Hitung jumlah arsip riil jika belum disediakan atau 0
+    var jumlahArsipFinal = parseInt(data.jumlahArsip) || 0;
+    if (jumlahArsipFinal <= 0) {
+      try {
+        var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP) || [];
+        var matchingArsip = allArsip.filter(function(a) {
+          var d = a.tanggal_input ? new Date(a.tanggal_input) : null;
+          if (!d || isNaN(d.getTime())) return false;
+          if (a.status === 'Dihapus') return false;
+          var matchDate = d.getMonth() === bulanInt && d.getFullYear() === tahunInt;
+          if (!matchDate) return false;
+          if (tipe === 'per_staf' && stafIdFinal !== 'ALL') {
+            return a.staf_id === stafIdFinal;
+          }
+          return true;
+        });
+        jumlahArsipFinal = matchingArsip.length;
+      } catch (errCount) {}
+    }
+
+    // Hitung nomor urut BA dalam tahun berjalan
+    var allBA = readAllData(CONFIG.SHEETS.BERITA_ACARA) || [];
+    var urut = allBA.length + 1;
+    var urutPadded = padNumber(urut, 2);
+    var romawiBulan = getBulanRomawi(bulanInt);
+    var generatedNomorBA = data.nomorBA || ('000.4.1/DAP/BA-AM/' + urutPadded + '/' + romawiBulan + '/' + tahunInt);
+
+    var user = (data && data.activeUser) ? data.activeUser : (getCurrentUser() || { id: stafIdFinal, nama: stafNamaFinal });
+
     var baData = {
       id: generateId('BA'),
-      bulan: data.bulan,
-      tahun: data.tahun,
-      tipe: data.tipe, // 'per_staf' atau 'gabungan'
-      staf_id: data.stafId || 'ALL',
-      staf_nama: data.stafNama || 'Seluruh Staf',
-      jumlah_arsip: data.jumlahArsip || 0,
-      waktu_pelaksanaan: data.waktuPelaksanaan || getNamaBulan(parseInt(data.bulan)) + ' ' + data.tahun,
+      nomor_ba: generatedNomorBA,
+      bulan: bulanInt,
+      tahun: tahunInt,
+      tipe: tipe,
+      staf_id: stafIdFinal,
+      staf_nama: stafNamaFinal,
+      jumlah_arsip: jumlahArsipFinal,
+      waktu_pelaksanaan: data.waktuPelaksanaan || (getNamaBulan(bulanInt) + ' ' + tahunInt),
       tempat_pelaksanaan: data.tempatPelaksanaan || 'Dinas Kearsipan dan Perpustakaan Daerah Kab. Manggarai Barat',
       jenis_media: data.jenisMedia || 'Arsip Statis',
       file_id: '',
       file_url: '',
-      status: 'Draft',
+      status: 'Final',
       tanggal_dibuat: new Date()
     };
     
     appendData(CONFIG.SHEETS.BERITA_ACARA, baData);
     
     logActivity('GENERATE_BA', 'BeritaAcara',
-      'Generate BA ' + data.tipe + ': ' + getNamaBulan(parseInt(data.bulan)) + ' ' + data.tahun);
+      'Generate BA ' + tipe + ' ' + generatedNomorBA + ' (' + getNamaBulan(bulanInt) + ' ' + tahunInt + ' - ' + jumlahArsipFinal + ' arsip)', user);
     
-    return jsonResponse(true, { id: baData.id }, 'Berita acara berhasil dibuat.');
+    return jsonResponse(true, {
+      id: baData.id,
+      nomorBA: generatedNomorBA
+    }, 'Berita Acara ' + generatedNomorBA + ' berhasil diterbitkan.');
     
   } catch (e) {
     return jsonResponse(false, null, 'Error: ' + e.message);
@@ -308,8 +361,18 @@ function getBeritaAcaraFormalDetail(params) {
     }
     
     // Tanggal formal pelaksanaan
-    var tglPelaksanaan = new Date(thn, bln, 18);
-    var blnIndex = (bln !== undefined && !isNaN(bln)) ? bln : 5;
+    var tglPelaksanaan = null;
+    if (baRecord && baRecord.tanggal_dibuat) {
+      tglPelaksanaan = parseDate(baRecord.tanggal_dibuat);
+    }
+    if (!tglPelaksanaan || isNaN(tglPelaksanaan.getTime())) {
+      tglPelaksanaan = new Date(thn, bln, 18);
+    }
+
+    var daftarNamaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    var namaHari = daftarNamaHari[tglPelaksanaan.getDay()] || 'Kamis';
+
+    var blnIndex = (bln !== undefined && !isNaN(bln)) ? bln : tglPelaksanaan.getMonth();
     var blnAngka = blnIndex + 1;
     var tglAngka = tglPelaksanaan.getDate();
     var blnStr = (blnAngka < 10 ? '0' : '') + blnAngka;

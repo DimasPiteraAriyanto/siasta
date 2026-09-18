@@ -150,6 +150,14 @@ function getNamaBulan(monthIndex) {
 }
 
 /**
+ * Get bulan dalam angka romawi (contoh: 0 -> I, 8 -> IX, 11 -> XII)
+ */
+function getBulanRomawi(monthIndex) {
+  var romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+  return romawi[parseInt(monthIndex)] || 'I';
+}
+
+/**
  * Parse date string yang beragam format
  */
 function parseDate(dateStr) {

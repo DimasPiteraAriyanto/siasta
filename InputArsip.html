@@ -332,12 +332,39 @@ function syncActiveStaffField() {
       if (raw) user = JSON.parse(raw);
     } catch (e) {}
   }
+  if (!user && window._currentUser) {
+    user = window._currentUser;
+  }
+  if (!user) {
+    var sideName = document.getElementById('user-name');
+    var sideRole = document.getElementById('user-role');
+    if (sideName && sideName.textContent && sideName.textContent.trim() && sideName.textContent.trim() !== 'Petugas') {
+      user = {
+        id: '',
+        nama: sideName.textContent.trim(),
+        jabatan: sideRole ? sideRole.textContent.trim() : ''
+      };
+    }
+  }
 
   if (user && user.nama) {
     staffNameInput.value = user.nama + (user.jabatan ? ' (' + user.jabatan + ')' : '');
     if (staffIdInput) staffIdInput.value = user.id || '';
   } else {
     staffNameInput.value = 'Petugas Alih Media SIASTA';
+    // Fallback ambil identitas login langsung dari server
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(serverUser) {
+          if (serverUser && serverUser.nama) {
+            try { sessionStorage.setItem('siasta_user', JSON.stringify(serverUser)); } catch (e) {}
+            window._currentUser = serverUser;
+            staffNameInput.value = serverUser.nama + (serverUser.jabatan ? ' (' + serverUser.jabatan + ')' : '');
+            if (staffIdInput) staffIdInput.value = serverUser.id || '';
+          }
+        })
+        .getCurrentUser();
+    }
   }
 }
 
@@ -648,31 +675,51 @@ function processSaveArsip(qaChecklist) {
   var kodeAsalSelect = document.getElementById('kodeAsal');
   var asalNama = kodeAsalSelect.selectedOptions[0] ? (kodeAsalSelect.selectedOptions[0].getAttribute('data-nama') || '') : '';
 
-  var formData = {
-    statusKeterbukaan: document.getElementById('statusKeterbukaan').value,
-    jenisArsip: document.getElementById('jenisArsip').value,
-    kategoriUrusan: document.getElementById('kategoriUrusan').value,
-    kodeKlasifikasiAsli: document.getElementById('kodeKlasifikasiAsli').value.trim(),
-    nomorAsli: document.getElementById('nomorAsli').value.trim(),
-    kodeAsal: kodeAsalSelect.value,
-    asalArsip: asalNama,
-    nomorBox: document.getElementById('nomorBox').value,
-    kodeUnik: document.getElementById('kodeUnik').value.trim(),
-    unitPengelola: document.getElementById('unitPengelola').value.trim(),
-    kurunWaktu: document.getElementById('kurunWaktu').value.trim(),
-    kurunWaktuMulai: document.getElementById('kurunWaktu').value.trim(),
-    kurunWaktuAkhir: '',
-    rangkapKe: document.getElementById('rangkapKe').value || 1,
-    jumlahLembar: document.getElementById('jumlahLembar').value || 1,
-    jumlahBerkas: document.getElementById('jumlahBerkas').value || 1,
-    kondisiFisik: document.getElementById('kondisiFisik').value,
-    lokasiSimpan: document.getElementById('lokasiSimpan').value.trim(),
-    deskripsi: document.getElementById('deskripsi').value.trim(),
-    keterangan: document.getElementById('keterangan').value.trim(),
-    waktuUnggah: document.getElementById('waktuUnggah').value || new Date().toISOString(),
-    qaChecklist: qaChecklist,
-    activeUser: (typeof getActiveUserFromSession === 'function' ? getActiveUserFromSession() : null)
-  };
+    // Identitas staf penginput dari sesi login aktif
+    var currentUser = null;
+    if (typeof getActiveUserFromSession === 'function') currentUser = getActiveUserFromSession();
+    if (!currentUser) {
+      try {
+        var rawUser = sessionStorage.getItem('siasta_user');
+        if (rawUser) currentUser = JSON.parse(rawUser);
+      } catch (eU) {}
+    }
+    if (!currentUser && window._currentUser) currentUser = window._currentUser;
+
+    var inputStafNama = document.getElementById('stafNama') ? document.getElementById('stafNama').value.trim() : '';
+    var inputStafId = document.getElementById('stafId') ? document.getElementById('stafId').value.trim() : '';
+    if ((!inputStafNama || inputStafNama === 'Petugas Alih Media SIASTA') && currentUser && currentUser.nama) {
+      inputStafNama = currentUser.nama;
+      inputStafId = currentUser.id || '';
+    }
+
+    var formData = {
+      statusKeterbukaan: document.getElementById('statusKeterbukaan').value,
+      jenisArsip: document.getElementById('jenisArsip').value,
+      kategoriUrusan: document.getElementById('kategoriUrusan').value,
+      kodeKlasifikasiAsli: document.getElementById('kodeKlasifikasiAsli').value.trim(),
+      nomorAsli: document.getElementById('nomorAsli').value.trim(),
+      kodeAsal: kodeAsalSelect.value,
+      asalArsip: asalNama,
+      nomorBox: document.getElementById('nomorBox').value,
+      kodeUnik: document.getElementById('kodeUnik').value.trim(),
+      unitPengelola: document.getElementById('unitPengelola').value.trim(),
+      kurunWaktu: document.getElementById('kurunWaktu').value.trim(),
+      kurunWaktuMulai: document.getElementById('kurunWaktu').value.trim(),
+      kurunWaktuAkhir: '',
+      rangkapKe: document.getElementById('rangkapKe').value || 1,
+      jumlahLembar: document.getElementById('jumlahLembar').value || 1,
+      jumlahBerkas: document.getElementById('jumlahBerkas').value || 1,
+      kondisiFisik: document.getElementById('kondisiFisik').value,
+      lokasiSimpan: document.getElementById('lokasiSimpan').value.trim(),
+      deskripsi: document.getElementById('deskripsi').value.trim(),
+      keterangan: document.getElementById('keterangan').value.trim(),
+      waktuUnggah: document.getElementById('waktuUnggah').value || new Date().toISOString(),
+      qaChecklist: qaChecklist,
+      stafId: inputStafId,
+      stafNama: inputStafNama,
+      activeUser: currentUser
+    };
   
   readFileAsBase64('arsipFile', async function(fileInfo) {
     if (fileInfo) {
@@ -719,12 +766,28 @@ function processSaveArsip(qaChecklist) {
         hideProcessLoading();
         
         if (response && response.success) {
-          showSwalSuccess(response.message || 'Arsip berhasil disimpan!', 'Berhasil Disimpan');
-          resetForm();
-          // Invalidate cache
+          // Invalidate cache agar data baru langsung termuat
           if (typeof _pageHtmlCache !== 'undefined') {
             delete _pageHtmlCache['daftar-arsip'];
             delete _pageHtmlCache['dashboard'];
+          }
+          resetForm();
+
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil Disimpan',
+              text: response.message || 'Arsip berhasil disimpan! Mengalihkan ke Daftar Arsip...',
+              timer: 1600,
+              timerProgressBar: true,
+              confirmButtonColor: '#1B2A4A',
+              confirmButtonText: 'Buka Daftar Arsip'
+            }).then(function() {
+              navigateTo('daftar-arsip');
+            });
+          } else {
+            showToast(response.message || 'Arsip berhasil disimpan!', 'success');
+            navigateTo('daftar-arsip');
           }
         } else {
           showSwalError((response ? response.message : '') || 'Gagal menyimpan arsip.', 'Gagal Menyimpan');

@@ -7,13 +7,32 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 41 (Deployment @56)**
+- **Versi Terakhir**: **Versi 42 (Deployment @60)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 42 — Perbaikan Fitur Cetak Berita Acara & Rekapitulasi (Universal Direct Print Engine)
+- **Latar Belakang**: Menuntaskan kendala pada proses pencetakan Berita Acara dan Rekapitulasi Alih Media di mana dialog print browser muncul namun halaman pratinjau cetak kosong/tidak muncul apa-apa ("saat dicetak tidak muncul apa apa"), serta error saat penerbitan Berita Acara baru.
+- **Akar Masalah & Solusi**:
+  1. **DOM ID Mismatch di `populateFormalBAModal` (`DashboardBA.html`)**:
+     - *Masalah*: JavaScript memanggil `.textContent` pada elemen `doc-bulan`, `doc-tempat`, `doc-jenis-arsip`, dll. yang tidak ada di HTML (di HTML bernama `doc-bln-nama`, `doc-jenis-arsip-desc`, `doc-jml-angka`, dll.). Hal ini menimbulkan `TypeError: Cannot set properties of null (setting 'textContent')` yang memutus eksekusi modal sebelum data terisi atau dialog cetak terbuka.
+     - *Solusi*: Menggunakan fungsi `safeSetText(id, val)` dengan proteksi null-safety dan menyesuaikan seluruh ID target ke elemen DOM yang valid.
+  2. **Eliminasi Hidden Iframe 0x0 / Offscreen `-9999px`**:
+     - *Masalah*: Fungsi cetak lama menggunakan iframe tersembunyi berukuran 0x0 atau diposisikan di `left: -9999px`. Pada browser Chromium (Chrome/Edge) di lingkungan sandbox Google Apps Script, browser menganggap dokumen tersebut berada di luar batas pandang (out-of-bounds/0-pixel layout area), sehingga print preview me-render halaman kosong (0 halaman / kertas putih polos).
+     - *Solusi*: Mengembangkan mesin cetak terpadu `siastaPrint(target, options)` di `ClientScript.html`. Kloning lembar dokumen disematkan langsung di root `document.body`, dan menggunakan aturan `@media print` murni (`body.siasta-is-printing`) untuk menyembunyikan semua antarmuka sistem (sidebar, top-header, modal backdrop, tombol) dan hanya menampilkan lembar dokumen A4 resmi beresolusi tinggi dengan gambar kop dan tanda tangan utuh.
+  3. **Pengaturan Orientasi Cetak Otomatis (`@page`)**:
+     - Menyuntikkan CSS `@page` dinamis secara otomatis: **A4 Portrait (15mm 18mm)** untuk Berita Acara, dan **A4 Landscape (12mm 10mm)** untuk Rekapitulasi Daftar Arsip.
+  4. **Perbaikan Backend Database & Berita Acara (`BeritaAcaraService.gs` & `Database.gs`)**:
+     - Memperbaiki `namaHari is not defined` pada `getBeritaAcaraFormalDetail()` dengan mendeklarasikan kamus nama hari dan menghitung hari dari tanggal dokumen.
+     - Memperbaiki `Database.gs` saat memanggil `appendData()`, `updateData()`, `getHeaders()`, dan `readAllData()` agar terlindung dari error rentang kolom kurang dari 1 pada sheet kosong.
+  5. **Penetapan Pegawai & Redirect Input Arsip (`InputArsip.html`)**:
+     - Nilai staf input otomatis diisi sesuai akun yang sedang login dan setelah pengunggahan arsip baru berhasil, sistem otomatis melakukan navigasi dan penyegaran ke halaman Daftar Arsip.
+
+---
 
 ### Versi 41 — Watermark Visual Otomatis Berkas PDF (pdf-lib) & Perbaikan Alur Input Arsip
 - **Latar Belakang**: Memenuhi instruksi agar setiap berkas arsip yang diunggah (baik Gambar maupun Dokumen PDF) otomatis memiliki cap watermark visual permanen resmi, serta mengatasi kendala dropdown Asal Arsip kosong dan menyelaraskan field rincian metadata arsip.
@@ -167,6 +186,60 @@
        KABUPATEN MANGGARAI BARAT
        ```
      - Dilengkapi aturan CSS cetak `@media print` dengan `print-color-adjust: exact` sehingga hasil cetak atau unduhan PDF mempertahankan logo tajam dan watermark transparan tanpa menutupi teks dokumen.
+
+### Versi 36 — Perbaikan Error "namaHari is not defined" Saat Cetak/Pratinjau Berita Acara
+- **Latar Belakang Permintaan**:
+  - Pengguna melaporkan error (*"Terjadi Kesalahan - Error getBeritaAcaraFormalDetail: namaHari is not defined"*) saat hendak mencetak atau mempratinjau Berita Acara Alih Media.
+- **Penyebab**:
+  - Di dalam fungsi `getBeritaAcaraFormalDetail()` pada `BeritaAcaraService.gs`, objek respons mencoba mengakses variabel `namaHari` pada properti `hariNama: namaHari` dan `tanggalPelaksanaanFormatted`, namun variabel `namaHari` belum dideklarasikan sebelumnya.
+- **Modifikasi Berkas**:
+  1. `BeritaAcaraService.gs`:
+     - Menambahkan deklarasi dan kalkulasi hari pelaksanaan formal `daftarNamaHari` berdasarkan tanggal dokumen `tglPelaksanaan.getDay()` (Minggu - Sabtu).
+     - Menjadikan tanggal Berita Acara dinamis mengikuti `tanggal_dibuat` dokumen aktual jika tersedia.
+- **Deployment**:
+  - Berhasil di-deploy ke deployment aktif `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B` (@59).
+
+---
+
+### Versi 35 — Perbaikan Error "Jumlah kolom dalam rentang setidaknya harus 1" Saat Pembuatan Berita Acara
+- **Latar Belakang Permintaan**:
+  - Pengguna melaporkan pesan error (*"Terjadi Kesalahan - Error: Jumlah kolom dalam rentang setidaknya harus 1"*) saat menerbitkan Berita Acara Alih Media baru.
+- **Penyebab**:
+  - Pada sheet `berita_acara` yang masih kosong (0 kolom), pemanggilan `appendData()` di `Database.gs` memanggil `sheet.getRange(1, 1, 1, sheet.getLastColumn())` di mana `getLastColumn() == 0`. Dalam Google Apps Script, parameter jumlah kolom rentang harus $\ge 1$, sehingga fungsi melempar exception `Jumlah kolom dalam rentang setidaknya harus 1`.
+  - Fungsi inisialisasi awal `syncAllDatabaseHeaders()` sebelumnya hanya mendaftarkan sheet `master_arsip`, sehingga sheet `berita_acara` tidak memiliki header saat pertama kali diakses.
+- **Modifikasi Berkas**:
+  1. `Database.gs`:
+     - Menambahkan proteksi otomatis pada `appendData()`: jika sheet memiliki 0 kolom (`lastCol < 1`), sistem secara otomatis memasang baris header resmi dan menata format header sebelum data dimasukkan.
+     - Melindungi `updateData()`, `getHeaders()`, dan `readAllData()` agar kebal dari sheet kosong.
+     - Memperluas `syncAllDatabaseHeaders()` agar secara otomatis mensinkronkan kolom seluruh sheet sistem (`BERITA_ACARA`, `MASTER_ARSIP`, `MASTER_STAF`, `LOG_AKTIVITAS`, `LOG_AKSES`, `TARGET_REALISASI`, `PENGATURAN`, `KODE_ASAL`).
+  2. `BeritaAcaraService.gs`:
+     - Fungsi `generateBeritaAcara()` kini secara otomatis menghasilkan Nomor Berita Acara resmi (contoh: `000.4.1/DAP/BA-AM/01/IX/2026`).
+     - Otomatis menghitung jumlah arsip aktual dari `master_arsip` untuk bulan dan staf bersangkutan jika belum terisi.
+     - Menghubungkan identitas pembuat ke log aktivitas audit trail.
+  3. `Utils.gs`:
+     - Menambahkan fungsi pembantu `getBulanRomawi(monthIndex)` untuk penomoran naskah dinas resmi.
+- **Deployment**:
+  - Berhasil di-deploy ke deployment aktif `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B` (@58).
+
+---
+
+### Versi 34 — Penguncian Staf Penginput dari Sesi Login & Auto-Redirect ke Daftar Arsip
+- **Latar Belakang Permintaan**:
+  1. Pegawai yang menginputkan arsip baru harus 100% terkunci sesuai identitas staf yang dipilih saat login (`select-staff`).
+  2. Setelah form input arsip baru berhasil disimpan, halaman otomatis dialihkan (reload/redirect SPA) langsung ke halaman **Daftar Arsip** (`daftar-arsip`).
+- **Modifikasi Berkas**:
+  1. `InputArsip.html`:
+     - Sinkronisasi otomatis field `stafNama` dan `stafId` dari multi-level session (`sessionStorage['siasta_user']`, `window._currentUser`, dan DOM `#user-name`).
+     - Di `processSaveArsip()`, payload `formData` menyertakan `stafId`, `stafNama`, dan objek `activeUser` lengkap.
+     - Setelah sukses simpan, form di-reset, cache template di-clear, dan dialog SweetAlert otomatis memicu navigasi langsung ke `navigateTo('daftar-arsip')` dalam 1.6 detik atau melalui tombol 'Buka Daftar Arsip'.
+  2. `ArsipService.gs`:
+     - Logika `saveArsip(data)` memprioritaskan identitas staf dari klien (`data.activeUser` / `data.stafNama` / `data.stafId`) sebelum fallback ke server session `getCurrentUser()`.
+     - Data `staf_id` dan `staf_nama` tersimpan akurat di Google Sheet `master_arsip`.
+     - `logActivity('INPUT_ARSIP', ...)` mencatat nama staf penginput aktual.
+  3. `LogService.gs`:
+     - Menambahkan parameter opsional `stafObj` pada fungsi `logActivity(aksi, modul, detail, stafObj)` agar pencatatan audit trail aktivitas selaras dengan staf yang bertugas.
+- **Deployment**:
+  - Berhasil di-deploy ke deployment aktif `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B` (@57).
 
 ---
 

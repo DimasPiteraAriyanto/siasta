@@ -625,7 +625,18 @@ function previewFormalBAMonth(bulan) {
     .getBeritaAcaraFormalDetail({ bulan: bulan, tahun: tahun, tipe: 'gabungan' });
 }
 
+function padZero(num) {
+  num = parseInt(num) || 0;
+  return (num < 10 ? '0' : '') + num;
+}
+
+function safeSetText(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = (val !== undefined && val !== null) ? val : '';
+}
+
 function populateFormalBAModal(d) {
+  if (!d) return;
   _currentFormalBAData = d;
   var cK = document.getElementById('toggle-ba-kadis');
   var cP = document.getElementById('toggle-ba-pelaksana');
@@ -636,46 +647,46 @@ function populateFormalBAModal(d) {
 
   var logoEl = document.getElementById('doc-logo-img');
   if (logoEl) logoEl.src = window._logoMabar || '';
-  document.getElementById('doc-alamat-kop').textContent = d.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT';
-  document.getElementById('doc-nomor-ba').textContent = d.nomorBA || '....................................................';
-  document.getElementById('doc-hari').textContent = d.hariNama || 'Senin';
+  safeSetText('doc-alamat-kop', d.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT');
+  safeSetText('doc-nomor-ba', d.nomorBA || '....................................................');
+  safeSetText('doc-hari', d.hariNama || 'Kamis');
+  
   var tglNum = (d.tanggalAngka !== undefined && d.tanggalAngka !== null && !isNaN(d.tanggalAngka)) ? parseInt(d.tanggalAngka) : 18;
   var blnNum = (d.bulanAngka !== undefined && d.bulanAngka !== null && !isNaN(d.bulanAngka)) ? parseInt(d.bulanAngka) : ((d.bulan !== undefined && !isNaN(d.bulan)) ? (parseInt(d.bulan) + 1) : 6);
   var thnNum = d.tahunAngka || d.tahun || 2026;
-  document.getElementById('doc-tgl-angka').textContent = d.tanggalAngkaLengkap || (padZero(tglNum) + '-' + padZero(blnNum) + '-' + thnNum);
-  document.getElementById('doc-tgl-terbilang').textContent = d.tanggalTerbilang || 'Delapan Belas';
-  document.getElementById('doc-bulan').textContent = d.bulanNama || 'Juni';
-  document.getElementById('doc-thn-terbilang').textContent = d.tahunTerbilang || 'Dua Ribu Dua Puluh Enam';
-  document.getElementById('doc-tempat').textContent = d.tempatPelaksanaan || 'Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat';
   
-  document.getElementById('doc-jenis-kegiatan').textContent = d.jenisKegiatan;
-  document.getElementById('doc-jenis-arsip').textContent = d.jenisArsip;
-  document.getElementById('doc-jumlah-arsip').textContent = d.jumlahArsip || 0;
-  document.getElementById('doc-jumlah-terbilang').textContent = d.jumlahArsipTerbilang || 'Nol';
-  document.getElementById('doc-total-lembar').textContent = d.totalLembar || 0;
-  document.getElementById('doc-asal-arsip').textContent = d.asalArsip;
-  document.getElementById('doc-dasar-hukum').textContent = d.dasarPelaksanaan;
+  safeSetText('doc-tgl-angka', d.tanggalAngkaLengkap || (padZero(tglNum) + '-' + padZero(blnNum) + '-' + thnNum));
+  safeSetText('doc-tgl-terbilang', d.tanggalTerbilang || 'delapan belas');
+  safeSetText('doc-bln-nama', d.bulanNama || 'Desember');
+  safeSetText('doc-thn-terbilang', d.tahunTerbilang || 'dua ribu dua puluh enam');
+  
+  safeSetText('doc-jenis-arsip-desc', d.jenisArsip);
+  safeSetText('doc-jml-angka', (d.jumlahArsip !== undefined && d.jumlahArsip !== null) ? d.jumlahArsip : 0);
+  safeSetText('doc-jml-terbilang', d.jumlahArsipTerbilang || 'nol');
+  safeSetText('doc-asal-arsip-desc', d.asalArsip);
+  safeSetText('doc-dasar-hukum', d.dasarPelaksanaan);
+
+  // Update span tahun jika ada
+  document.querySelectorAll('.doc-tahun-span').forEach(function(el) {
+    el.textContent = thnNum;
+  });
 
   // Tanggal TTD
-  document.getElementById('doc-tgl-surat').textContent = d.tanggalAngka + ' ' + d.bulanNama + ' ' + d.tahunAngka;
+  safeSetText('doc-tgl-surat', (d.tanggalAngka || tglNum) + ' ' + (d.bulanNama || 'Desember') + ' ' + thnNum);
 
   // Kadis
   if (d.kadis) {
-    document.getElementById('doc-kadis-nama').textContent = (d.kadis.NAMA || 'AUGUSTINUS RINUS, S.Pd').toUpperCase();
-    document.getElementById('doc-kadis-pangkat').textContent = d.kadis.PANGKAT || 'Pembina Utama Muda';
-    document.getElementById('doc-kadis-nip').textContent = d.kadis.NIP || '19720219 199903 1 008';
+    safeSetText('doc-kadis-nama', (d.kadis.NAMA || 'AUGUSTINUS RINUS, S.Pd').toUpperCase());
+    safeSetText('doc-kadis-pangkat', d.kadis.PANGKAT || 'Pembina Utama Muda');
+    safeSetText('doc-kadis-nip', d.kadis.NIP || '19720219 199903 1 008');
   }
 
   // Pelaksana
   if (d.pelaksana) {
-    document.getElementById('doc-pelaksana-nama').textContent = (d.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md').toUpperCase();
-    document.getElementById('doc-pelaksana-jabatan').textContent = d.pelaksana.jabatan || 'Pelaksana Alih Media';
-    document.getElementById('doc-pelaksana-nip').textContent = d.pelaksana.nip || '-';
-    if (d.tipe === 'gabungan') {
-      document.getElementById('doc-pelaksana-title').textContent = 'Koordinator Pelaksana Alih Media,';
-    } else {
-      document.getElementById('doc-pelaksana-title').textContent = 'Pelaksana Alih Media,';
-    }
+    safeSetText('doc-pelaksana-nama', (d.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md').toUpperCase());
+    safeSetText('doc-pelaksana-jabatan', d.pelaksana.jabatan || 'Pelaksana Alih Media');
+    safeSetText('doc-pelaksana-nip', d.pelaksana.nip || '-');
+    safeSetText('doc-pelaksana-title', (d.tipe === 'gabungan' ? 'Koordinator Pelaksana Alih Media,' : 'Pelaksana Alih Media,'));
 
     var ttdImg = document.getElementById('doc-pelaksana-ttd-img');
     var ttdSrc = d.pelaksanaTtd || (d.pelaksana && d.pelaksana.ttd) || window._dummyTtd || '';
@@ -713,43 +724,17 @@ function toggleBASignerBlock(signer, isChecked) {
   }
 }
 
-// ANTI POPUP-BLOCKER PRINT VIA HIDDEN IFRAME
+// METODE CETAK RESMI: ISOLASI SHEET DENGAN DUKUNGAN SEMUA BROWSER
 function printFormalBA() {
-  var sheet = document.getElementById('ba-print-sheet');
-  if (!sheet) return;
-
-  var printFrame = document.getElementById('siasta-print-frame');
-  if (!printFrame) {
-    printFrame = document.createElement('iframe');
-    printFrame.id = 'siasta-print-frame';
-    printFrame.style.position = 'fixed';
-    printFrame.style.right = '0';
-    printFrame.style.bottom = '0';
-    printFrame.style.width = '0';
-    printFrame.style.height = '0';
-    printFrame.style.border = '0';
-    printFrame.style.zIndex = '-1';
-    document.body.appendChild(printFrame);
+  if (typeof siastaPrint === 'function') {
+    siastaPrint('ba-print-sheet', {
+      orientation: 'portrait',
+      margin: '15mm 18mm',
+      className: 'siasta-print-section-ba'
+    });
+  } else {
+    window.print();
   }
-
-  var doc = printFrame.contentWindow.document;
-  doc.open();
-  doc.write('<!DOCTYPE html><html><head><title>Cetak Berita Acara Alih Media</title>');
-  doc.write('<style>');
-  doc.write('@page { size: A4 portrait; margin: 15mm 18mm; }');
-  doc.write('body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; font-size: 12pt; line-height: 1.5; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }');
-  doc.write('table { width: 100%; border-collapse: collapse; }');
-  doc.write('img { max-width: 100%; }');
-  doc.write('@media print { body { margin: 0; } }');
-  doc.write('</style></head><body>');
-  doc.write(sheet.innerHTML);
-  doc.write('</body></html>');
-  doc.close();
-
-  setTimeout(function() {
-    printFrame.contentWindow.focus();
-    printFrame.contentWindow.print();
-  }, 250);
 }
 
 function saveFormalBAToGoogleDocs() {

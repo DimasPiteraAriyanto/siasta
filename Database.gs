@@ -79,9 +79,50 @@ function readPaginated(sheetName, page, pageSize) {
  */
 function appendData(sheetName, rowData) {
   const sheet = getSheet(sheetName);
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var lastCol = sheet.getLastColumn();
+  var headers = [];
   
-  // Periksa apakah rowData memiliki kolom yang belum ada di sheet
+  // Penanganan aman jika sheet baru/kosong (0 kolom) untuk mencegah error "Jumlah kolom dalam rentang setidaknya harus 1"
+  if (lastCol < 1) {
+    var defaultHeadersMap = {
+      'berita_acara': ['id', 'nomor_ba', 'bulan', 'tahun', 'tipe', 'staf_id', 'staf_nama', 'jumlah_arsip', 'waktu_pelaksanaan', 'tempat_pelaksanaan', 'jenis_media', 'file_id', 'file_url', 'status', 'tanggal_dibuat'],
+      'master_arsip': ['id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal', 'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan', 'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas', 'rangkap_ke', 'kondisi_fisik', 'kurun_waktu', 'kurun_waktu_mulai', 'kurun_waktu_akhir', 'unit_pengelola', 'lokasi_simpan', 'keterangan', 'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url', 'waktu_unggah', 'qa_checklist', 'watermark_applied', 'staf_id', 'staf_nama', 'tanggal_input', 'tanggal_update', 'status'],
+      'master_staf': ['id', 'nama', 'nip', 'jabatan', 'email', 'status', 'tanda_tangan_id', 'tanda_tangan_url', 'tanggal_dibuat'],
+      'log_aktivitas': ['id', 'timestamp', 'staf_id', 'staf_nama', 'aksi', 'modul', 'detail', 'ip_address'],
+      'log_akses': ['id', 'timestamp', 'staf_id', 'staf_nama', 'arsip_id', 'arsip_kode', 'jenis_akses'],
+      'target_realisasi': ['id', 'tahun', 'bulan', 'target', 'realisasi', 'keterangan'],
+      'pengaturan': ['key', 'value', 'deskripsi', 'tanggal_update'],
+      'kode_asal_arsip': ['kode', 'nama', 'deskripsi', 'status']
+    };
+
+    var baseHeaders = defaultHeadersMap[sheetName] ? defaultHeadersMap[sheetName].slice() : [];
+    if (baseHeaders.length === 0) {
+      baseHeaders = Object.keys(rowData).filter(function(k) { return k && k !== '_rowIndex'; });
+    } else {
+      Object.keys(rowData).forEach(function(k) {
+        if (k && k !== '_rowIndex' && baseHeaders.indexOf(k) === -1) {
+          baseHeaders.push(k);
+        }
+      });
+    }
+
+    if (baseHeaders.length > 0) {
+      sheet.appendRow(baseHeaders);
+      try {
+        var hRange = sheet.getRange(1, 1, 1, baseHeaders.length);
+        hRange.setFontWeight('bold');
+        hRange.setBackground('#1B2A4A');
+        hRange.setFontColor('#FFFFFF');
+        sheet.setFrozenRows(1);
+      } catch (eH) {}
+      headers = baseHeaders;
+      lastCol = baseHeaders.length;
+    }
+  } else {
+    headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  }
+  
+  // Periksa apakah rowData memiliki kolom baru yang belum ada di sheet
   var missingCols = [];
   Object.keys(rowData).forEach(function(k) {
     if (k && k !== '_rowIndex' && headers.indexOf(k) === -1) {
@@ -117,7 +158,10 @@ function appendData(sheetName, rowData) {
  */
 function updateData(sheetName, rowNumber, rowData) {
   const sheet = getSheet(sheetName);
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var lastCol = sheet.getLastColumn();
+  if (lastCol < 1) return;
+  
+  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   
   // Pastikan kolom yang diupdate sudah ada di header sheet
   var missingCols = [];
@@ -221,7 +265,7 @@ function countByFilter(sheetName, columnName, value) {
  */
 function getHeaders(sheetName) {
   const sheet = getSheet(sheetName);
-  if (sheet.getLastColumn() === 0) return [];
+  if (!sheet || sheet.getLastColumn() < 1) return [];
   return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 }
 
@@ -230,9 +274,12 @@ function getHeaders(sheetName) {
  */
 function setupSheetHeaders(sheetName, headers) {
   const sheet = getSheet(sheetName);
-  if (!sheet) return;
+  if (!sheet || !headers || headers.length === 0) return;
   
-  if (sheet.getLastRow() === 0 || sheet.getLastColumn() === 0) {
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+
+  if (lastRow === 0 || lastCol === 0) {
     sheet.appendRow(headers);
     try {
       const headerRange = sheet.getRange(1, 1, 1, headers.length);
@@ -245,7 +292,6 @@ function setupSheetHeaders(sheetName, headers) {
   }
   
   // Jika sheet sudah ada kolom, tambahkan kolom yang belum ada
-  const lastCol = sheet.getLastColumn();
   const currentHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   const missingHeaders = [];
   headers.forEach(function(h) {
@@ -273,15 +319,56 @@ function setupSheetHeaders(sheetName, headers) {
  */
 function syncAllDatabaseHeaders() {
   try {
+    // 1. Berita Acara
+    setupSheetHeaders(CONFIG.SHEETS.BERITA_ACARA, [
+      'id', 'nomor_ba', 'bulan', 'tahun', 'tipe', 'staf_id', 'staf_nama',
+      'jumlah_arsip', 'waktu_pelaksanaan', 'tempat_pelaksanaan',
+      'jenis_media', 'file_id', 'file_url', 'status', 'tanggal_dibuat'
+    ]);
+
+    // 2. Master Arsip
     setupSheetHeaders(CONFIG.SHEETS.MASTER_ARSIP, [
       'id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal',
       'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan',
       'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas',
-      'rangkap_ke', 'kondisi_fisik', 'kurun_waktu_mulai', 'kurun_waktu_akhir',
+      'rangkap_ke', 'kondisi_fisik', 'kurun_waktu', 'kurun_waktu_mulai', 'kurun_waktu_akhir',
       'unit_pengelola', 'lokasi_simpan', 'keterangan',
       'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url',
       'waktu_unggah', 'qa_checklist', 'watermark_applied',
       'staf_id', 'staf_nama', 'tanggal_input', 'tanggal_update', 'status'
+    ]);
+
+    // 3. Master Staf
+    setupSheetHeaders(CONFIG.SHEETS.MASTER_STAF, [
+      'id', 'nama', 'nip', 'jabatan', 'email', 'status',
+      'tanda_tangan_id', 'tanda_tangan_url', 'tanggal_dibuat'
+    ]);
+
+    // 4. Log Aktivitas
+    setupSheetHeaders(CONFIG.SHEETS.LOG_AKTIVITAS, [
+      'id', 'timestamp', 'staf_id', 'staf_nama', 'aksi',
+      'modul', 'detail', 'ip_address'
+    ]);
+
+    // 5. Log Akses
+    setupSheetHeaders(CONFIG.SHEETS.LOG_AKSES, [
+      'id', 'timestamp', 'staf_id', 'staf_nama',
+      'arsip_id', 'arsip_kode', 'jenis_akses'
+    ]);
+
+    // 6. Target Realisasi
+    setupSheetHeaders(CONFIG.SHEETS.TARGET_REALISASI, [
+      'id', 'tahun', 'bulan', 'target', 'realisasi', 'keterangan'
+    ]);
+
+    // 7. Pengaturan
+    setupSheetHeaders(CONFIG.SHEETS.PENGATURAN, [
+      'key', 'value', 'deskripsi', 'tanggal_update'
+    ]);
+
+    // 8. Kode Asal Arsip
+    setupSheetHeaders(CONFIG.SHEETS.KODE_ASAL, [
+      'kode', 'nama', 'deskripsi', 'status'
     ]);
   } catch (e) {
     Logger.log('syncAllDatabaseHeaders error: ' + e.message);

@@ -1741,6 +1741,181 @@ html, body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
+  /* ===================================================
+     UNIVERSAL PRINT ISOLATION ENGINE (SIASTA PRINT)
+     Menjamin dokumen tercetak bersih, rapi, dan tidak kosong
+     =================================================== */
+  body.siasta-is-printing > *:not(#siasta-print-section) {
+    display: none !important;
+  }
+  body.siasta-is-printing {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  body.siasta-is-printing #siasta-print-section {
+    display: block !important;
+    position: static !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    page-break-inside: avoid;
+  }
+  body.siasta-is-printing #siasta-print-section img {
+    max-width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body.siasta-is-printing #siasta-print-section table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  body.siasta-is-printing #siasta-print-section th,
+  body.siasta-is-printing #siasta-print-section td {
+    color: #000000 !important;
+  }
+  body.siasta-is-printing #siasta-print-section .no-print,
+  body.siasta-is-printing #siasta-print-section button {
+    display: none !important;
+  }
+
+  /* Khusus Berita Acara (A4 Portrait) */
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-ba {
+    max-width: 210mm !important;
+    padding: 15mm 20mm !important;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Khusus Rekapitulasi Alih Media (A4 Landscape) */
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-rekap {
+    max-width: 297mm !important;
+    padding: 10mm 12mm !important;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 9.5pt !important;
+    line-height: 1.3 !important;
+  }
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-rekap table th,
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-rekap table td {
+    border: 1px solid #000000 !important;
+  }
+
+  /* Mode Cetak Khusus Berita Acara */
+  body.print-mode-ba > *:not(#main-app-container),
+  body.print-mode-ba #sidebar,
+  body.print-mode-ba .header,
+  body.print-mode-ba #top-progress-bar,
+  body.print-mode-ba .modal-header,
+  body.print-mode-ba .modal-footer,
+  body.print-mode-ba .cell-actions,
+  body.print-mode-ba [style*="background:#f1f5f9"],
+  body.print-mode-ba [style*="background: #f1f5f9"] {
+    display: none !important;
+  }
+  body.print-mode-ba,
+  body.print-mode-ba #main-app-container,
+  body.print-mode-ba .content-area,
+  body.print-mode-ba #page-content {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  body.print-mode-ba .modal-overlay {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+  }
+  body.print-mode-ba .modal {
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  body.print-mode-ba .modal-body {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  body.print-mode-ba #ba-print-sheet {
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    padding: 15mm 20mm !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    min-height: auto !important;
+  }
+
+  /* Mode Cetak Khusus Rekapitulasi */
+  body.print-mode-rekap > *:not(#main-app-container),
+  body.print-mode-rekap #sidebar,
+  body.print-mode-rekap .header,
+  body.print-mode-rekap #top-progress-bar,
+  body.print-mode-rekap .modal-header,
+  body.print-mode-rekap .modal-footer {
+    display: none !important;
+  }
+  body.print-mode-rekap,
+  body.print-mode-rekap #main-app-container,
+  body.print-mode-rekap .content-area,
+  body.print-mode-rekap #page-content {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  body.print-mode-rekap .modal-overlay {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+  }
+  body.print-mode-rekap .modal {
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  body.print-mode-rekap .modal-body {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  body.print-mode-rekap #rekap-doc-sheet {
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    padding: 10mm 12mm !important;
+    width: 100% !important;
+    max-width: 297mm !important;
+    min-height: auto !important;
+  }
 }
 </style>
 

@@ -10,15 +10,16 @@
  * @param {string} aksi - Jenis aksi (LOGIN, LOGOUT, INPUT, EDIT, DELETE, GENERATE_BA, GENERATE_LAPORAN, dll)
  * @param {string} modul - Modul/halaman (Auth, Arsip, BeritaAcara, Laporan, dll)
  * @param {string} detail - Detail aktivitas
+ * @param {Object} [stafObj] - Objek staf opsional {id, nama}
  */
-function logActivity(aksi, modul, detail) {
+function logActivity(aksi, modul, detail, stafObj) {
   try {
-    var user = getCurrentUser();
+    var user = stafObj || getCurrentUser();
     var logData = {
       id: generateId('LOG'),
       timestamp: new Date(),
-      staf_id: user ? user.id : 'SYSTEM',
-      staf_nama: user ? user.nama : 'System',
+      staf_id: user ? (user.id || user.staf_id || 'SYSTEM') : 'SYSTEM',
+      staf_nama: user ? (user.nama || user.staf_nama || 'System') : 'System',
       aksi: aksi,
       modul: modul,
       detail: detail,

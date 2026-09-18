@@ -58,7 +58,34 @@ function previewKodeUnik(kodeAsal, nomorBox) {
  */
 function saveArsip(data) {
   try {
-    var user = getCurrentUser() || (data && data.activeUser ? data.activeUser : null) || { id: 'STAF-001', nama: 'Siprianus Mbemba', jabatan: 'Arsiparis Ahli Pertama' };
+    // Resolusi identitas staf penginput (prioritas: activeUser / form klien dari sesi login, lalu session server, fallback staf default)
+    var stafIdFinal = '';
+    var stafNamaFinal = '';
+    
+    if (data && data.activeUser && (data.activeUser.nama || data.activeUser.id)) {
+      stafNamaFinal = (data.activeUser.nama || '').trim();
+      stafIdFinal = (data.activeUser.id || '').trim();
+    }
+    
+    if (!stafNamaFinal && data && data.stafNama && data.stafNama.trim() && data.stafNama !== 'Petugas Alih Media SIASTA') {
+      stafNamaFinal = data.stafNama.replace(/\s*\(.*?\)\s*$/, '').trim();
+      stafIdFinal = (data.stafId || '').trim();
+    }
+    
+    if (!stafNamaFinal) {
+      var sUser = getCurrentUser();
+      if (sUser && sUser.nama) {
+        stafNamaFinal = sUser.nama.trim();
+        stafIdFinal = (sUser.id || '').trim();
+      }
+    }
+    
+    if (!stafNamaFinal) {
+      stafIdFinal = 'STAF-005';
+      stafNamaFinal = 'Muhammad Dzaky Nathanegara, A.Md';
+    }
+
+    var user = { id: stafIdFinal, nama: stafNamaFinal };
     
     // Generate kode unik
     var cleanBox = parseInt(String(data.nomorBox || '1').replace(/\D/g, '')) || 1;
@@ -105,6 +132,7 @@ function saveArsip(data) {
       jumlah_berkas: parseInt(data.jumlahBerkas) || 1,
       rangkap_ke: parseInt(data.rangkapKe) || 1,
       kondisi_fisik: data.kondisiFisik || 'Baik',
+      kurun_waktu: data.kurunWaktu || data.kurunWaktuMulai || '',
       kurun_waktu_mulai: data.kurunWaktuMulai || data.kurunWaktu || '',
       kurun_waktu_akhir: data.kurunWaktuAkhir || '',
       unit_pengelola: data.unitPengelola || '',
@@ -117,8 +145,8 @@ function saveArsip(data) {
       waktu_unggah: data.waktuUnggah || new Date().toISOString(),
       qa_checklist: JSON.stringify(data.qaChecklist || []),
       watermark_applied: fileResult ? 'Ya' : 'Tidak',
-      staf_id: (data.activeUser && data.activeUser.id) ? data.activeUser.id : user.id,
-      staf_nama: (data.activeUser && data.activeUser.nama) ? data.activeUser.nama : user.nama,
+      staf_id: stafIdFinal,
+      staf_nama: stafNamaFinal,
       tanggal_input: new Date(),
       tanggal_update: new Date(),
       status: 'Aktif'
@@ -127,8 +155,8 @@ function saveArsip(data) {
     // Simpan ke sheet
     appendData(CONFIG.SHEETS.MASTER_ARSIP, arsipData);
     
-    // Log aktivitas
-    logActivity('INPUT_ARSIP', 'Arsip', 'Input arsip baru: ' + kodeUnikFinal + ' - ' + data.deskripsi);
+    // Log aktivitas dengan staf yang sesuai
+    logActivity('INPUT_ARSIP', 'Arsip', 'Input arsip baru: ' + kodeUnikFinal + ' - ' + data.deskripsi, user);
     
     // Invalidate dashboard cache
     clearCache('CACHE_DASHBOARD_STATS');
