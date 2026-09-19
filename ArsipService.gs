@@ -1101,27 +1101,31 @@ function getRekapitulasiArsipExport(params) {
       var berkas = parseInt(a.jumlah_berkas) || 1;
       totalLembar += lembar;
       totalBerkas += berkas;
-      var kw = a.kurun_waktu_mulai || '-';
+      var kw = a.kurun_waktu || a.kurun_waktu_mulai || '-';
       return {
         no: idx + 1,
-        nomorBox: a.nomor_box || '-',
         kodeUnik: a.kode_unik || '-',
-        nomorAsli: a.nomor_asli || '-',
-        kodeKlasifikasiAsli: a.kode_klasifikasi_asli || '-',
+        statusKeterbukaan: a.status_keterbukaan || 'Tertutup',
+        asalArsip: a.asal_arsip || '-',
+        kodeAsal: a.kode_asal || a.asal_arsip_kode || '-',
+        nomorBox: a.nomor_box || '-',
+        nomorUrut: a.nomor_urut || '-',
         deskripsi: a.deskripsi || '-',
-        kurunWaktu: kw || '-',
         jenisArsip: a.jenis_arsip || 'Tekstual',
         kategoriUrusan: a.kategori_urusan || 'Pemerintahan',
-        unitPengelola: a.unit_pengelola || a.asal_arsip || '-',
-        asalArsip: a.asal_arsip || '-',
-        jumlahBerkas: berkas,
+        kodeKlasifikasi: a.kode_klasifikasi || a.kode_klasifikasi_asli || '-',
+        kodeKlasifikasiAsli: a.kode_klasifikasi || a.kode_klasifikasi_asli || '-',
+        nomorAsli: a.nomor_asli || '-',
         jumlahLembar: lembar,
-        lokasiSimpan: a.lokasi_simpan || '-',
+        jumlahBerkas: berkas,
+        rangkapKe: (a.rangkap_ke !== undefined && a.rangkap_ke !== '') ? a.rangkap_ke : 1,
         kondisiFisik: a.kondisi_fisik || 'Baik',
-        statusKeterbukaan: a.status_keterbukaan || 'Terbuka',
+        kurunWaktu: kw || '-',
+        unitPengelola: a.unit_pengelola || a.asal_arsip || '-',
+        lokasiSimpan: a.lokasi_simpan || '-',
+        keterangan: a.keterangan || '-',
         kesesuaianStandar: 'Sesuai Standar ANRI',
         nomorRegistrasi: a.nomor_registrasi || '-',
-        keterangan: a.keterangan || (a.status_keterbukaan || 'Terbuka'),
         stafNama: a.staf_nama || '-'
       };
     });

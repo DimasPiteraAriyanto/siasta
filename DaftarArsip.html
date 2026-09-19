@@ -264,38 +264,46 @@
             <div style="font-size:10.5pt; margin-top:3px;">Periode: Tahun <span id="rekap-doc-periode">2026</span></div>
           </div>
 
-          <!-- Tabel Rekapitulasi Format Fisik Gambar 3 -->
-          <table style="width:100%; border-collapse:collapse; font-size:8.5pt; margin-bottom:20px;">
-            <thead>
-              <tr style="background:#f2f2f2; text-align:center; font-weight:bold;">
-                <th style="width:25px; border:1px solid #000; padding:4px;">No</th>
-                <th style="width:50px; border:1px solid #000; padding:4px;">No. Box</th>
-                <th style="width:65px; border:1px solid #000; padding:4px;">Kode Unik</th>
-                <th style="width:45px; border:1px solid #000; padding:4px;">Kurun Waktu</th>
-                <th style="border:1px solid #000; padding:4px;">Uraian Informasi Arsip</th>
-                <th style="width:75px; border:1px solid #000; padding:4px;">Asal Arsip</th>
-                <th style="width:50px; border:1px solid #000; padding:4px;">Jenis</th>
-                <th style="width:40px; border:1px solid #000; padding:4px;">Jml Lbr</th>
-                <th style="width:65px; border:1px solid #000; padding:4px;">Keterangan</th>
-                <th style="width:50px; border:1px solid #000; padding:4px;">Kondisi</th>
-                <th style="width:40px; border:1px solid #000; padding:4px;">No. Bks</th>
-                <th style="width:40px; border:1px solid #000; padding:4px;">No. Urut</th>
-                <th style="width:55px; border:1px solid #000; padding:4px;">Klasifikasi</th>
-                <th style="width:50px; border:1px solid #000; padding:4px;">No. Asli</th>
-              </tr>
-            </thead>
-            <tbody id="rekap-doc-tbody">
-              <!-- Rendered via JS -->
-            </tbody>
-            <tfoot>
-              <tr style="font-weight:bold; background:#fafafa;">
-                <td colspan="10" style="text-align:right; border:1px solid #000; padding:5px;">Total Arsip Teralih Media:</td>
-                <td style="text-align:center; border:1px solid #000; padding:5px;" id="rekap-doc-total-berkas">0</td>
-                <td style="text-align:center; border:1px solid #000; padding:5px;" id="rekap-doc-total-lbr">0</td>
-                <td colspan="4" style="border:1px solid #000; text-align:center; padding:5px;">Sesuai Standar ANRI</td>
-              </tr>
-            </tfoot>
-          </table>
+          <!-- Tabel Rekapitulasi Format Master Arsip Lengkap (20 Kolom) -->
+          <div style="width:100%; overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:6.5pt; margin-bottom:20px; table-layout:auto;">
+              <thead>
+                <tr style="background:#f2f2f2; text-align:center; font-weight:bold;">
+                  <th style="width:20px; border:1px solid #000; padding:3px 2px;">No</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kode Unik</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Status Keterbukaan</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Asal Arsip</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kode Asal</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Nomor Box</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Nomor Urut</th>
+                  <th style="border:1px solid #000; padding:3px 2px; min-width:110px;">Deskripsi</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Jenis Arsip</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kategori Urusan</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kode Klasifikasi</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Nomor Asli</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Jumlah Lembar</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Jumlah Berkas</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Rangkap Ke</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kondisi Fisik</th>
+                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kurun Waktu (Tahun Pembuatan)</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Unit Pengelola</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Lokasi Simpan</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="rekap-doc-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+              <tfoot>
+                <tr style="font-weight:bold; background:#fafafa;">
+                  <td colspan="12" style="text-align:right; border:1px solid #000; padding:4px 6px;">Total Arsip Teralih Media:</td>
+                  <td style="text-align:center; border:1px solid #000; padding:4px 2px;" id="rekap-doc-total-lbr">0</td>
+                  <td style="text-align:center; border:1px solid #000; padding:4px 2px;" id="rekap-doc-total-berkas">0</td>
+                  <td colspan="6" style="border:1px solid #000; text-align:center; padding:4px 2px;">Sesuai Standar ANRI</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
 
           <!-- Blok Tanda Tangan: Mengetahui Kepala Bidang & Pelaksana -->
           <div id="rekap-ttd-container" style="display:flex; justify-content:space-between; margin-top:24px; font-size:11pt; page-break-inside:avoid;">
@@ -600,45 +608,53 @@ function generateAndDownloadCSV(d) {
   rows.push(['Tanggal Export:', d.tanggalCetak]);
   rows.push([]);
 
-  // Kolom Tabel Lengkap (16 Kolom Sesuai Input Arsip)
+  // Kolom Tabel Lengkap (20 Kolom Selaras Master Arsip)
   rows.push([
     'No',
+    'Kode Unik',
+    'Status Keterbukaan',
+    'Asal Arsip',
+    'Kode Asal',
     'Nomor Box',
-    'Kode Unik Arsip',
-    'Nomor Arsip / Nomor Arsip Asli',
-    'Kode Klasifikasi Asli',
-    'Uraian Informasi Arsip',
-    'Kurun Waktu',
+    'Nomor Urut',
+    'Deskripsi',
     'Jenis Arsip',
     'Kategori Urusan',
-    'Unit Pengolah / Pengelola',
-    'Jumlah Berkas',
+    'Kode Klasifikasi',
+    'Nomor Asli',
     'Jumlah Lembar',
-    'Lokasi Simpan Fisik',
+    'Jumlah Berkas',
+    'Rangkap Ke',
     'Kondisi Fisik',
-    'Status Keterbukaan',
-    'Kesesuaian Standar'
+    'Kurun Waktu (Tahun Pembuatan)',
+    'Unit Pengelola',
+    'Lokasi Simpan',
+    'Keterangan'
   ]);
 
   // Data items
   d.items.forEach(function(item) {
     rows.push([
       item.no,
-      item.nomorBox,
       item.kodeUnik,
-      item.nomorAsli || '-',
-      item.kodeKlasifikasiAsli || '-',
+      item.statusKeterbukaan,
+      item.asalArsip,
+      item.kodeAsal,
+      item.nomorBox,
+      item.nomorUrut,
       item.deskripsi,
-      item.kurunWaktu,
       item.jenisArsip,
-      item.kategoriUrusan || '-',
-      item.unitPengelola || item.asalArsip || '-',
-      item.jumlahBerkas || 1,
+      item.kategoriUrusan,
+      item.kodeKlasifikasi,
+      item.nomorAsli,
       item.jumlahLembar,
-      item.lokasiSimpan || '-',
-      item.kondisiFisik || 'Baik',
-      item.statusKeterbukaan || 'Terbuka',
-      item.kesesuaianStandar || 'Sesuai Standar ANRI'
+      item.jumlahBerkas,
+      item.rangkapKe,
+      item.kondisiFisik,
+      item.kurunWaktu,
+      item.unitPengelola,
+      item.lokasiSimpan,
+      item.keterangan
     ]);
   });
 
@@ -724,23 +740,27 @@ function populateRekapPrintModal(d) {
   var tbody = document.getElementById('rekap-doc-tbody');
   var html = '';
   d.items.forEach(function(item) {
-    html += '<tr style="vertical-align:top; font-size:7.5pt;">' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + item.no + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.nomorBox) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px; font-weight:bold;">' + escapeHtml(item.kodeUnik) + '</td>' +
-      '<td style="border:1px solid #000; padding:3px;">' + escapeHtml(item.nomorAsli || '-') + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kodeKlasifikasiAsli || '-') + '</td>' +
-      '<td style="border:1px solid #000; padding:3px; text-align:justify;">' + escapeHtml(item.deskripsi) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kurunWaktu) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.jenisArsip) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kategoriUrusan || '-') + '</td>' +
-      '<td style="border:1px solid #000; padding:3px;">' + escapeHtml(item.unitPengelola || item.asalArsip || '-') + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + (item.jumlahBerkas || 1) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + item.jumlahLembar + '</td>' +
-      '<td style="border:1px solid #000; padding:3px;">' + escapeHtml(item.lokasiSimpan || '-') + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kondisiFisik || 'Baik') + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.statusKeterbukaan || 'Terbuka') + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:3px;">' + escapeHtml(item.kesesuaianStandar || 'Sesuai') + '</td>' +
+    html += '<tr style="vertical-align:top; font-size:6.5pt;">' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.no + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; font-weight:600; white-space:nowrap;">' + escapeHtml(item.kodeUnik) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.statusKeterbukaan) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.asalArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kodeAsal) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.nomorBox) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.nomorUrut) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 3px; text-align:left;">' + escapeHtml(item.deskripsi) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.jenisArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kategoriUrusan) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kodeKlasifikasi) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.nomorAsli) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.jumlahLembar + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.jumlahBerkas + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.rangkapKe + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kondisiFisik) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kurunWaktu) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.unitPengelola) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.lokasiSimpan) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.keterangan) + '</td>' +
     '</tr>';
   });
   tbody.innerHTML = html;
