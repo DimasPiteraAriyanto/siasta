@@ -350,14 +350,19 @@ function getBeritaAcaraFormalDetail(params) {
     }
     if (!pelaksana) {
       pelaksana = {
-        nama: (baRecord && baRecord.staf_nama && baRecord.staf_nama !== 'Seluruh Staf') ? baRecord.staf_nama : 'Muhammad Dzaky N修正egan A.Md',
+        nama: (baRecord && baRecord.staf_nama && baRecord.staf_nama !== 'Seluruh Staf') ? baRecord.staf_nama : 'Muhammad Dzaky Nathanegara, A.Md',
         nip: (baRecord && baRecord.staf_nip) ? baRecord.staf_nip : '19980508 202506 1 004',
-        jabatan: 'Pelaksana Alih Media'
+        jabatan: 'Pelaksana Alih Media',
+        tanda_tangan_url: ''
       };
-      // Jika nama sampel typo, pakai nama resmi staf yang ada atau default yang rapi
-      if (pelaksana.nama.indexOf('N修正egan') !== -1) {
-        pelaksana.nama = 'Muhammad Dzaky Nathanegara, A.Md';
-      }
+      // Jika staf nama cocok di master_staf, ambil tanda tangannya
+      try {
+        var matchStaf = allStaf.find(function(s) { return s.nama === pelaksana.nama || s.id === (baRecord && baRecord.staf_id); });
+        if (matchStaf) {
+          if (matchStaf.tanda_tangan_url) pelaksana.tanda_tangan_url = matchStaf.tanda_tangan_url;
+          if (matchStaf.nip) pelaksana.nip = matchStaf.nip;
+        }
+      } catch (eMatch) {}
     }
     
     // Tanggal formal pelaksanaan
@@ -441,7 +446,7 @@ function getBeritaAcaraFormalDetail(params) {
       },
       alamatKop: (CONFIG.PEJABAT && CONFIG.PEJABAT.ALAMAT_KOP) ? CONFIG.PEJABAT.ALAMAT_KOP : 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT',
       pelaksana: pelaksana,
-      pelaksanaTtd: (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : ''),
+      pelaksanaTtd: (pelaksana && pelaksana.tanda_tangan_url) ? pelaksana.tanda_tangan_url : ((CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : '')),
       tipe: tipe,
       tipeLabel: tipe === 'per_staf' ? 'Per Staf (' + pelaksana.nama + ')' : 'Gabungan (Seluruh Tim Alih Media)',
       arsipList: mappedArsipList

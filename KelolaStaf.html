@@ -15,6 +15,7 @@
               <th>NIP</th>
               <th>Jabatan</th>
               <th>Email</th>
+              <th>Tanda Tangan</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
@@ -27,6 +28,10 @@
                    var statusBadge = isAktif ?
                      '<span class="badge badge-success">Aktif</span>' :
                      '<span class="badge badge-danger">Nonaktif</span>';
+                   var hasTtd = !!(s.tanda_tangan_url && s.tanda_tangan_url.trim());
+                   var ttdBadge = hasTtd ?
+                     '<div style="display:flex; align-items:center; gap:6px;"><img src="' + s.tanda_tangan_url + '" style="height:24px; max-width:65px; object-fit:contain; border:1px solid #cbd5e1; border-radius:4px; padding:1px 3px; background:#fff;"><span class="badge badge-success" style="font-size:10px;">Ada</span></div>' :
+                     '<span class="badge" style="background:#f1f5f9; color:#94a3b8; font-size:10px;">Belum Ada</span>';
               ?>
                 <tr>
                   <td><?= i + 1 ?></td>
@@ -34,12 +39,13 @@
                   <td><?= s.nip || '-' ?></td>
                   <td><?= s.jabatan || '-' ?></td>
                   <td><?= s.email || '-' ?></td>
+                  <td><?!= ttdBadge ?></td>
                   <td><?!= statusBadge ?></td>
-                  <td><button class="btn btn-sm btn-outline" onclick="editStaf('<?= s.id ?>','<?= (s.nama || '').replace(/'/g, "\\'") ?>','<?= s.nip || '' ?>','<?= (s.jabatan || '').replace(/'/g, "\\'") ?>','<?= s.email || '' ?>','<?= isAktif ? 'Aktif' : 'Nonaktif' ?>')">✏️ Edit</button></td>
+                  <td><button class="btn btn-sm btn-outline" onclick="editStaf('<?= s.id ?>','<?= (s.nama || '').replace(/'/g, "\\'") ?>','<?= s.nip || '' ?>','<?= (s.jabatan || '').replace(/'/g, "\\'") ?>','<?= s.email || '' ?>','<?= isAktif ? 'Aktif' : 'Nonaktif' ?>','<?= (s.tanda_tangan_url || '').replace(/'/g, "\\'") ?>')">✏️ Edit</button></td>
                 </tr>
               <? } ?>
             <? } else { ?>
-              <tr><td colspan="7" class="text-center text-muted">Memuat data...</td></tr>
+              <tr><td colspan="8" class="text-center text-muted">Memuat data...</td></tr>
             <? } ?>
           </tbody>
         </table>
@@ -79,6 +85,27 @@
             <option value="Nonaktif">Nonaktif</option>
           </select>
         </div>
+        <!-- Spesimen Tanda Tangan Digital -->
+        <div class="form-group">
+          <label class="form-label">Spesimen Tanda Tangan Digital (Opsional)</label>
+          <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
+            <div id="staf-ttd-preview-box" style="width:130px; height:65px; border:1px dashed #cbd5e1; border-radius:6px; display:flex; align-items:center; justify-content:center; background:#f8fafc; overflow:hidden;">
+              <img id="staf-ttd-preview-img" src="" alt="Preview TTD" style="max-height:58px; max-width:120px; object-fit:contain; display:none;">
+              <span id="staf-ttd-preview-empty" style="font-size:11.5px; color:#94a3b8; text-align:center;">Belum Ada TTD</span>
+            </div>
+            <div>
+              <input type="file" id="staf-ttd-file" accept="image/png, image/jpeg, image/jpg" style="display:none;" onchange="handleStafTtdFileChange(this)">
+              <input type="hidden" id="staf-ttd-data">
+              <input type="hidden" id="staf-ttd-name">
+              <input type="hidden" id="staf-ttd-mime">
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('staf-ttd-file').click()">📁 Pilih File TTD</button>
+                <button type="button" class="btn btn-sm btn-outline" id="btn-hapus-ttd-form" style="display:none; color:#ef4444; border-color:#fca5a5;" onclick="resetStafTtdPreview()">✕ Hapus</button>
+              </div>
+              <div style="font-size:11px; color:#64748b; margin-top:4px;">Format PNG transparan atau JPG bersih (Maks 5 MB)</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeModal('modal-staf')">Batal</button>
@@ -104,7 +131,7 @@ function loadStafData() {
       if (response.success) {
         var html = '';
         if (!response.data || response.data.length === 0) {
-          html = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div>' +
+          html = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">👥</div>' +
             '<div class="empty-title">Belum ada staf terdaftar</div></div></td></tr>';
         } else {
           response.data.forEach(function(s, i) {
@@ -112,19 +139,25 @@ function loadStafData() {
             var statusBadge = isAktif ?
               '<span class="badge badge-success">Aktif</span>' :
               '<span class="badge badge-danger">Nonaktif</span>';
+            var hasTtd = !!(s.tanda_tangan_url && s.tanda_tangan_url.trim());
+            var ttdBadge = hasTtd ?
+              '<div style="display:flex; align-items:center; gap:6px;"><img src="' + s.tanda_tangan_url + '" style="height:24px; max-width:65px; object-fit:contain; border:1px solid #cbd5e1; border-radius:4px; padding:1px 3px; background:#fff;"><span class="badge badge-success" style="font-size:10px;">Ada</span></div>' :
+              '<span class="badge" style="background:#f1f5f9; color:#94a3b8; font-size:10px;">Belum Ada</span>';
             html += '<tr>' +
               '<td>' + (i + 1) + '</td>' +
-              '<td><strong>' + s.nama + '</strong></td>' +
-              '<td>' + (s.nip || '-') + '</td>' +
-              '<td>' + (s.jabatan || '-') + '</td>' +
-              '<td>' + (s.email || '-') + '</td>' +
+              '<td><strong>' + escapeHtml(s.nama) + '</strong></td>' +
+              '<td>' + escapeHtml(s.nip || '-') + '</td>' +
+              '<td>' + escapeHtml(s.jabatan || '-') + '</td>' +
+              '<td>' + escapeHtml(s.email || '-') + '</td>' +
+              '<td>' + ttdBadge + '</td>' +
               '<td>' + statusBadge + '</td>' +
               '<td><button class="btn btn-sm btn-outline" onclick="editStaf(\'' + s.id + '\',\'' +
-                (s.nama || '').replace(/'/g, "\\'") + '\',\'' +
-                (s.nip || '') + '\',\'' +
-                (s.jabatan || '').replace(/'/g, "\\'") + '\',\'' +
-                (s.email || '') + '\',\'' +
-                (isAktif ? 'Aktif' : 'Nonaktif') + '\')">✏️ Edit</button></td>' +
+                escapeHtml(s.nama).replace(/'/g, "\\'") + '\',\'' +
+                escapeHtml(s.nip || '') + '\',\'' +
+                escapeHtml(s.jabatan || '').replace(/'/g, "\\'") + '\',\'' +
+                escapeHtml(s.email || '') + '\',\'' +
+                (isAktif ? 'Aktif' : 'Nonaktif') + '\',\'' +
+                escapeHtml(s.tanda_tangan_url || '').replace(/'/g, "\\'") + '\')">✏️ Edit</button></td>' +
               '</tr>';
           });
         }
@@ -138,6 +171,56 @@ function loadStafData() {
     .getAllStaf();
 }
 
+function handleStafTtdFileChange(input) {
+  if (!input || !input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (!file.type.match(/image\/(png|jpeg|jpg)/)) {
+    showSwalWarning('Format file tanda tangan harus berupa gambar PNG transparan atau JPG.');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showSwalWarning('Ukuran file tanda tangan maksimal 5 MB.');
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result;
+    document.getElementById('staf-ttd-data').value = base64;
+    document.getElementById('staf-ttd-name').value = file.name;
+    document.getElementById('staf-ttd-mime').value = file.type;
+
+    var previewImg = document.getElementById('staf-ttd-preview-img');
+    var emptyText = document.getElementById('staf-ttd-preview-empty');
+    var btnHapus = document.getElementById('btn-hapus-ttd-form');
+    if (previewImg) {
+      previewImg.src = base64;
+      previewImg.style.display = 'block';
+    }
+    if (emptyText) emptyText.style.display = 'none';
+    if (btnHapus) btnHapus.style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetStafTtdPreview() {
+  var fileInput = document.getElementById('staf-ttd-file');
+  if (fileInput) fileInput.value = '';
+  document.getElementById('staf-ttd-data').value = 'REMOVE';
+  document.getElementById('staf-ttd-name').value = '';
+  document.getElementById('staf-ttd-mime').value = '';
+
+  var previewImg = document.getElementById('staf-ttd-preview-img');
+  var emptyText = document.getElementById('staf-ttd-preview-empty');
+  var btnHapus = document.getElementById('btn-hapus-ttd-form');
+  if (previewImg) {
+    previewImg.src = '';
+    previewImg.style.display = 'none';
+  }
+  if (emptyText) emptyText.style.display = 'inline';
+  if (btnHapus) btnHapus.style.display = 'none';
+}
+
 function openAddStafModal() {
   document.getElementById('staf-edit-id').value = '';
   document.getElementById('staf-nama').value = '';
@@ -146,10 +229,13 @@ function openAddStafModal() {
   document.getElementById('staf-email').value = '';
   document.getElementById('staf-status').value = 'Aktif';
   document.getElementById('modal-staf-title').textContent = 'Tambah Staf Baru';
+  
+  resetStafTtdPreview();
+  document.getElementById('staf-ttd-data').value = '';
   openModal('modal-staf');
 }
 
-function editStaf(id, nama, nip, jabatan, email, status) {
+function editStaf(id, nama, nip, jabatan, email, status, ttdUrl) {
   document.getElementById('staf-edit-id').value = id;
   document.getElementById('staf-nama').value = nama;
   document.getElementById('staf-nip').value = nip;
@@ -157,10 +243,38 @@ function editStaf(id, nama, nip, jabatan, email, status) {
   document.getElementById('staf-email').value = email;
   document.getElementById('staf-status').value = status;
   document.getElementById('modal-staf-title').textContent = 'Edit Data Staf';
+
+  // Setup preview TTD yang ada
+  var previewImg = document.getElementById('staf-ttd-preview-img');
+  var emptyText = document.getElementById('staf-ttd-preview-empty');
+  var btnHapus = document.getElementById('btn-hapus-ttd-form');
+  var fileInput = document.getElementById('staf-ttd-file');
+  if (fileInput) fileInput.value = '';
+  document.getElementById('staf-ttd-data').value = '';
+  document.getElementById('staf-ttd-name').value = '';
+  document.getElementById('staf-ttd-mime').value = '';
+
+  if (ttdUrl && ttdUrl.trim()) {
+    if (previewImg) {
+      previewImg.src = ttdUrl;
+      previewImg.style.display = 'block';
+    }
+    if (emptyText) emptyText.style.display = 'none';
+    if (btnHapus) btnHapus.style.display = 'inline-block';
+  } else {
+    if (previewImg) {
+      previewImg.src = '';
+      previewImg.style.display = 'none';
+    }
+    if (emptyText) emptyText.style.display = 'inline';
+    if (btnHapus) btnHapus.style.display = 'none';
+  }
+
   openModal('modal-staf');
 }
 
 function saveStafForm() {
+  var ttdDataVal = document.getElementById('staf-ttd-data').value;
   var data = {
     id: document.getElementById('staf-edit-id').value,
     nama: document.getElementById('staf-nama').value.trim(),
@@ -169,6 +283,15 @@ function saveStafForm() {
     email: document.getElementById('staf-email').value.trim(),
     status: document.getElementById('staf-status').value
   };
+
+  if (ttdDataVal === 'REMOVE') {
+    data.tanda_tangan_id = '';
+    data.tanda_tangan_url = '';
+  } else if (ttdDataVal) {
+    data.tandaTanganData = ttdDataVal;
+    data.tandaTanganName = document.getElementById('staf-ttd-name').value;
+    data.tandaTanganMime = document.getElementById('staf-ttd-mime').value;
+  }
   
   if (!data.nama || !data.nip || !data.jabatan) {
     showSwalWarning('Kolom Nama, NIP, dan Jabatan staf wajib diisi.', 'Data Belum Lengkap');
@@ -184,12 +307,6 @@ function saveStafForm() {
         showSwalSuccess(response.message, 'Berhasil Disimpan');
         closeModal('modal-staf');
         loadStafData();
-        // Reset form
-        document.getElementById('staf-edit-id').value = '';
-        document.getElementById('staf-nama').value = '';
-        document.getElementById('staf-nip').value = '';
-        document.getElementById('staf-jabatan').value = '';
-        document.getElementById('staf-email').value = '';
         document.getElementById('staf-status').value = 'Aktif';
         document.getElementById('modal-staf-title').textContent = 'Tambah Staf Baru';
       } else {

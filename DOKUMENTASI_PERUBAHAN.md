@@ -7,13 +7,31 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 45 (Deployment @63)**
+- **Versi Terakhir**: **Versi 46 (Deployment @64)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 46 — Pengelolaan & Upload Spesimen Tanda Tangan Digital Individual Masing-Masing Pegawai
+- **Latar Belakang**: Memenuhi kebutuhan agar setiap staf/petugas alih media kearsipan dapat mengunggah dan memiliki spesimen tanda tangan digital yang berbeda-beda, bukan hanya satu tanda tangan default. Tanda tangan ini tersimpan otomatis di Google Drive dan langsung terhubung dengan profil pegawai di basis data `master_staf`, serta otomatis disematkan saat pegawai yang bersangkutan membuat atau mengesahkan Berita Acara maupun Laporan Alih Media.
+- **Rincian Fitur yang Diimplementasikan**:
+  1. **Backend & Cloud Drive (`LaporanService.gs` & `DriveService.gs`)**:
+     - Menambahkan fungsi `uploadTandaTanganStaf(stafId, base64Data, fileName, mimeType)` yang mengunggah gambar tanda tangan ke folder Google Drive `Tanda Tangan` dan memperbarui kolom `tanda_tangan_id` serta `tanda_tangan_url` pada sheet `master_staf`.
+     - Menambahkan fungsi `deleteTandaTanganStaf(stafId)` untuk menghapus spesimen tanda tangan pegawai secara aman (termasuk memindahkan file lama di Drive ke tong sampah/trash).
+     - Menambahkan helper `processTandaTanganUpload()` dan mengintegrasikannya ke `saveStaf()` agar tanda tangan juga dapat diunggah bersamaan saat menambah atau mengedit pegawai.
+  2. **Galeri Spesimen Tanda Tangan di Menu Pengaturan (`Pengaturan.html`)**:
+     - Mengubah Tab *✍️ Tanda Tangan* menjadi antarmuka katalog/galeri spesimen tanda tangan seluruh pegawai aktif.
+     - Menampilkan kartu masing-masing staf lengkap dengan Nama, Jabatan, NIP, status Aktif/Nonaktif, kotak pratinjau tanda tangan, tombol *📤 Upload/Ganti TTD* instan, dan tombol *🗑️ Hapus TTD*.
+  3. **Antarmuka Kelola Staf (`KelolaStaf.html`)**:
+     - Menambahkan kolom **Tanda Tangan** pada tabel data staf dengan thumbnail gambar mini dan badge status (*Ada TTD* / *Belum Ada*).
+     - Menambahkan opsi upload file tanda tangan beserta kotak pratinjau langsung pada modal Tambah / Edit Staf.
+  4. **Koneksi Dinamis Berita Acara (`BeritaAcaraService.gs`)**:
+     - Fungsi `getBeritaAcaraFormalDetail()` otomatis mencocokkan staf pelaksana alih media dan mengambil `tanda_tangan_url` milik staf yang bersangkutan untuk disematkan pada dokumen Berita Acara.
+
+---
 
 ### Versi 45 — Penerapan Template Resmi Berita Acara Alih Media DOCX (Dinas Kearsipan Kab. Manggarai Barat)
 - **Latar Belakang**: Menerapkan berkas template naskah dinas resmi kearsipan `Tempate Berita Acara untuk SIASTA.docx` secara penuh ke dalam sistem SIASTA dengan data dinamis yang terintegrasi langsung dengan database arsip dan riwayat Berita Acara.

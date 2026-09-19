@@ -216,24 +216,61 @@ function saveStaf(data) {
         email: data.email || '',
         status: data.status || 'Aktif'
       };
+
+      // Simpan tanda tangan jika ada perubahan
+      if (data.tanda_tangan_url !== undefined) {
+        updateFields.tanda_tangan_url = data.tanda_tangan_url;
+      }
+      if (data.tanda_tangan_id !== undefined) {
+        updateFields.tanda_tangan_id = data.tanda_tangan_id;
+      }
+
+      // Jika ada file TTD baru yang diunggah bersama form
+      if (data.tandaTanganData) {
+        try {
+          var ttdUpload = processTandaTanganUpload(staf.id, data.tandaTanganData, data.tandaTanganName, data.tandaTanganMime);
+          if (ttdUpload) {
+            updateFields.tanda_tangan_id = ttdUpload.id;
+            updateFields.tanda_tangan_url = ttdUpload.url;
+          }
+        } catch (eTTD) {
+          Logger.log('Gagal upload TTD saat edit staf: ' + eTTD.message);
+        }
+      }
       
       updateData(CONFIG.SHEETS.MASTER_STAF, staf._rowIndex, updateFields);
       logActivity('EDIT_STAF', 'KelolaStaf', 'Edit staf: ' + data.nama);
       invalidateSheetCache(CONFIG.SHEETS.MASTER_STAF);
       clearCache('CACHE_STAFF_LIST');
-      return jsonResponse(true, null, 'Data staf berhasil diupdate.');
+      return jsonResponse(true, { id: staf.id, tanda_tangan_url: updateFields.tanda_tangan_url || staf.tanda_tangan_url }, 'Data staf berhasil diupdate.');
       
     } else {
       // Create new
+      var newStafId = generateId('STF');
+      var ttdId = '';
+      var ttdUrl = data.tanda_tangan_url || '';
+
+      if (data.tandaTanganData) {
+        try {
+          var ttdNew = processTandaTanganUpload(newStafId, data.tandaTanganData, data.tandaTanganName, data.tandaTanganMime);
+          if (ttdNew) {
+            ttdId = ttdNew.id;
+            ttdUrl = ttdNew.url;
+          }
+        } catch (eNewTTD) {
+          Logger.log('Gagal upload TTD saat tambah staf: ' + eNewTTD.message);
+        }
+      }
+
       var newStaf = {
-        id: generateId('STF'),
+        id: newStafId,
         nama: data.nama,
         nip: data.nip,
         jabatan: data.jabatan,
         email: data.email || '',
-        status: 'Aktif',
-        tanda_tangan_id: '',
-        tanda_tangan_url: '',
+        status: data.status || 'Aktif',
+        tanda_tangan_id: ttdId,
+        tanda_tangan_url: ttdUrl,
         tanggal_dibuat: new Date()
       };
       
@@ -241,9 +278,115 @@ function saveStaf(data) {
       logActivity('TAMBAH_STAF', 'KelolaStaf', 'Tambah staf baru: ' + data.nama);
       invalidateSheetCache(CONFIG.SHEETS.MASTER_STAF);
       clearCache('CACHE_STAFF_LIST');
-      return jsonResponse(true, { id: newStaf.id }, 'Staf baru berhasil ditambahkan.');
+      return jsonResponse(true, { id: newStaf.id, tanda_tangan_url: ttdUrl }, 'Staf baru berhasil ditambahkan.');
     }
     
+  } catch (e) {
+    return jsonResponse(false, null, 'Error: ' + e.message);
+  }
+}
+
+/**
+ * Helper internal untuk proses file upload tanda tangan staf
+ */
+function processTandaTanganUpload(stafId, base64Data, fileName, mimeType) {
+  if (!base64Data) return null;
+  var cleanBase64 = base64Data;
+  if (cleanBase64.indexOf('base64,') !== -1) {
+    cleanBase64 = cleanBase64.split('base64,')[1];
+  }
+  mimeType = mimeType || 'image/png';
+  var ext = mimeType.indexOf('jpeg') !== -1 || mimeType.indexOf('jpg') !== -1 ? '.jpg' : '.png';
+  var finalName = 'ttd_' + stafId + '_' + new Date().getTime() + ext;
+
+  var uploadResult = uploadFile(cleanBase64, finalName, mimeType, CONFIG.DRIVE_FOLDERS.TANDA_TANGAN);
+  if (!uploadResult || !uploadResult.id) return null;
+
+  // Hasilkan data URI jika file kecil, atau thumbnail URL Drive
+  var directUrl = 'https://drive.google.com/thumbnail?id=' + uploadResult.id + '&sz=w600';
+  // Jika base64 tersedia dan tidak terlalu besar (< 70KB), data URI lebih cepat di-render di preview dan print
+  var dataUri = 'data:' + mimeType + ';base64,' + cleanBase64;
+  var storedUrl = (dataUri.length < 80000) ? dataUri : directUrl;
+
+  return {
+    id: uploadResult.id,
+    url: storedUrl,
+    driveUrl: directUrl
+  };
+}
+
+/**
+ * Upload tanda tangan khusus untuk staf tertentu (bisa dipanggil mandiri dari menu Pengaturan / Kelola Staf)
+ * @param {string} stafId
+ * @param {string} base64Data
+ * @param {string} fileName
+ * @param {string} mimeType
+ */
+function uploadTandaTanganStaf(stafId, base64Data, fileName, mimeType) {
+  try {
+    if (!stafId) return jsonResponse(false, null, 'ID staf wajib disertakan.');
+    if (!base64Data) return jsonResponse(false, null, 'Berkas tanda tangan kosong.');
+
+    var staf = findOneByColumn(CONFIG.SHEETS.MASTER_STAF, 'id', stafId);
+    if (!staf) return jsonResponse(false, null, 'Data staf tidak ditemukan di database.');
+
+    var uploadResult = processTandaTanganUpload(stafId, base64Data, fileName, mimeType);
+    if (!uploadResult) {
+      return jsonResponse(false, null, 'Gagal mengunggah berkas tanda tangan ke Google Drive.');
+    }
+
+    // Update data di sheet master_staf
+    updateData(CONFIG.SHEETS.MASTER_STAF, staf._rowIndex, {
+      tanda_tangan_id: uploadResult.id,
+      tanda_tangan_url: uploadResult.url
+    });
+
+    invalidateSheetCache(CONFIG.SHEETS.MASTER_STAF);
+    clearCache('CACHE_STAFF_LIST');
+    logActivity('UPLOAD_TTD', 'KelolaStaf', 'Upload tanda tangan staf: ' + staf.nama);
+
+    return jsonResponse(true, {
+      stafId: stafId,
+      tanda_tangan_id: uploadResult.id,
+      tanda_tangan_url: uploadResult.url
+    }, 'Tanda tangan untuk ' + staf.nama + ' berhasil diperbarui.');
+
+  } catch (e) {
+    Logger.log('Error uploadTandaTanganStaf: ' + e.message);
+    return jsonResponse(false, null, 'Gagal upload tanda tangan: ' + e.message);
+  }
+}
+
+/**
+ * Hapus tanda tangan staf
+ * @param {string} stafId
+ */
+function deleteTandaTanganStaf(stafId) {
+  try {
+    if (!stafId) return jsonResponse(false, null, 'ID staf wajib disertakan.');
+    var staf = findOneByColumn(CONFIG.SHEETS.MASTER_STAF, 'id', stafId);
+    if (!staf) return jsonResponse(false, null, 'Staf tidak ditemukan.');
+
+    // Hapus file fisik di Drive jika ada
+    if (staf.tanda_tangan_id) {
+      try {
+        var file = DriveApp.getFileById(staf.tanda_tangan_id);
+        if (file) file.setTrashed(true);
+      } catch (eTrash) {
+        Logger.log('Notice: Gagal menghapus file TTD di Drive: ' + eTrash.message);
+      }
+    }
+
+    updateData(CONFIG.SHEETS.MASTER_STAF, staf._rowIndex, {
+      tanda_tangan_id: '',
+      tanda_tangan_url: ''
+    });
+
+    invalidateSheetCache(CONFIG.SHEETS.MASTER_STAF);
+    clearCache('CACHE_STAFF_LIST');
+    logActivity('DELETE_TTD', 'KelolaStaf', 'Hapus tanda tangan staf: ' + staf.nama);
+
+    return jsonResponse(true, { stafId: stafId }, 'Tanda tangan staf berhasil dihapus.');
   } catch (e) {
     return jsonResponse(false, null, 'Error: ' + e.message);
   }
@@ -273,6 +416,9 @@ function getAllStaf() {
         if (!s.status) s.status = 'Aktif';
         if ((!s.email || s.email === '-') && dummyMap[s.id] && dummyMap[s.id].email) {
           s.email = dummyMap[s.id].email;
+        }
+        if (!s.tanda_tangan_url && dummyMap[s.id] && dummyMap[s.id].tanda_tangan_url) {
+          s.tanda_tangan_url = dummyMap[s.id].tanda_tangan_url;
         }
       });
     }
