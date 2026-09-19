@@ -79,7 +79,7 @@ function generateLaporanData(params) {
           asal_arsip: a.asal_arsip,
           jumlah_lembar: a.jumlah_lembar,
           jumlah_berkas: a.jumlah_berkas,
-          kurun_waktu: a.kurun_waktu_mulai || '-',
+          kurun_waktu: a.kurun_waktu || a.kurun_waktu_mulai || '-',
           unit_pengelola: a.unit_pengelola,
           lokasi_simpan: a.lokasi_simpan,
           status_keterbukaan: a.status_keterbukaan,
@@ -112,7 +112,7 @@ function generateLaporanData(params) {
           kode_unik: a.kode_unik,
           deskripsi: a.deskripsi,
           jenis_arsip: a.jenis_arsip,
-          kurun_waktu: a.kurun_waktu_mulai || '-',
+          kurun_waktu: a.kurun_waktu || a.kurun_waktu_mulai || '-',
           status_keterbukaan: a.status_keterbukaan
         };
       });

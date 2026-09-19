@@ -86,11 +86,9 @@ function appendData(sheetName, rowData) {
   if (lastCol < 1) {
     var defaultHeadersMap = {
       'berita_acara': ['id', 'nomor_ba', 'bulan', 'tahun', 'tipe', 'staf_id', 'staf_nama', 'jumlah_arsip', 'waktu_pelaksanaan', 'tempat_pelaksanaan', 'jenis_media', 'file_id', 'file_url', 'status', 'tanggal_dibuat'],
-      'master_arsip': ['id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal', 'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan', 'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas', 'rangkap_ke', 'kondisi_fisik', 'kurun_waktu', 'kurun_waktu_mulai', 'kurun_waktu_akhir', 'unit_pengelola', 'lokasi_simpan', 'keterangan', 'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url', 'waktu_unggah', 'qa_checklist', 'watermark_applied', 'staf_id', 'staf_nama', 'tanggal_input', 'tanggal_update', 'status'],
+      'master_arsip': ['id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal', 'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan', 'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas', 'rangkap_ke', 'kondisi_fisik', 'kurun_waktu', 'unit_pengelola', 'lokasi_simpan', 'keterangan', 'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url', 'waktu_unggah', 'qa_checklist', 'watermark_applied', 'staf_id', 'staf_nama', 'tanggal_input', 'tanggal_update', 'status'],
       'master_staf': ['id', 'nama', 'nip', 'jabatan', 'email', 'status', 'tanda_tangan_id', 'tanda_tangan_url', 'tanggal_dibuat'],
       'log_aktivitas': ['id', 'timestamp', 'staf_id', 'staf_nama', 'aksi', 'modul', 'detail', 'ip_address'],
-      'log_akses': ['id', 'timestamp', 'staf_id', 'staf_nama', 'arsip_id', 'arsip_kode', 'jenis_akses'],
-      'target_realisasi': ['id', 'tahun', 'bulan', 'target', 'realisasi', 'keterangan'],
       'pengaturan': ['key', 'value', 'deskripsi', 'tanggal_update'],
       'kode_asal_arsip': ['kode', 'nama', 'deskripsi', 'status']
     };
@@ -331,7 +329,7 @@ function syncAllDatabaseHeaders() {
       'id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal',
       'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan',
       'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas',
-      'rangkap_ke', 'kondisi_fisik', 'kurun_waktu', 'kurun_waktu_mulai', 'kurun_waktu_akhir',
+      'rangkap_ke', 'kondisi_fisik', 'kurun_waktu',
       'unit_pengelola', 'lokasi_simpan', 'keterangan',
       'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url',
       'waktu_unggah', 'qa_checklist', 'watermark_applied',
@@ -350,23 +348,12 @@ function syncAllDatabaseHeaders() {
       'modul', 'detail', 'ip_address'
     ]);
 
-    // 5. Log Akses
-    setupSheetHeaders(CONFIG.SHEETS.LOG_AKSES, [
-      'id', 'timestamp', 'staf_id', 'staf_nama',
-      'arsip_id', 'arsip_kode', 'jenis_akses'
-    ]);
-
-    // 6. Target Realisasi
-    setupSheetHeaders(CONFIG.SHEETS.TARGET_REALISASI, [
-      'id', 'tahun', 'bulan', 'target', 'realisasi', 'keterangan'
-    ]);
-
-    // 7. Pengaturan
+    // 5. Pengaturan
     setupSheetHeaders(CONFIG.SHEETS.PENGATURAN, [
       'key', 'value', 'deskripsi', 'tanggal_update'
     ]);
 
-    // 8. Kode Asal Arsip
+    // 6. Kode Asal Arsip
     setupSheetHeaders(CONFIG.SHEETS.KODE_ASAL, [
       'kode', 'nama', 'deskripsi', 'status'
     ]);
@@ -384,7 +371,7 @@ function initializeAllSheets() {
     'id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal',
     'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan',
     'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas',
-    'rangkap_ke', 'kondisi_fisik', 'kurun_waktu_mulai', 'kurun_waktu_akhir',
+    'rangkap_ke', 'kondisi_fisik', 'kurun_waktu',
     'unit_pengelola', 'lokasi_simpan', 'keterangan',
     'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url',
     'waktu_unggah', 'qa_checklist', 'watermark_applied',
@@ -403,22 +390,11 @@ function initializeAllSheets() {
     'modul', 'detail', 'ip_address'
   ]);
 
-  // Log Akses
-  setupSheetHeaders(CONFIG.SHEETS.LOG_AKSES, [
-    'id', 'timestamp', 'staf_id', 'staf_nama',
-    'arsip_id', 'arsip_kode', 'jenis_akses'
-  ]);
-
   // Berita Acara
   setupSheetHeaders(CONFIG.SHEETS.BERITA_ACARA, [
-    'id', 'bulan', 'tahun', 'tipe', 'staf_id', 'staf_nama',
+    'id', 'nomor_ba', 'bulan', 'tahun', 'tipe', 'staf_id', 'staf_nama',
     'jumlah_arsip', 'waktu_pelaksanaan', 'tempat_pelaksanaan',
     'jenis_media', 'file_id', 'file_url', 'status', 'tanggal_dibuat'
-  ]);
-
-  // Target Realisasi
-  setupSheetHeaders(CONFIG.SHEETS.TARGET_REALISASI, [
-    'id', 'tahun', 'bulan', 'target', 'realisasi', 'keterangan'
   ]);
 
   // Pengaturan
@@ -431,7 +407,186 @@ function initializeAllSheets() {
     'kode', 'nama', 'deskripsi', 'status'
   ]);
 
-  return 'Semua sheet berhasil diinisialisasi!';
+  return 'Semua sheet aktif berhasil diinisialisasi!';
+}
+
+/**
+ * Pembersihan Basis Data Terpadu:
+ * 1. Menghapus 13 sheet tak terpakai / duplikat / kosong
+ * 2. Membersihkan kolom wadah kosong pada master_arsip, pengaturan, dan kode_asal_arsip
+ * 3. Mempertahankan 100% data riil pada 6 sheet utama aktif
+ */
+function executeCleanDatabaseStructure() {
+  var ss = getSpreadsheet();
+  var results = {
+    status: 'success',
+    deletedSheets: [],
+    cleanedSheets: {},
+    remainingSheets: []
+  };
+
+  // 1. Hapus 13 sheet tak terpakai / duplikat / kosong
+  var unusedSheetNames = [
+    'Sheet1', 'DataArsip', 'data_arsip', 'arsip',
+    'BeritaAcara', 'LogAktivitas', 'LogAkses', 'log_akses',
+    'MasterSumberArsip', 'MasterStaff', 'Target', 'target_realisasi', 'Login'
+  ];
+
+  unusedSheetNames.forEach(function(sName) {
+    try {
+      var sh = ss.getSheetByName(sName);
+      if (sh) {
+        ss.deleteSheet(sh);
+        results.deletedSheets.push(sName);
+      }
+    } catch (e) {
+      results.deletedSheets.push(sName + ' (failed: ' + e.message + ')');
+    }
+  });
+
+  // 2. Bersihkan master_arsip
+  try {
+    var arsipSheet = ss.getSheetByName(CONFIG.SHEETS.MASTER_ARSIP);
+    if (arsipSheet) {
+      var cleanArsipHeaders = [
+        'id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal',
+        'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'kategori_urusan',
+        'kode_klasifikasi_asli', 'nomor_asli', 'jumlah_lembar', 'jumlah_berkas',
+        'rangkap_ke', 'kondisi_fisik', 'kurun_waktu',
+        'unit_pengelola', 'lokasi_simpan', 'keterangan',
+        'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url',
+        'waktu_unggah', 'qa_checklist', 'watermark_applied',
+        'staf_id', 'staf_nama', 'tanggal_input', 'tanggal_update', 'status'
+      ];
+
+      var lastRow = arsipSheet.getLastRow();
+      var lastCol = arsipSheet.getLastColumn();
+      var migratedRowsCount = 0;
+
+      if (lastRow >= 2 && lastCol >= 1) {
+        var oldData = arsipSheet.getRange(1, 1, lastRow, lastCol).getValues();
+        var oldHeaders = oldData[0];
+        var newRows = [];
+
+        for (var r = 1; r < oldData.length; r++) {
+          var rowObj = {};
+          for (var c = 0; c < oldHeaders.length; c++) {
+            rowObj[oldHeaders[c]] = oldData[r][c];
+          }
+          // Normalisasi kurun_waktu dari kurun_waktu_mulai jika kurun_waktu belum ada
+          if (!rowObj['kurun_waktu'] && rowObj['kurun_waktu_mulai']) {
+            rowObj['kurun_waktu'] = rowObj['kurun_waktu_mulai'];
+          }
+          var cleanRow = cleanArsipHeaders.map(function(h) {
+            return rowObj[h] !== undefined ? rowObj[h] : '';
+          });
+          newRows.push(cleanRow);
+        }
+
+        arsipSheet.clearContents();
+        arsipSheet.getRange(1, 1, 1, cleanArsipHeaders.length).setValues([cleanArsipHeaders]);
+        if (newRows.length > 0) {
+          arsipSheet.getRange(2, 1, newRows.length, cleanArsipHeaders.length).setValues(newRows);
+        }
+        migratedRowsCount = newRows.length;
+      } else {
+        arsipSheet.clearContents();
+        arsipSheet.getRange(1, 1, 1, cleanArsipHeaders.length).setValues([cleanArsipHeaders]);
+      }
+
+      // Hapus kelebihan kolom di kanan
+      if (arsipSheet.getMaxColumns() > cleanArsipHeaders.length) {
+        arsipSheet.deleteColumns(cleanArsipHeaders.length + 1, arsipSheet.getMaxColumns() - cleanArsipHeaders.length);
+      }
+
+      var hRange = arsipSheet.getRange(1, 1, 1, cleanArsipHeaders.length);
+      hRange.setFontWeight('bold');
+      hRange.setBackground('#1B2A4A');
+      hRange.setFontColor('#FFFFFF');
+      arsipSheet.setFrozenRows(1);
+
+      results.cleanedSheets['master_arsip'] = {
+        columns: cleanArsipHeaders.length,
+        rowsPreserved: migratedRowsCount
+      };
+    }
+  } catch (eArsip) {
+    results.cleanedSheets['master_arsip'] = 'Error: ' + eArsip.message;
+  }
+
+  // 3. Bersihkan pengaturan (hapus kolom E 'kunci' & F 'nilai')
+  try {
+    var setSheet = ss.getSheetByName(CONFIG.SHEETS.PENGATURAN);
+    if (setSheet) {
+      var cleanSetHeaders = ['key', 'value', 'deskripsi', 'tanggal_update'];
+      setSheet.getRange(1, 1, 1, cleanSetHeaders.length).setValues([cleanSetHeaders]);
+      if (setSheet.getMaxColumns() > cleanSetHeaders.length) {
+        setSheet.deleteColumns(cleanSetHeaders.length + 1, setSheet.getMaxColumns() - cleanSetHeaders.length);
+      }
+      var hRangeSet = setSheet.getRange(1, 1, 1, cleanSetHeaders.length);
+      hRangeSet.setFontWeight('bold');
+      hRangeSet.setBackground('#1B2A4A');
+      hRangeSet.setFontColor('#FFFFFF');
+      setSheet.setFrozenRows(1);
+      results.cleanedSheets['pengaturan'] = { columns: cleanSetHeaders.length };
+    }
+  } catch (eSet) {
+    results.cleanedSheets['pengaturan'] = 'Error: ' + eSet.message;
+  }
+
+  // 4. Bersihkan kode_asal_arsip (hapus kolom E-H kosong dan standarkan header A-D)
+  try {
+    var kodeSheet = ss.getSheetByName(CONFIG.SHEETS.KODE_ASAL);
+    if (kodeSheet) {
+      var cleanKodeHeaders = ['kode', 'nama', 'deskripsi', 'status'];
+      kodeSheet.getRange(1, 1, 1, cleanKodeHeaders.length).setValues([cleanKodeHeaders]);
+      if (kodeSheet.getMaxColumns() > cleanKodeHeaders.length) {
+        kodeSheet.deleteColumns(cleanKodeHeaders.length + 1, kodeSheet.getMaxColumns() - cleanKodeHeaders.length);
+      }
+      var hRangeKode = kodeSheet.getRange(1, 1, 1, cleanKodeHeaders.length);
+      hRangeKode.setFontWeight('bold');
+      hRangeKode.setBackground('#1B2A4A');
+      hRangeKode.setFontColor('#FFFFFF');
+      kodeSheet.setFrozenRows(1);
+      results.cleanedSheets['kode_asal_arsip'] = { columns: cleanKodeHeaders.length };
+    }
+  } catch (eKode) {
+    results.cleanedSheets['kode_asal_arsip'] = 'Error: ' + eKode.message;
+  }
+
+  // 5. Rapikan header untuk master_staf, berita_acara, log_aktivitas
+  var standardSheets = [
+    { name: CONFIG.SHEETS.MASTER_STAF, cols: 9 },
+    { name: CONFIG.SHEETS.BERITA_ACARA, cols: 15 },
+    { name: CONFIG.SHEETS.LOG_AKTIVITAS, cols: 8 }
+  ];
+  standardSheets.forEach(function(item) {
+    try {
+      var curSh = ss.getSheetByName(item.name);
+      if (curSh) {
+        if (curSh.getMaxColumns() > item.cols) {
+          curSh.deleteColumns(item.cols + 1, curSh.getMaxColumns() - item.cols);
+        }
+        var hr = curSh.getRange(1, 1, 1, item.cols);
+        hr.setFontWeight('bold');
+        hr.setBackground('#1B2A4A');
+        hr.setFontColor('#FFFFFF');
+        curSh.setFrozenRows(1);
+        results.cleanedSheets[item.name] = { columns: item.cols };
+      }
+    } catch (eStd) {}
+  });
+
+  // 6. Invalidate seluruh cache
+  invalidateSheetCache();
+  clearCache('CACHE_DASHBOARD_STATS');
+  clearCache('CACHE_KODE_ASAL');
+  clearCache('CACHE_PENGATURAN');
+
+  // 7. Ambil daftar sheet yang tersisa
+  results.remainingSheets = ss.getSheets().map(function(s) { return s.getName(); });
+
+  return results;
 }
 
 /**

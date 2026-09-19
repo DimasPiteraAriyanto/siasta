@@ -865,7 +865,7 @@ function seedFullDummyData(force) {
     var arsipHeaders = [
       'id', 'kode_unik', 'status_keterbukaan', 'asal_arsip', 'kode_asal',
       'nomor_box', 'nomor_urut', 'deskripsi', 'jenis_arsip', 'jumlah_lembar',
-      'jumlah_berkas', 'kurun_waktu_mulai', 'kurun_waktu_akhir',
+      'jumlah_berkas', 'kurun_waktu',
       'unit_pengelola', 'lokasi_simpan', 'keterangan',
       'file_pelestarian_id', 'file_akses_id', 'file_pelestarian_url', 'file_akses_url',
       'qa_checklist', 'watermark_applied',
@@ -890,8 +890,7 @@ function seedFullDummyData(force) {
         jenis_arsip: item.jenis_arsip,
         jumlah_lembar: item.jumlah_lembar,
         jumlah_berkas: item.jumlah_berkas,
-        kurun_waktu_mulai: item.kurun_waktu_mulai,
-        kurun_waktu_akhir: item.kurun_waktu_akhir,
+        kurun_waktu: item.kurun_waktu_mulai || item.kurun_waktu || '',
         unit_pengelola: item.unit_pengelola,
         lokasi_simpan: item.lokasi_simpan,
         keterangan: item.keterangan,

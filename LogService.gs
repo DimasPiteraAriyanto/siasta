@@ -42,17 +42,8 @@ function logActivity(aksi, modul, detail, stafObj) {
 function logAksesArsip(arsipId, arsipKode, jenisAkses) {
   try {
     var user = getCurrentUser();
-    var logData = {
-      id: generateId('ACS'),
-      timestamp: new Date(),
-      staf_id: user ? user.id : 'ANONYMOUS',
-      staf_nama: user ? user.nama : 'Anonymous',
-      arsip_id: arsipId,
-      arsip_kode: arsipKode,
-      jenis_akses: jenisAkses
-    };
-    
-    appendData(CONFIG.SHEETS.LOG_AKSES, logData);
+    var detailText = 'Mengakses arsip ' + (arsipKode || arsipId) + ' (' + (jenisAkses || 'VIEW') + ')';
+    logActivity('AKSES_ARSIP', 'Arsip', detailText, user);
   } catch (e) {
     Logger.log('Log akses error: ' + e.message);
   }

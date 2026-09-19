@@ -24,6 +24,13 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
+  // Support direct database cleaning trigger via URL parameter ?action=clean_database
+  if (e && e.parameter && e.parameter.action === 'clean_database') {
+    var cleanRes = executeCleanDatabaseStructure();
+    return ContentService.createTextOutput(JSON.stringify(cleanRes, null, 2))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Support direct wipe dummy data across all spreadsheets
   if (e && e.parameter && (e.parameter.action === 'wipe_all_dummy' || e.parameter.action === 'wipe')) {
     var report = [];
@@ -66,7 +73,7 @@ function doGet(e) {
         ];
 
         // Exclude reference & user sheets from wiping
-        var protectSheets = ['MasterStaff', 'master_staf', 'MasterSumberArsip', 'kode_asal_arsip', 'pengaturan', 'Login', 'Target', 'target_realisasi'];
+        var protectSheets = ['master_staf', 'kode_asal_arsip', 'pengaturan'];
 
         sheets.forEach(function(sh) {
           var name = sh.getName();

@@ -299,6 +299,9 @@ function getArsipDetail(arsipId) {
       Logger.log('logAksesArsip error: ' + logErr.message);
     }
     
+    arsip.kurun_waktu = arsip.kurun_waktu || arsip.kurun_waktu_mulai || '';
+    arsip.kurun_waktu_mulai = arsip.kurun_waktu;
+
     return jsonResponse(true, arsip);
     
   } catch (e) {
@@ -321,7 +324,7 @@ function updateArsip(arsipId, data) {
     // Update fields (gunakan nama updateObj agar tidak menimpa fungsi database updateData)
     var updateObj = {};
     var fields = ['deskripsi', 'jenis_arsip', 'jumlah_lembar', 'jumlah_berkas',
-                  'kurun_waktu_mulai', 'kurun_waktu_akhir', 'unit_pengelola',
+                  'kurun_waktu', 'unit_pengelola',
                   'lokasi_simpan', 'keterangan', 'status_keterbukaan'];
     
     fields.forEach(function(field) {
@@ -329,6 +332,10 @@ function updateArsip(arsipId, data) {
         updateObj[field] = data[field];
       }
     });
+
+    if (data.kurun_waktu || data.kurun_waktu_mulai) {
+      updateObj.kurun_waktu = data.kurun_waktu || data.kurun_waktu_mulai;
+    }
     
     updateObj.tanggal_update = new Date();
     

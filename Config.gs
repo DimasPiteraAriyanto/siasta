@@ -17,14 +17,12 @@ const CONFIG = {
   // Ganti dengan ID spreadsheet Anda setelah dibuat
   SPREADSHEET_ID: '1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0',
   
-  // Nama-nama sheet
+  // Nama-nama sheet utama aktif SIASTA
   SHEETS: {
     MASTER_ARSIP: 'master_arsip',
     MASTER_STAF: 'master_staf',
     LOG_AKTIVITAS: 'log_aktivitas',
-    LOG_AKSES: 'log_akses',
     BERITA_ACARA: 'berita_acara',
-    TARGET_REALISASI: 'target_realisasi',
     PENGATURAN: 'pengaturan',
     KODE_ASAL: 'kode_asal_arsip'
   },

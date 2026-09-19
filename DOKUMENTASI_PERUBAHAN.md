@@ -456,3 +456,36 @@
    - Nama: **MUHAMMAD DZAKY NATHANEGARA, A.Md**
    - Jabatan: Pengelola Kearsipan / Pelaksana Alih Media
    - NIP: `19980508 202506 1 004`
+
+---
+
+## 🧹 Pembersihan Basis Data Google Spreadsheet (v1.0.0 - Rev 67 / 19 September 2026)
+
+### Latar Belakang & Masalah
+Sesuai arahan pengguna untuk menghilangkan sheet dan field/kolom yang tidak terpakai ("wadah kosong") yang membingungkan, dilakukan audit basis data menyeluruh terhadap Google Spreadsheet SIASTA (`1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`). Ditemukan 13 sheet peninggalan versi uji coba lama yang kosong/duplikat serta beberapa kolom kosong pada sheet utama.
+
+### Rincian Tindakan Pembersihan
+1. **Pemberhentian & Penghapusan 13 Sheet Tidak Terpakai**:
+   - `Sheet1` (sheet default kosong bawaan Google Sheets)
+   - `DataArsip`, `data_arsip`, `arsip` (wadah lama bekas inisialisasi awal)
+   - `BeritaAcara`, `LogAktivitas`, `LogAkses` (duplikat huruf besar yang tidak dipakai)
+   - `log_akses` (wadah kosong; audit trail aktif sepenuhnya menggunakan `log_aktivitas`)
+   - `MasterSumberArsip` (duplikat lama dari `kode_asal_arsip`)
+   - `MasterStaff` (duplikat lama dari `master_staf`)
+   - `Target`, `target_realisasi` (wadah kosong; modul target & realisasi dikalkulasi secara dinamis dari `master_arsip`)
+   - `Login` (wadah statis lama; autentikasi aktif menggunakan kredensial `master_staf` & `CONFIG.AUTH`)
+
+2. **Pembersihan Kolom Wadah Kosong pada Sheet Aktif**:
+   - **`master_arsip`**: Dihapus kolom kosong `kurun_waktu_akhir` dan kolom duplikat `kurun_waktu` (AH). Nilai tahun dinormalisasi ke satu kolom bersih `kurun_waktu`. Total kolom tepat 32 kolom terstruktur rapi.
+   - **`pengaturan`**: Dihapus kolom kosong E (`kunci`) dan F (`nilai`). Total kolom tepat 4 kolom (`key`, `value`, `deskripsi`, `tanggal_update`).
+   - **`kode_asal_arsip`**: Dihapus kolom kosong E-H (`kode`, `nama`, `deskripsi`, `status` duplikat). Standardisasi header menjadi 4 kolom bersih (`kode`, `nama`, `deskripsi`, `status`).
+   - **`master_staf`**, **`berita_acara`**, **`log_aktivitas`**: Merapikan pembatasan kolom dan pemformatan header (background navy `#1B2A4A`, teks putih tebal, baris pertama dibekukan/frozen).
+
+3. **Hasil Akhir Basis Data (Hanya Tersisa 6 Sheet Utama Aktif)**:
+   - `master_arsip` (32 kolom) - Seluruh data arsip riil aman 100%.
+   - `master_staf` (9 kolom) - Profil 6 staf & tanda tangan digital aman 100%.
+   - `berita_acara` (15 kolom) - Riwayat dokumen BA resmi aman 100%.
+   - `log_aktivitas` (8 kolom) - Catatan audit aktivitas aman 100%.
+   - `pengaturan` (4 kolom) - Konfigurasi pejabat, watermark, dan target aman 100%.
+   - `kode_asal_arsip` (4 kolom) - 10 daftar referensi unit/kecamatan asal arsip aman 100%.
+

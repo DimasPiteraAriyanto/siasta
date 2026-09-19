@@ -49,7 +49,7 @@
               <? if (initialDetail.kondisi_fisik) { ?>
                 <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kondisi Fisik</td><td style="padding:8px 0;"><?= initialDetail.kondisi_fisik ?></td></tr>
               <? } ?>
-              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;"><?= initialDetail.kurun_waktu_mulai || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;"><?= initialDetail.kurun_waktu || initialDetail.kurun_waktu_mulai || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Unit Pengelola</td><td style="padding:8px 0;"><?= initialDetail.unit_pengelola || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Lokasi Simpan</td><td style="padding:8px 0;"><?= initialDetail.lokasi_simpan || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Keterangan</td><td style="padding:8px 0;"><?= initialDetail.keterangan || '-' ?></td></tr>
@@ -355,7 +355,7 @@ function renderArsipDetail(arsip) {
           '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Jumlah Berkas</td><td style="padding:8px 0;">' + (arsip.jumlah_berkas || 1) + ' berkas</td></tr>' +
           (arsip.rangkap_ke ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Rangkap Ke</td><td style="padding:8px 0;">' + arsip.rangkap_ke + '</td></tr>' : '') +
           (arsip.kondisi_fisik ? '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kondisi Fisik</td><td style="padding:8px 0;">' + arsip.kondisi_fisik + '</td></tr>' : '') +
-          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;">' + (arsip.kurun_waktu_mulai || '-') + '</td></tr>' +
+          '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;">' + (arsip.kurun_waktu || arsip.kurun_waktu_mulai || '-') + '</td></tr>' +
           '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Unit Pengelola</td><td style="padding:8px 0;">' + (arsip.unit_pengelola || '-') + '</td></tr>' +
           '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Lokasi Simpan</td><td style="padding:8px 0;">' + (arsip.lokasi_simpan || '-') + '</td></tr>' +
           '<tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Keterangan</td><td style="padding:8px 0;">' + (arsip.keterangan || '-') + '</td></tr>' +
@@ -436,7 +436,7 @@ function openEditArsipModal() {
   document.getElementById('edit-jenis-arsip').value = d.jenis_arsip || 'Tekstual';
   document.getElementById('edit-jumlah-lembar').value = d.jumlah_lembar || '';
   document.getElementById('edit-jumlah-berkas').value = d.jumlah_berkas || '';
-  document.getElementById('edit-kurun-mulai').value = d.kurun_waktu_mulai || '';
+  document.getElementById('edit-kurun-mulai').value = d.kurun_waktu || d.kurun_waktu_mulai || '';
   document.getElementById('edit-unit-pengelola').value = d.unit_pengelola || '';
   document.getElementById('edit-lokasi-simpan').value = d.lokasi_simpan || '';
   document.getElementById('edit-keterangan').value = d.keterangan || '';
@@ -459,8 +459,8 @@ function submitEditArsip() {
     jenis_arsip: document.getElementById('edit-jenis-arsip').value,
     jumlah_lembar: parseInt(document.getElementById('edit-jumlah-lembar').value) || 0,
     jumlah_berkas: parseInt(document.getElementById('edit-jumlah-berkas').value) || 0,
+    kurun_waktu: document.getElementById('edit-kurun-mulai').value.trim(),
     kurun_waktu_mulai: document.getElementById('edit-kurun-mulai').value.trim(),
-    kurun_waktu_akhir: '',
     unit_pengelola: document.getElementById('edit-unit-pengelola').value.trim(),
     lokasi_simpan: document.getElementById('edit-lokasi-simpan').value.trim(),
     keterangan: document.getElementById('edit-keterangan').value.trim()
