@@ -233,10 +233,10 @@
           </button>
         </div>
 
-        <div id="rekap-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:280mm; min-height:210mm; padding:20mm 18mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:11pt; line-height:1.4;">
+        <div id="rekap-print-sheet" style="position:relative; overflow:visible; background:#fff; margin:10px auto; max-width:285mm; padding:8mm 8mm; box-shadow:0 2px 10px rgba(0,0,0,0.08); font-family:'Times New Roman', Times, serif; color:#000; font-size:10pt; line-height:1.25;">
           <!-- Cap Visual Watermark Resmi Pemkab Manggarai Barat (A4 Landscape) -->
           <div id="doc-rekap-watermark" class="watermark-pdf-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-25deg); pointer-events:none; user-select:none; z-index:0; text-align:center; width:140%; white-space:nowrap;">
-            <div id="doc-rekap-watermark-content" style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:24pt; font-weight:800; color:rgba(100, 116, 139, 0.16); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
+            <div id="doc-rekap-watermark-content" style="font-family:'Plus Jakarta Sans', Arial, Helvetica, sans-serif; font-size:22pt; font-weight:800; color:rgba(100, 116, 139, 0.12); letter-spacing:3px; line-height:1.35; text-transform:uppercase;">
               ARSIP HASIL ALIH MEDIA<br>
               DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH<br>
               KABUPATEN MANGGARAI BARAT
@@ -245,82 +245,84 @@
 
           <div style="position:relative; z-index:1;">
           <!-- Kop Surat Resmi -->
-          <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
-            <div style="position:absolute; left:10px; top:0; width:65px; height:75px; display:flex; align-items:center; justify-content:center;"><img id="rekap-doc-logo-img" src="" alt="Logo Pemkab Manggarai Barat" style="width:60px; height:auto; max-height:75px; object-fit:contain;"></div>
-            <div style="margin-left:70px;">
-              <div style="font-size:13pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
-              <div style="font-size:15pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
-              <div style="font-size:9.5pt; font-style:italic; margin-top:4px;" id="rekap-doc-alamat-kop">
+          <div style="text-align:center; position:relative; padding-bottom:6px; margin-bottom:10px;">
+            <div style="position:absolute; left:6px; top:0; width:55px; height:65px; display:flex; align-items:center; justify-content:center;">
+              <img id="rekap-doc-logo-img" src="" alt="Logo Pemkab Manggarai Barat" style="width:48px; height:auto; max-height:58px; object-fit:contain;">
+            </div>
+            <div style="margin-left:55px; margin-right:55px;">
+              <div style="font-size:11.5pt; font-weight:bold; letter-spacing:0.5px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
+              <div style="font-size:13.5pt; font-weight:bold; letter-spacing:0.5px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
+              <div style="font-size:8pt; font-style:italic; margin-top:2px;" id="rekap-doc-alamat-kop">
                 Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT
               </div>
             </div>
-            <div style="border-bottom:3px solid #000; margin-top:12px;"></div>
-            <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
+            <div style="border-bottom:2px solid #000; margin-top:6px;"></div>
+            <div style="border-bottom:1px solid #000; margin-top:1.5px;"></div>
           </div>
 
           <!-- Judul Dokumen -->
-          <div style="text-align:center; margin-bottom:16px;">
-            <div style="font-size:12pt; font-weight:bold; text-decoration:underline;">DAFTAR ARSIP HASIL ALIH MEDIA ARSIP STATIS</div>
-            <div style="font-size:10.5pt; margin-top:3px;">Periode: Tahun <span id="rekap-doc-periode">2026</span></div>
+          <div style="text-align:center; margin-bottom:10px;">
+            <div style="font-size:11pt; font-weight:bold; text-decoration:underline; letter-spacing:0.5px;">DAFTAR ARSIP HASIL ALIH MEDIA ARSIP STATIS</div>
+            <div style="font-size:9.5pt; margin-top:2px;">Periode: <span id="rekap-doc-periode">Tahun 2026</span></div>
           </div>
 
-          <!-- Tabel Rekapitulasi Format Master Arsip Lengkap (20 Kolom) -->
-          <div style="width:100%; overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; font-size:6.5pt; margin-bottom:20px; table-layout:auto;">
+          <!-- Tabel Rekapitulasi Format Master Arsip Lengkap (20 Kolom Anti-Cutoff) -->
+          <div style="width:100%; overflow:visible;">
+            <table style="width:100%; border-collapse:collapse; font-size:5.2pt; margin-bottom:12px; table-layout:fixed;">
               <thead>
-                <tr style="background:#f2f2f2; text-align:center; font-weight:bold;">
-                  <th style="width:20px; border:1px solid #000; padding:3px 2px;">No</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Kode Unik</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Status Keterbukaan</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Asal Arsip</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Kode Asal</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Nomor Box</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Nomor Urut</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Deskripsi</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Jenis Arsip</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Kategori Urusan</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Kode Klasifikasi</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Nomor Asli</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Jumlah Lembar</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Jumlah Berkas</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Rangkap Ke</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Kondisi Fisik</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Kurun Waktu (Tahun Pembuatan)</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Unit Pengelola</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Lokasi Simpan</th>
-                  <th style="border:1px solid #000; padding:3px 2px;">Keterangan</th>
+                <tr style="background:#f1f5f9; text-align:center; font-weight:bold; font-size:5.2pt; vertical-align:middle;">
+                  <th style="width:2.2%; border:1px solid #000; padding:2px 1px;">No</th>
+                  <th style="width:5.5%; border:1px solid #000; padding:2px 1px;">Kode<br>Unik</th>
+                  <th style="width:4.8%; border:1px solid #000; padding:2px 1px;">Status<br>Akses</th>
+                  <th style="width:7%; border:1px solid #000; padding:2px 1px;">Asal<br>Arsip</th>
+                  <th style="width:2.5%; border:1px solid #000; padding:2px 1px;">Kode<br>Asal</th>
+                  <th style="width:2.5%; border:1px solid #000; padding:2px 1px;">No.<br>Box</th>
+                  <th style="width:2.2%; border:1px solid #000; padding:2px 1px;">No.<br>Urut</th>
+                  <th style="width:16.5%; border:1px solid #000; padding:2px 2px;">Deskripsi / Uraian Informasi</th>
+                  <th style="width:3.8%; border:1px solid #000; padding:2px 1px;">Jenis<br>Arsip</th>
+                  <th style="width:5.5%; border:1px solid #000; padding:2px 1px;">Kategori<br>Urusan</th>
+                  <th style="width:4.2%; border:1px solid #000; padding:2px 1px;">Kode<br>Klasifikasi</th>
+                  <th style="width:5.5%; border:1px solid #000; padding:2px 1px;">Nomor<br>Asli</th>
+                  <th style="width:2.5%; border:1px solid #000; padding:2px 1px;">Jml<br>Lbr</th>
+                  <th style="width:2.5%; border:1px solid #000; padding:2px 1px;">Jml<br>Bks</th>
+                  <th style="width:2.2%; border:1px solid #000; padding:2px 1px;">Rkp</th>
+                  <th style="width:3.2%; border:1px solid #000; padding:2px 1px;">Kondisi<br>Fisik</th>
+                  <th style="width:3.7%; border:1px solid #000; padding:2px 1px;">Kurun Waktu<br>(Tahun)</th>
+                  <th style="width:7.5%; border:1px solid #000; padding:2px 1px;">Unit<br>Pengelola</th>
+                  <th style="width:8%; border:1px solid #000; padding:2px 1px;">Lokasi<br>Simpan</th>
+                  <th style="width:8.8%; border:1px solid #000; padding:2px 1px;">Keterangan</th>
                 </tr>
               </thead>
               <tbody id="rekap-doc-tbody">
                 <!-- Rendered via JS -->
               </tbody>
               <tfoot>
-                <tr style="font-weight:bold; background:#fafafa;">
-                  <td colspan="12" style="text-align:right; border:1px solid #000; padding:4px 6px;">Total Arsip Teralih Media:</td>
-                  <td style="text-align:center; border:1px solid #000; padding:4px 2px;" id="rekap-doc-total-lbr">0</td>
-                  <td style="text-align:center; border:1px solid #000; padding:4px 2px;" id="rekap-doc-total-berkas">0</td>
-                  <td colspan="6" style="border:1px solid #000; text-align:center; padding:4px 2px;">Sesuai Standar ANRI</td>
+                <tr style="font-weight:bold; background:#fafafa; font-size:5.2pt;">
+                  <td colspan="12" style="text-align:right; border:1px solid #000; padding:3px 4px;">Total Arsip Teralih Media:</td>
+                  <td style="text-align:center; border:1px solid #000; padding:3px 1px; white-space:nowrap;" id="rekap-doc-total-lbr">0</td>
+                  <td style="text-align:center; border:1px solid #000; padding:3px 1px; white-space:nowrap;" id="rekap-doc-total-berkas">0</td>
+                  <td colspan="6" style="border:1px solid #000; text-align:center; padding:3px 1px; white-space:nowrap;">Sesuai Standar ANRI</td>
                 </tr>
               </tfoot>
             </table>
           </div>
 
           <!-- Blok Tanda Tangan: Mengetahui Kepala Bidang & Pelaksana -->
-          <div id="rekap-ttd-container" style="display:flex; justify-content:space-between; margin-top:24px; font-size:11pt; page-break-inside:avoid;">
-            <div id="rekap-block-kabid" style="width:48%; text-align:center;">
+          <div id="rekap-ttd-container" style="display:flex; justify-content:space-between; margin-top:12px; font-size:8.5pt; page-break-inside:avoid; break-inside:avoid;">
+            <div id="rekap-block-kabid" style="width:45%; text-align:center;">
               <div>Mengetahui,</div>
-              <div style="font-weight:bold; margin-top:2px;" id="rekap-doc-kabid-jabatan">Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip</div>
-              <div style="height:70px;"></div>
+              <div style="font-weight:bold; margin-top:1px;" id="rekap-doc-kabid-jabatan">Kepala Bidang Layanan, Alih Media dan Perlindungan Arsip</div>
+              <div style="height:48px;"></div>
               <div style="font-weight:bold; text-decoration:underline;" id="rekap-doc-kabid-nama">STEFANUS RAHMAT, S.Sos</div>
               <div id="rekap-doc-kabid-pangkat">Pembina / IV a</div>
               <div>NIP. <span id="rekap-doc-kabid-nip">19850215 201001 1 018</span></div>
             </div>
 
-            <div id="rekap-block-pelaksana" style="width:48%; text-align:center;">
+            <div id="rekap-block-pelaksana" style="width:45%; text-align:center;">
               <div>Labuan Bajo, <span id="rekap-doc-tgl-surat">18 September 2026</span></div>
-              <div style="font-weight:bold; margin-top:2px;" id="rekap-doc-pelaksana-jabatan">Pelaksana Alih Media,</div>
-              <div style="height:70px; display:flex; align-items:center; justify-content:center;">
-                <img id="rekap-doc-pelaksana-ttd-img" src="" alt="TTD Pelaksana" style="max-height:65px; max-width:150px; object-fit:contain; display:none;">
+              <div style="font-weight:bold; margin-top:1px;" id="rekap-doc-pelaksana-jabatan">Pelaksana Alih Media,</div>
+              <div style="height:48px; display:flex; align-items:center; justify-content:center;">
+                <img id="rekap-doc-pelaksana-ttd-img" src="" alt="TTD Pelaksana" style="max-height:45px; max-width:130px; object-fit:contain; display:none;">
               </div>
               <div style="font-weight:bold; text-decoration:underline;" id="rekap-doc-pelaksana-nama">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
               <div>Pengelola Kearsipan</div>
@@ -729,7 +731,11 @@ function populateRekapPrintModal(d) {
   if (logoEl) logoEl.src = window._logoMabar || '';
   var pe = d.pejabat || {};
   document.getElementById('rekap-doc-alamat-kop').textContent = pe.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT';
-  document.getElementById('rekap-doc-periode').textContent = d.periodeLabel || 'Tahun 2026';
+  var pStr = String(d.periodeLabel || '2026').trim();
+  if (!pStr.toLowerCase().startsWith('tahun') && !pStr.toLowerCase().startsWith('semua') && !pStr.toLowerCase().startsWith('periode')) {
+    pStr = 'Tahun ' + pStr;
+  }
+  document.getElementById('rekap-doc-periode').textContent = pStr;
   document.getElementById('rekap-doc-tgl-surat').textContent = d.tanggalCetak || '';
   
   var cW = document.getElementById('toggle-rekap-watermark');
@@ -740,27 +746,27 @@ function populateRekapPrintModal(d) {
   var tbody = document.getElementById('rekap-doc-tbody');
   var html = '';
   d.items.forEach(function(item) {
-    html += '<tr style="vertical-align:top; font-size:6.5pt;">' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.no + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px; font-weight:600;">' + escapeHtml(item.kodeUnik) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.statusKeterbukaan) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.asalArsip) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kodeAsal) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.nomorBox) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.nomorUrut) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 2px; text-align:left;">' + escapeHtml(item.deskripsi) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.jenisArsip) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kategoriUrusan) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kodeKlasifikasi) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.nomorAsli) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.jumlahLembar + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.jumlahBerkas + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.rangkapKe + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kondisiFisik) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kurunWaktu) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.unitPengelola) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.lokasiSimpan) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.keterangan) + '</td>' +
+    html += '<tr style="vertical-align:middle; font-size:5.2pt;">' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px;">' + item.no + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; font-weight:600; white-space:nowrap;">' + escapeHtml(item.kodeUnik) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.statusKeterbukaan) + '</td>' +
+      '<td style="border:1px solid #000; padding:1.5px 2px; text-align:left; word-break:normal;">' + escapeHtml(item.asalArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.kodeAsal) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.nomorBox) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.nomorUrut) + '</td>' +
+      '<td style="border:1px solid #000; padding:1.5px 2px; text-align:left; word-break:normal; line-height:1.2;">' + escapeHtml(item.deskripsi) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.jenisArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.kategoriUrusan) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.kodeKlasifikasi) + '</td>' +
+      '<td style="border:1px solid #000; padding:1.5px 1px; text-align:center; white-space:nowrap;">' + escapeHtml(item.nomorAsli) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + item.jumlahLembar + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + item.jumlahBerkas + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + item.rangkapKe + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.kondisiFisik) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:1.5px 1px; white-space:nowrap;">' + escapeHtml(item.kurunWaktu) + '</td>' +
+      '<td style="border:1px solid #000; padding:1.5px 2px; text-align:left; word-break:normal;">' + escapeHtml(item.unitPengelola) + '</td>' +
+      '<td style="border:1px solid #000; padding:1.5px 2px; text-align:left; word-break:normal;">' + escapeHtml(item.lokasiSimpan) + '</td>' +
+      '<td style="border:1px solid #000; padding:1.5px 2px; text-align:left; word-break:normal;">' + escapeHtml(item.keterangan) + '</td>' +
     '</tr>';
   });
   tbody.innerHTML = html;
@@ -819,7 +825,7 @@ function toggleRekapSignerBlock(signer, isChecked) {
   }
 }
 
-// CETAK DOKUMEN REKAPITULASI RESMI (BUKA DI TAB BARU AGAR TIDAK TERPOTONG)
+// CETAK DOKUMEN REKAPITULASI RESMI (BUKA DI TAB BARU ANTI-TERPOTONG)
 function printRekapDoc() {
   var printContent = document.getElementById('rekap-print-sheet');
   if (!printContent) {
@@ -857,7 +863,7 @@ function printRekapDoc() {
     '  <style>\n' +
     '    @page {\n' +
     '      size: A4 landscape;\n' +
-    '      margin: 6mm 6mm 6mm 6mm;\n' +
+    '      margin: 5mm 6mm 5mm 6mm;\n' +
     '    }\n' +
     '    *, *::before, *::after {\n' +
     '      box-sizing: border-box;\n' +
@@ -877,16 +883,18 @@ function printRekapDoc() {
     '      top: 0;\n' +
     '      background: #1B2A4A;\n' +
     '      color: #ffffff;\n' +
-    '      padding: 10px 24px;\n' +
+    '      padding: 8px 20px;\n' +
     '      display: flex;\n' +
+    '      flex-wrap: wrap;\n' +
     '      justify-content: space-between;\n' +
     '      align-items: center;\n' +
+    '      gap: 12px;\n' +
     '      box-shadow: 0 2px 10px rgba(0,0,0,0.2);\n' +
     '      z-index: 99999;\n' +
     '      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n' +
     '    }\n' +
     '    .no-print-toolbar .doc-title {\n' +
-    '      font-size: 14px;\n' +
+    '      font-size: 13px;\n' +
     '      font-weight: 600;\n' +
     '      display: flex;\n' +
     '      align-items: center;\n' +
@@ -894,18 +902,19 @@ function printRekapDoc() {
     '    }\n' +
     '    .no-print-toolbar .actions {\n' +
     '      display: flex;\n' +
-    '      gap: 10px;\n' +
+    '      align-items: center;\n' +
+    '      gap: 8px;\n' +
     '    }\n' +
     '    .btn-act {\n' +
-    '      padding: 7px 16px;\n' +
-    '      font-size: 13px;\n' +
+    '      padding: 6px 14px;\n' +
+    '      font-size: 12px;\n' +
     '      font-weight: 600;\n' +
     '      border-radius: 6px;\n' +
     '      border: none;\n' +
     '      cursor: pointer;\n' +
     '      display: inline-flex;\n' +
     '      align-items: center;\n' +
-    '      gap: 6px;\n' +
+    '      gap: 5px;\n' +
     '      transition: all 0.2s;\n' +
     '    }\n' +
     '    .btn-print {\n' +
@@ -915,48 +924,55 @@ function printRekapDoc() {
     '    .btn-print:hover {\n' +
     '      background: #bfa02e;\n' +
     '    }\n' +
+    '    .btn-scale {\n' +
+    '      background: rgba(255,255,255,0.18);\n' +
+    '      color: #fff;\n' +
+    '    }\n' +
+    '    .btn-scale:hover, .btn-scale.active {\n' +
+    '      background: rgba(255,255,255,0.35);\n' +
+    '    }\n' +
     '    .btn-close {\n' +
-    '      background: rgba(255,255,255,0.15);\n' +
+    '      background: rgba(255,255,255,0.12);\n' +
     '      color: #fff;\n' +
     '    }\n' +
     '    .btn-close:hover {\n' +
     '      background: rgba(255,255,255,0.25);\n' +
     '    }\n' +
+    '    .print-paper-wrapper {\n' +
+    '      padding: 12px 10px 40px 10px;\n' +
+    '      display: flex;\n' +
+    '      justify-content: center;\n' +
+    '    }\n' +
     '    .print-paper {\n' +
     '      position: relative;\n' +
     '      width: 100%;\n' +
-    '      max-width: 288mm;\n' +
-    '      margin: 16px auto 40px auto;\n' +
+    '      max-width: 285mm;\n' +
+    '      margin: 0 auto;\n' +
     '      background: #fff;\n' +
-    '      padding: 8mm 8mm;\n' +
-    '      box-shadow: 0 4px 20px rgba(0,0,0,0.15);\n' +
-    '      min-height: 195mm;\n' +
-    '      overflow: hidden;\n' +
-    '    }\n' +
-    '    div[style*="overflow-x"] {\n' +
+    '      padding: 5mm 6mm;\n' +
+    '      box-shadow: 0 4px 20px rgba(0,0,0,0.12);\n' +
     '      overflow: visible !important;\n' +
-    '      width: 100% !important;\n' +
+    '      transform-origin: top center;\n' +
+    '      transition: transform 0.2s ease;\n' +
     '    }\n' +
     '    table {\n' +
     '      width: 100% !important;\n' +
     '      border-collapse: collapse !important;\n' +
-    '      table-layout: auto !important;\n' +
-    '      margin-bottom: 16px !important;\n' +
+    '      table-layout: fixed !important;\n' +
+    '      margin-bottom: 12px !important;\n' +
     '    }\n' +
     '    table th, table td {\n' +
     '      border: 1px solid #000000 !important;\n' +
-    '      padding: 2px 2px !important;\n' +
-    '      font-size: 5.8pt !important;\n' +
+    '      padding: 1.5px 1px !important;\n' +
+    '      font-size: 5.2pt !important;\n' +
     '      line-height: 1.15 !important;\n' +
-    '      word-break: break-word !important;\n' +
-    '      white-space: normal !important;\n' +
     '    }\n' +
     '    table th {\n' +
     '      background-color: #f1f5f9 !important;\n' +
     '      font-weight: bold !important;\n' +
     '      text-align: center !important;\n' +
-    '      font-size: 6pt !important;\n' +
-    '      padding: 3px 1.5px !important;\n' +
+    '      font-size: 5.2pt !important;\n' +
+    '      padding: 2px 1px !important;\n' +
     '      vertical-align: middle !important;\n' +
     '    }\n' +
     '    .watermark-pdf-overlay {\n' +
@@ -974,24 +990,34 @@ function printRekapDoc() {
     '    #rekap-ttd-container {\n' +
     '      display: flex !important;\n' +
     '      justify-content: space-between !important;\n' +
-    '      margin-top: 20px !important;\n' +
+    '      margin-top: 12px !important;\n' +
     '      page-break-inside: avoid !important;\n' +
     '      break-inside: avoid !important;\n' +
-    '      font-size: 9.5pt !important;\n' +
+    '      font-size: 8.5pt !important;\n' +
     '    }\n' +
     '    #rekap-block-kabid, #rekap-block-pelaksana {\n' +
-    '      width: 48% !important;\n' +
+    '      width: 45% !important;\n' +
     '      text-align: center !important;\n' +
     '      page-break-inside: avoid !important;\n' +
     '    }\n' +
     '    @media print {\n' +
+    '      @page {\n' +
+    '        size: A4 landscape;\n' +
+    '        margin: 5mm 5mm 5mm 5mm;\n' +
+    '      }\n' +
     '      html, body {\n' +
     '        background: #fff !important;\n' +
     '        margin: 0 !important;\n' +
     '        padding: 0 !important;\n' +
+    '        width: 100% !important;\n' +
     '      }\n' +
-    '      .no-print-toolbar {\n' +
+    '      .no-print-toolbar, .no-print-tip {\n' +
     '        display: none !important;\n' +
+    '      }\n' +
+    '      .print-paper-wrapper {\n' +
+    '        padding: 0 !important;\n' +
+    '        margin: 0 !important;\n' +
+    '        display: block !important;\n' +
     '      }\n' +
     '      .print-paper {\n' +
     '        margin: 0 !important;\n' +
@@ -1000,14 +1026,16 @@ function printRekapDoc() {
     '        width: 100% !important;\n' +
     '        box-shadow: none !important;\n' +
     '        min-height: auto !important;\n' +
+    '        overflow: visible !important;\n' +
+    '        transform: none !important;\n' +
     '      }\n' +
     '      table {\n' +
-    '        font-size: 5.8pt !important;\n' +
+    '        font-size: 5.2pt !important;\n' +
+    '        table-layout: fixed !important;\n' +
     '        page-break-inside: auto !important;\n' +
     '      }\n' +
     '      tr {\n' +
     '        page-break-inside: avoid !important;\n' +
-    '        page-break-after: auto !important;\n' +
     '      }\n' +
     '      thead {\n' +
     '        display: table-header-group !important;\n' +
@@ -1022,14 +1050,31 @@ function printRekapDoc() {
     '  <div class="no-print-toolbar">\n' +
     '    <div class="doc-title">📄 <strong>Daftar Rekapitulasi Alih Media Arsip (A4 Landscape)</strong></div>\n' +
     '    <div class="actions">\n' +
+    '      <span style="font-size:11px; color:#cbd5e1;">Skala Tampilan:</span>\n' +
+    '      <button type="button" class="btn-act btn-scale active" id="btn-scale-100" onclick="setPrintScale(1, this)">100% (Normal)</button>\n' +
+    '      <button type="button" class="btn-act btn-scale" id="btn-scale-95" onclick="setPrintScale(0.95, this)">95% (Pas)</button>\n' +
+    '      <button type="button" class="btn-act btn-scale" id="btn-scale-90" onclick="setPrintScale(0.90, this)">90% (Kompak)</button>\n' +
     '      <button type="button" class="btn-act btn-print" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>\n' +
     '      <button type="button" class="btn-act btn-close" onclick="window.close()">✕ Tutup Tab</button>\n' +
     '    </div>\n' +
     '  </div>\n' +
-    '  <div class="print-paper">\n' +
-    '    ' + contentHtml + '\n' +
+    '  <div class="no-print-toolbar no-print-tip" style="background:#0f172a; padding:5px 20px; font-size:11px; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.08);">\n' +
+    '    💡 <em>Tips Cetak: Pastikan di dialog cetak browser Orientasi dipilih <strong>Landscape</strong> dan Margin disetel ke <strong>Default / Minimum</strong>.</em>\n' +
+    '  </div>\n' +
+    '  <div class="print-paper-wrapper">\n' +
+    '    <div class="print-paper" id="paper-element">\n' +
+    '      ' + contentHtml + '\n' +
+    '    </div>\n' +
     '  </div>\n' +
     '  <script>\n' +
+    '    function setPrintScale(scale, btn) {\n' +
+    '      var p = document.getElementById("paper-element");\n' +
+    '      if (p) {\n' +
+    '        p.style.transform = scale === 1 ? "none" : "scale(" + scale + ")";\n' +
+    '      }\n' +
+    '      document.querySelectorAll(".btn-scale").forEach(function(b) { b.classList.remove("active"); });\n' +
+    '      if (btn) btn.classList.add("active");\n' +
+    '    }\n' +
     '    window.onload = function() {\n' +
     '      setTimeout(function() {\n' +
     '        window.print();\n' +

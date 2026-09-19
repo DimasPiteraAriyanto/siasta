@@ -489,3 +489,29 @@ Sesuai arahan pengguna untuk menghilangkan sheet dan field/kolom yang tidak terp
    - `pengaturan` (4 kolom) - Konfigurasi pejabat, watermark, dan target aman 100%.
    - `kode_asal_arsip` (4 kolom) - 10 daftar referensi unit/kecamatan asal arsip aman 100%.
 
+---
+
+## 🖨️ Perbaikan Cetak Rekapitulasi Alih Media Anti-Terpotong (v1.0.0 - Rev 68 / 19 September 2026)
+
+### Latar Belakang & Masalah
+Pada dokumen cetak rekapitulasi alih media arsip statis di menu **Daftar Arsip -> Export -> Cetak Rekap Resmi**, ditemukan masalah tampilan saat dicetak/dipratinjau:
+1. **Kata-kata terpotong menjadi dua baris**: Nilai sel seperti *Tekstual* terpotong menjadi *Tekstu* / *al*, *Pemerintahan* terpotong menjadi *Pemerinta* / *han*, *Klasifikasi* terpotong menjadi *Klasifika* / *si*, dan *Status Keterbukaan* terpotong karena tidak ada lebar kolom yang proporsional serta penggunaan `word-break: break-word`.
+2. **Duplikasi Kata Judul**: Muncul tulisan `Periode: Tahun Tahun 2026` akibat string filter tahun digabung berulang.
+3. **Margin & Pemotongan Halaman**: Padding ganda (`padding: 20mm 18mm` + `8mm`) mempersempit area tabel 20 kolom sehingga terdesak ke batas kanan kertas.
+
+### Rincian Perbaikan
+1. **Lebar Kolom Proporsional & Presisi (100% Total Table Width)**:
+   - Diterapkan `table-layout: fixed !important;` dengan persentase lebar yang presisi untuk ke-20 kolom (No: 2.2%, Kode Unik: 5.5%, Status: 4.8%, Asal: 7%, Kode Asal: 2.5%, Box: 2.5%, Urut: 2.2%, Deskripsi: 16.5%, Jenis: 3.8%, Urusan: 5.5%, Klasifikasi: 4.2%, Nomor Asli: 5.5%, Lbr: 2.5%, Bks: 2.5%, Rkp: 2.2%, Fisik: 3.2%, Tahun: 3.7%, Unit: 7.5%, Lokasi: 8%, Ket: 8.8%).
+   - Diterapkan `white-space: nowrap !important;` pada sel kode unik, status, nomor box, tanggal, angka lembar/berkas, jenis arsip, dan kondisi fisik sehingga kata tidak akan pernah terbelah dua.
+   - Kolom deskripsi naratif tetap memecah baris secara alami per kata (`word-break: normal; line-height: 1.2;`).
+2. **Kop Surat & Header Kompak**:
+   - Memperkecil tinggi Kop Surat dan margin bawah secara proporsional.
+   - Judul periode dinormalisasi menjadi `Periode: Tahun 2026`.
+3. **Pengatur Skala Cetak Interaktif**:
+   - Menambahkan tombol pilihan skala pada toolbar cetak di tab baru:
+     - `100% (Normal)`
+     - `95% (Pas)`
+     - `90% (Kompak)`
+   - Disertai tips pengaturan dialog cetak browser (*Landscape* & *Margin Minimum*).
+
+
