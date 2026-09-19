@@ -700,7 +700,7 @@ function getDummyStaffList() {
       email: 'dzaky.nathanegara@manggaraibaratkab.go.id',
       status: 'Aktif',
       tanda_tangan_id: 'TTD-DEFAULT-005',
-      tanda_tangan_url: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 100' width='280' height='100'><path d='M25,65 C40,25 55,20 65,45 C75,70 60,85 80,60 C100,35 120,40 135,55 C150,70 160,35 175,50 C190,65 210,40 225,55 C235,65 245,55 260,50 M35,80 C95,72 170,75 255,70' fill='none' stroke='%231a4fa0' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>",
+      tanda_tangan_url: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyODAgMTAwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjEwMCI+PHBhdGggZD0iTTI1LDY1IEM0MCwyNSA1NSwyMCA2NSw0NSBDNzUsNzAgNjAsODUgODAsNjAgQzEwMCwzNSAxMjAsNDAgMTM1LDU1IEMxNTAsNzAgMTYwLDM1IDE3NSw1MCBDMTkwLDY1IDIxMCw0MCAyMjUsNTUgQzIzNSw2NSAyNDUsNTUgMjYwLDUwIE0zNSw4MCBDOTUsNzIgMTcwLDc1IDI1NSw3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMWE0ZmEwIiBzdHJva2Utd2lkdGg9IjMuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+",
       tanggal_dibuat: new Date()
     },
     {

@@ -7,13 +7,27 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 47 (Deployment @66)**
+- **Versi Terakhir**: **Versi 48 (Deployment @69)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 48 — Perbaikan Kebocoran Tag HTML TTD pada Generate Laporan & Cetak Tab Baru Standalone (Deployment @69)
+- **Latar Belakang**: Pada menu **Generate Laporan**, ketika laporan dibuat, bagian tanda tangan kanan memunculkan teks mentah `" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">` di sebelah kanan tanggal dan memunculkan gambar rusak (*broken image*). Hal ini disebabkan oleh string SVG `window._dummyTtd` yang mengandung tanda petik ganda (`"`) tanpa encoding sehingga memutus atribut `src` HTML, menutup tag `<img>` sebelum waktunya, dan memuntahkan sisa kode sebagai teks mentah di layar.
+- **Rincian Perubahan yang Diimplementasikan**:
+  1. **Konversi SVG Data URI ke Base64 Standar**:
+     - Mengubah seluruh definisi data URI SVG tanda tangan dummy (`window._dummyTtd` pada `ClientScript.html`, `CONFIG.PEJABAT.PELAKSANA.TTD` & `CONFIG.PEJABAT.DUMMY_TTD` pada `Config.gs`, serta seed data `Database.gs`) menjadi string Base64 murni tanpa tanda petik, kurung sudut, ataupun karakter khusus lainnya.
+  2. **Dukungan Tanda Tangan Dinamis per Staf pada Laporan**:
+     - Memperbarui fungsi `renderLaporanPreview()` pada `GenerateLaporan.html` agar membaca tanda tangan asli staf terpilih (`_activeSigner1Data.tanda_tangan_url` dan `_activeSigner2Data.tanda_tangan_url`).
+     - Jika staf yang dipilih (misal: Kabid atau Kadis) belum mengunggah tanda tangan di menu Pengaturan, sistem secara otomatis menyediakan ruang kosong 70px yang bersih untuk tanda tangan basah (tanpa memaksakan tanda tangan dummy orang lain dan tanpa memunculkan gambar rusak).
+  3. **Sinkronisasi Otomatis Jabatan Pengesah & Pelaksana**:
+     - Memperbarui `syncSigner1Details()` dan `syncSigner2Details()` agar kolom teks jabatan otomatis berganti mengikuti nama pejabat/staf yang dipilih pada dropdown.
+     - Menambahkan event `oninput` pada kedua field jabatan sehingga perubahan kustom langsung ter-update secara *real-time* pada lembar preview laporan.
+  4. **Fitur Cetak Dokumen Laporan (Tab Baru Standalone A4 Portrait)**:
+     - Menggantikan cetak biasa dengan `printLaporanDoc()` yang membuka lembar naskah dinas di tab baru terisolasi dengan toolbar cetak resmi, margin presisi A4 Portrait (15mm), dan tombol pintas `🖨️ Cetak / Simpan PDF`.
 
 ### Versi 47 — Penyelarasan Judul Kolom & Format Tabel Rekapitulasi Alih Media Sesuai Master Arsip
 - **Latar Belakang**: Menindaklanjuti permintaan revisi pada dokumen instruksi (Google Docs `1Nma2GuO4o0uC10wVuWSSws35fRhYFj932u198Mq2D_s`) mengenai tampilan format cetak rekapitulasi pada menu **Daftar Arsip -> Export -> Cetak Rekap Resmi**, di mana sebelumnya terdapat ketidaksinkronan jumlah kolom antara header (14 kolom) dan baris data (16 kolom) sehingga terdapat kolom yang tidak memiliki judul, serta mengoptimalkan proses cetak agar tidak terpotong dengan membuka lembar dokumen cetak di tab baru.

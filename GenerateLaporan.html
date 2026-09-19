@@ -59,7 +59,7 @@
               </div>
               <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label" style="font-size:11px;">Jabatan Pengesah</label>
-                <input type="text" class="form-control" id="lap-title-signer-1" value="Kepala Dinas Kearsipan dan Perpustakaan" style="font-size:12px; padding:6px 10px;">
+                <input type="text" class="form-control" id="lap-title-signer-1" value="Kepala Dinas Kearsipan dan Perpustakaan" oninput="if(_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData)" style="font-size:12px; padding:6px 10px;">
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@
               </div>
               <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label" style="font-size:11px;">Jabatan Pelaksana</label>
-                <input type="text" class="form-control" id="lap-title-signer-2" value="Pelaksana Alih Media," style="font-size:12px; padding:6px 10px;">
+                <input type="text" class="form-control" id="lap-title-signer-2" value="Pelaksana Alih Media," oninput="if(_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData)" style="font-size:12px; padding:6px 10px;">
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@
       <span class="card-title">📄 Preview Laporan</span>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-sm btn-outline" id="btn-save-lap-gdoc" onclick="saveLaporanToGoogleDocs()">📄 Simpan sebagai Google Docs</button>
-        <button class="btn btn-sm btn-gold" onclick="printElement('lap-preview-content')">🖨️ Cetak</button>
+        <button class="btn btn-sm btn-gold" onclick="printLaporanDoc()">🖨️ Cetak Dokumen</button>
       </div>
     </div>
     <div class="card-body" id="lap-preview-content">
@@ -225,7 +225,7 @@ function updateLaporanSignerInputs() {
 function syncSigner1Details() {
   var id = document.getElementById('lap-select-signer-1').value;
   _activeSigner1Data = _lapStaffList.find(function(s) { return s.id === id; }) || null;
-  if (_activeSigner1Data && document.getElementById('lap-title-signer-1').value.trim() === '') {
+  if (_activeSigner1Data) {
     document.getElementById('lap-title-signer-1').value = _activeSigner1Data.jabatan || 'Kepala Dinas Kearsipan dan Perpustakaan';
   }
   if (_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData);
@@ -234,7 +234,7 @@ function syncSigner1Details() {
 function syncSigner2Details() {
   var id = document.getElementById('lap-select-signer-2').value;
   _activeSigner2Data = _lapStaffList.find(function(s) { return s.id === id; }) || null;
-  if (_activeSigner2Data && document.getElementById('lap-title-signer-2').value.trim() === '') {
+  if (_activeSigner2Data) {
     document.getElementById('lap-title-signer-2').value = _activeSigner2Data.jabatan || 'Pelaksana Alih Media,';
   }
   if (_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData);
@@ -275,9 +275,11 @@ function generateLaporan() {
     .generateLaporanData(params);
 }
 
-// Render Laporan Preview (Bebas Watermark CSS Palsu)
+// Render Laporan Preview (Bebas Watermark CSS Palsu & Aman TTD)
 function renderLaporanPreview(data) {
   var isInternal = data.tipe === 'internal';
+  var safeEsc = typeof escapeHtml === 'function' ? escapeHtml : function(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+
   var html = '<div class="doc-preview" style="position:relative; overflow:hidden; background:#fff; padding:25px 30px; font-family:\'Times New Roman\', Times, serif; color:#000;">' +
     '<div style="position:relative; z-index:1;">' +
       '<div class="doc-header" style="text-align:center; position:relative; padding-bottom:12px; margin-bottom:18px; border-bottom:none;">' +
@@ -295,7 +297,7 @@ function renderLaporanPreview(data) {
       '<div style="text-align:center; margin-bottom:16px;">' +
         '<div class="doc-title" style="font-size:13pt; font-weight:bold; text-decoration:underline;">LAPORAN ' + (isInternal ? 'INTERNAL' : 'EKSTERNAL') + '</div>' +
         '<div style="font-size:11pt; font-weight:600; margin-top:2px;">KEGIATAN ALIH MEDIA ARSIP STATIS</div>' +
-        '<div style="font-size:10.5pt; margin-top:2px;">Periode: ' + data.periode + '</div>' +
+        '<div style="font-size:10.5pt; margin-top:2px;">Periode: ' + safeEsc(data.periode) + '</div>' +
       '</div>';
   
   // Summary
@@ -305,7 +307,7 @@ function renderLaporanPreview(data) {
     '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Arsip Dialihmediakan</td><td style="border:1px solid #333; padding:5px 8px;"><strong>' + data.totalArsip + '</strong> item arsip</td></tr>' +
     '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Lembar</td><td style="border:1px solid #333; padding:5px 8px;">' + data.totalLembar + ' lembar</td></tr>' +
     '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Berkas</td><td style="border:1px solid #333; padding:5px 8px;">' + data.totalBerkas + ' berkas</td></tr>' +
-    '<tr><td style="border:1px solid #333; padding:5px 8px;">Tanggal Laporan</td><td style="border:1px solid #333; padding:5px 8px;">' + data.tanggalGenerate + '</td></tr></table>';
+    '<tr><td style="border:1px solid #333; padding:5px 8px;">Tanggal Laporan</td><td style="border:1px solid #333; padding:5px 8px;">' + safeEsc(data.tanggalGenerate) + '</td></tr></table>';
   
   // Arsip detail table
   if (data.arsipDetail && data.arsipDetail.length > 0) {
@@ -320,11 +322,11 @@ function renderLaporanPreview(data) {
     
     data.arsipDetail.forEach(function(a) {
       html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + a.no + '</td>' +
-        '<td style="border:1px solid #333; padding:4px;">' + a.kode_unik + '</td>' +
-        '<td style="border:1px solid #333; padding:4px;">' + (a.deskripsi || '-') + '</td>' +
-        '<td style="border:1px solid #333; padding:4px;">' + (a.jenis_arsip || '-') + '</td>';
-      if (isInternal) html += '<td style="border:1px solid #333; padding:4px;">' + (a.staf_nama || '-') + '</td><td style="border:1px solid #333; padding:4px;">' + (a.lokasi_simpan || '-') + '</td>';
-      html += '<td style="border:1px solid #333; padding:4px; text-align:center;">' + (a.status_keterbukaan || '-') + '</td></tr>';
+        '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.kode_unik) + '</td>' +
+        '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.deskripsi || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.jenis_arsip || '-') + '</td>';
+      if (isInternal) html += '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.staf_nama || '-') + '</td><td style="border:1px solid #333; padding:4px;">' + safeEsc(a.lokasi_simpan || '-') + '</td>';
+      html += '<td style="border:1px solid #333; padding:4px; text-align:center;">' + safeEsc(a.status_keterbukaan || '-') + '</td></tr>';
     });
     html += '</tbody></table>';
   }
@@ -335,7 +337,7 @@ function renderLaporanPreview(data) {
       '<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10pt;">' +
       '<tr style="background:#f1f5f9;"><th style="border:1px solid #333; padding:5px; width:35px; text-align:center;">No</th><th style="border:1px solid #333; padding:5px; text-align:left;">Nama Staf / Petugas</th><th style="border:1px solid #333; padding:5px; width:120px; text-align:center;">Jumlah Arsip</th></tr>';
     data.stafBreakdown.forEach(function(s, idx) {
-      html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + (idx + 1) + '</td><td style="border:1px solid #333; padding:4px;">' + s.nama + '</td><td style="border:1px solid #333; padding:4px; text-align:center;">' + s.jumlah + ' item</td></tr>';
+      html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + (idx + 1) + '</td><td style="border:1px solid #333; padding:4px;">' + safeEsc(s.nama) + '</td><td style="border:1px solid #333; padding:4px; text-align:center;">' + s.jumlah + ' item</td></tr>';
     });
     html += '</table>';
   }
@@ -349,39 +351,51 @@ function renderLaporanPreview(data) {
     
     // Kolom Signer 1 (Mengetahui)
     if (useS1) {
-      var s1Title = document.getElementById('lap-title-signer-1').value || 'Kepala Dinas Kearsipan dan Perpustakaan';
+      var s1Title = document.getElementById('lap-title-signer-1') ? document.getElementById('lap-title-signer-1').value : 'Kepala Dinas Kearsipan dan Perpustakaan';
       var s1Nama = _activeSigner1Data ? _activeSigner1Data.nama : 'AUGUSTINUS RINUS, S.Pd';
       var s1Pangkat = _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina Utama Muda') : 'Pembina Utama Muda';
       var s1Nip = _activeSigner1Data ? (_activeSigner1Data.nip || '-') : '19720219 199903 1 008';
+      var s1Ttd = (_activeSigner1Data && _activeSigner1Data.tanda_tangan_url) ? _activeSigner1Data.tanda_tangan_url : '';
       
+      var s1TitleHtml = safeEsc(s1Title);
+      if (s1Title.toLowerCase().indexOf('kabupaten') === -1 && s1Title.toLowerCase().indexOf('mabar') === -1) {
+        s1TitleHtml += '<br>Kabupaten Manggarai Barat';
+      }
+
       html += '<div id="lap-col-signer-1" style="width:46%; text-align:center;">' +
         '<div>Mengetahui,</div>' +
-        '<div style="font-weight:bold; margin-top:2px;">' + s1Title + '<br>Kabupaten Manggarai Barat</div>' +
-        '<div style="height:70px;"></div>' +
-        '<div style="font-weight:bold; text-decoration:underline;">' + s1Nama + '</div>' +
-        '<div>' + s1Pangkat + '</div>' +
-        '<div>NIP. ' + s1Nip + '</div>' +
+        '<div style="font-weight:bold; margin-top:2px;">' + s1TitleHtml + '</div>' +
+        '<div style="height:70px; display:flex; align-items:center; justify-content:center;">' +
+        (s1Ttd ? '<img src="' + s1Ttd + '" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">' : '') +
+        '</div>' +
+        '<div style="font-weight:bold; text-decoration:underline;">' + safeEsc(s1Nama) + '</div>' +
+        '<div>' + safeEsc(s1Pangkat) + '</div>' +
+        '<div>NIP. ' + safeEsc(s1Nip) + '</div>' +
         '</div>';
     } else {
       html += '<div style="width:46%;"></div>';
     }
 
-    // Kolom Signer 2 (Pelaksana Alih Media)
+    // Kolom Signer 2 (Pelaksana / Penanggung Jawab)
     if (useS2) {
-      var s2Title = document.getElementById('lap-title-signer-2').value || 'Pelaksana Alih Media,';
+      var s2Title = document.getElementById('lap-title-signer-2') ? document.getElementById('lap-title-signer-2').value : 'Pelaksana Alih Media,';
       var s2Nama = _activeSigner2Data ? _activeSigner2Data.nama : 'MUHAMMAD DZAKY NATHANEGARA, A.Md';
       var s2Jabatan = _activeSigner2Data ? (_activeSigner2Data.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan';
       var s2Nip = _activeSigner2Data ? (_activeSigner2Data.nip || '-') : '19980508 202506 1 004';
+      var s2Ttd = (_activeSigner2Data && _activeSigner2Data.tanda_tangan_url) ? _activeSigner2Data.tanda_tangan_url : '';
+      if (!s2Ttd && (!_activeSigner2Data || (_activeSigner2Data.nama && _activeSigner2Data.nama.toLowerCase().indexOf('dzaky') !== -1))) {
+        s2Ttd = window._dummyTtd || '';
+      }
 
       html += '<div id="lap-col-signer-2" style="width:46%; text-align:center;">' +
-        '<div>Labuan Bajo, ' + (data.tanggalGenerate || '') + '</div>' +
-        '<div style="font-weight:bold; margin-top:2px;">' + s2Title + '</div>' +
+        '<div>Labuan Bajo, ' + safeEsc(data.tanggalGenerate || '') + '</div>' +
+        '<div style="font-weight:bold; margin-top:2px;">' + safeEsc(s2Title) + '</div>' +
         '<div style="height:70px; display:flex; align-items:center; justify-content:center;">' +
-        (window._dummyTtd ? '<img src="' + window._dummyTtd + '" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">' : '') +
+        (s2Ttd ? '<img src="' + s2Ttd + '" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">' : '') +
         '</div>' +
-        '<div style="font-weight:bold; text-decoration:underline;">' + s2Nama + '</div>' +
-        '<div>' + s2Jabatan + '</div>' +
-        '<div>NIP. ' + s2Nip + '</div>' +
+        '<div style="font-weight:bold; text-decoration:underline;">' + safeEsc(s2Nama) + '</div>' +
+        '<div>' + safeEsc(s2Jabatan) + '</div>' +
+        '<div>NIP. ' + safeEsc(s2Nip) + '</div>' +
         '</div>';
     } else {
       html += '<div style="width:46%;"></div>';
@@ -392,6 +406,84 @@ function renderLaporanPreview(data) {
 
   html += '</div></div>';
   document.getElementById('lap-preview-content').innerHTML = html;
+}
+
+// Fungsi Cetak Dokumen Laporan (Tab Baru Standalone A4 Portrait)
+function printLaporanDoc() {
+  var printContent = document.getElementById('lap-preview-content');
+  if (!printContent) {
+    showToast('Dokumen laporan belum dimuat.', 'warning');
+    return;
+  }
+
+  var printWin = window.open('', '_blank');
+  if (!printWin) {
+    if (typeof printElement === 'function') {
+      printElement('lap-preview-content', { orientation: 'portrait' });
+    } else {
+      window.print();
+    }
+    return;
+  }
+
+  var contentHtml = printContent.innerHTML;
+  var docHtml = '<!DOCTYPE html>\n' +
+    '<html lang="id">\n' +
+    '<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <title>Laporan Alih Media Arsip - SIASTA</title>\n' +
+    '  <style>\n' +
+    '    @page { size: A4 portrait; margin: 15mm 15mm 15mm 15mm; }\n' +
+    '    * { box-sizing: border-box; }\n' +
+    '    body { font-family: "Times New Roman", Times, serif; color: #000; margin: 0; padding: 0; background: #f8fafc; }\n' +
+    '    .no-print-toolbar {\n' +
+    '      background: #1e293b; color: #fff; padding: 10px 20px;\n' +
+    '      display: flex; justify-content: space-between; align-items: center;\n' +
+    '      box-shadow: 0 2px 8px rgba(0,0,0,0.15);\n' +
+    '      position: sticky; top: 0; z-index: 1000;\n' +
+    '    }\n' +
+    '    .btn-act {\n' +
+    '      padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer;\n' +
+    '      display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;\n' +
+    '    }\n' +
+    '    .btn-print { background: #d4af37; color: #1e293b; }\n' +
+    '    .btn-print:hover { background: #bfa02e; }\n' +
+    '    .btn-close { background: rgba(255,255,255,0.15); color: #fff; }\n' +
+    '    .btn-close:hover { background: rgba(255,255,255,0.25); }\n' +
+    '    .print-paper {\n' +
+    '      width: 100%; max-width: 210mm; min-height: 297mm; margin: 20px auto; background: #fff; padding: 15mm 18mm;\n' +
+    '      box-shadow: 0 4px 20px rgba(0,0,0,0.12);\n' +
+    '    }\n' +
+    '    @media print {\n' +
+    '      html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }\n' +
+    '      .no-print-toolbar { display: none !important; }\n' +
+    '      .print-paper { margin: 0 !important; padding: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; }\n' +
+    '      table { page-break-inside: auto; }\n' +
+    '      tr { page-break-inside: avoid; }\n' +
+    '      thead { display: table-header-group; }\n' +
+    '    }\n' +
+    '  </style>\n' +
+    '</head>\n' +
+    '<body>\n' +
+    '  <div class="no-print-toolbar">\n' +
+    '    <div style="font-size:13px; font-weight:600;">📑 <strong>Laporan Alih Media Arsip Statis (A4 Portrait)</strong></div>\n' +
+    '    <div style="display:flex; gap:8px;">\n' +
+    '      <button type="button" class="btn-act btn-print" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>\n' +
+    '      <button type="button" class="btn-act btn-close" onclick="window.close()">✕ Tutup Tab</button>\n' +
+    '    </div>\n' +
+    '  </div>\n' +
+    '  <div class="print-paper">\n' +
+    '    ' + contentHtml + '\n' +
+    '  </div>\n' +
+    '  <script>\n' +
+    '    window.onload = function() { setTimeout(function() { window.print(); }, 400); };\n' +
+    '  <\/script>\n' +
+    '</body>\n' +
+    '</html>';
+
+  printWin.document.open();
+  printWin.document.write(docHtml);
+  printWin.document.close();
 }
 
 // Opsi Simpan Laporan ke Google Docs Asli (DocumentApp)
