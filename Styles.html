@@ -1816,13 +1816,28 @@ html, body {
     display: none !important;
   }
 
-  /* Khusus Berita Acara (A4 Portrait) */
+  /* Khusus Berita Acara (A4 Portrait Sesuai Template DOCX) */
   body.siasta-is-printing #siasta-print-section.siasta-print-section-ba {
     max-width: 210mm !important;
-    padding: 15mm 20mm !important;
+    padding: 12mm 18mm !important;
     font-family: "Times New Roman", Times, serif !important;
-    font-size: 12pt !important;
-    line-height: 1.5 !important;
+    font-size: 11pt !important;
+    line-height: 1.45 !important;
+    color: #000000 !important;
+  }
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-ba table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-ba table th,
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-ba table td {
+    border-color: #000000 !important;
+  }
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-ba tr {
+    page-break-inside: avoid !important;
+  }
+  body.siasta-is-printing #siasta-print-section.siasta-print-section-ba thead {
+    display: table-header-group !important;
   }
 
   /* Khusus Rekapitulasi Alih Media (A4 Landscape) */

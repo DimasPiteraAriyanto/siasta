@@ -212,101 +212,142 @@
           </div>
         </div>
 
-        <!-- Kertas A4 Wrapper (Format Resmi Naskah Dinas Bersih) -->
-        <div id="ba-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:210mm; min-height:297mm; padding:25mm 20mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:12pt; line-height:1.5;">
+        <!-- Kertas A4 Wrapper (Format Resmi Naskah Dinas Bersih Sesuai Template DOCX) -->
+        <div id="ba-print-sheet" style="position:relative; overflow:hidden; background:#fff; margin:20px auto; max-width:210mm; min-height:297mm; padding:22mm 20mm; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:'Times New Roman', Times, serif; color:#000; font-size:11pt; line-height:1.45;">
           <div style="position:relative; z-index:1;">
-          <!-- Kop Surat Resmi -->
-          <div style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:16px;">
-            <div style="position:absolute; left:10px; top:0; width:70px; height:80px; display:flex; align-items:center; justify-content:center;"><img id="doc-logo-img" src="" alt="Logo Pemkab Manggarai Barat" style="width:65px; height:auto; max-height:80px; object-fit:contain;"></div>
-            <div style="margin-left:75px;">
-              <div style="font-size:14pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
-              <div style="font-size:16pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
-              <div style="font-size:10pt; font-style:italic; margin-top:4px;" id="doc-alamat-kop">
-                Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT
+            <!-- Kop Surat Resmi -->
+            <div style="text-align:center; position:relative; padding-bottom:8px; margin-bottom:14px;">
+              <div style="position:absolute; left:5px; top:0; width:70px; height:80px; display:flex; align-items:center; justify-content:center;">
+                <img id="doc-logo-img" src="" alt="Logo Pemkab Manggarai Barat" style="width:65px; height:auto; max-height:80px; object-fit:contain;">
+              </div>
+              <div style="margin-left:75px;">
+                <div style="font-size:13pt; font-weight:bold; letter-spacing:0.5px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>
+                <div style="font-size:15pt; font-weight:bold; letter-spacing:0.5px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>
+                <div style="font-size:9.5pt; font-style:italic; margin-top:3px;" id="doc-alamat-kop">
+                  Jl. Samping Bank NTT, Kelurahan Wae Kelambu<br>Labuan Bajo - Flores - NTT
+                </div>
+              </div>
+              <div style="border-bottom:3px solid #000; margin-top:12px;"></div>
+              <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
+            </div>
+
+            <!-- Judul Dokumen & Nomor -->
+            <div style="text-align:center; margin-bottom:16px;">
+              <div style="font-size:13pt; font-weight:bold; text-decoration:underline;">BERITA ACARA ALIH MEDIA ARSIP</div>
+              <div style="font-size:11pt; margin-top:3px;">Nomor: <span id="doc-nomor-ba">....................................................</span></div>
+            </div>
+
+            <!-- Paragraf Pembuka Sesuai Template DOCX -->
+            <div style="text-align:justify; margin-bottom:14px; text-indent:36px; line-height:1.45; font-size:11pt;">
+              Pada hari ini, <strong id="doc-hari">Rabu</strong>, tanggal <span id="doc-tgl-angka">31</span> <span id="doc-bln-nama">Desember</span> <span id="doc-thn-angka">2025</span>, bertempat di Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat, telah dilaksanakan kegiatan alih media arsip dari media fisik ke media digital dengan keterangan sebagai berikut:
+            </div>
+
+            <!-- Tabel 1: Ringkasan Kegiatan (Table Grid ber-border) -->
+            <table style="width:100%; border-collapse:collapse; margin-bottom:14px; font-size:10.5pt; border:1px solid #000;">
+              <thead>
+                <tr style="background:#f1f5f9; text-align:left;">
+                  <th style="border:1px solid #000; padding:6px 10px; width:30%; font-weight:bold;">Uraian</th>
+                  <th style="border:1px solid #000; padding:6px 10px; font-weight:bold;">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Jenis Kegiatan</td>
+                  <td style="border:1px solid #000; padding:5px 10px;" id="doc-jenis-kegiatan">Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Periode Pelaksanaan</td>
+                  <td style="border:1px solid #000; padding:5px 10px;" id="doc-periode-ba">Bulan Desember 2025</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Jenis Arsip</td>
+                  <td style="border:1px solid #000; padding:5px 10px;" id="doc-jenis-arsip">Arsip Statis Terbuka</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Jumlah Berkas</td>
+                  <td style="border:1px solid #000; padding:5px 10px;"><span id="doc-jml-berkas">0</span> berkas</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Jumlah Lembar</td>
+                  <td style="border:1px solid #000; padding:5px 10px;"><span id="doc-jml-lembar">0</span> lembar</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Pelaksana Alih Media</td>
+                  <td style="border:1px solid #000; padding:5px 10px;" id="doc-pelaksana-tabel">Muhammad Dzaky Nathanegara, A.Md</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #000; padding:5px 10px; font-weight:bold;">Lokasi Simpan Fisik</td>
+                  <td style="border:1px solid #000; padding:5px 10px;" id="doc-lokasi-simpan">Depo Arsip DKP Kab. Manggarai Barat</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Paragraf Pengantar Rincian Arsip -->
+            <div style="text-align:justify; margin-bottom:10px; font-size:11pt; line-height:1.45;">
+              Arsip yang telah dilaksanakan alih media pada periode sebagaimana tersebut di atas adalah sebagai berikut:
+            </div>
+
+            <!-- Tabel 2: Daftar Arsip Hasil Alih Media (Table Grid ber-border) -->
+            <table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:9.5pt; border:1px solid #000;">
+              <thead>
+                <tr style="background:#f1f5f9; text-align:center;">
+                  <th style="border:1px solid #000; padding:6px 4px; width:5%; font-weight:bold;">No</th>
+                  <th style="border:1px solid #000; padding:6px 6px; width:18%; font-weight:bold;">Kode Unik</th>
+                  <th style="border:1px solid #000; padding:6px 6px; width:17%; font-weight:bold;">Jenis Arsip</th>
+                  <th style="border:1px solid #000; padding:6px 8px; width:33%; font-weight:bold;">Uraian Arsip</th>
+                  <th style="border:1px solid #000; padding:6px 6px; width:14%; font-weight:bold;">Kurun Waktu</th>
+                  <th style="border:1px solid #000; padding:6px 6px; width:13%; font-weight:bold;">Jumlah Lembar</th>
+                </tr>
+              </thead>
+              <tbody id="doc-ba-arsip-tbody">
+                <!-- Diisi secara dinamis oleh JavaScript -->
+              </tbody>
+              <tfoot>
+                <tr style="background:#fafafa; font-weight:bold;">
+                  <td colspan="4" style="border:1px solid #000; padding:6px 8px;"></td>
+                  <td style="border:1px solid #000; padding:6px 8px; text-align:right; font-weight:bold;">TOTAL</td>
+                  <td style="border:1px solid #000; padding:6px 8px; text-align:center; font-weight:bold;" id="doc-ba-total-lembar">0 lembar</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <!-- Klausul Hukum ANRI & UU 43/2009 + Penutup Sesuai Template DOCX -->
+            <div style="text-align:justify; margin-bottom:8px; text-indent:36px; line-height:1.45; font-size:10.5pt;">
+              Kegiatan alih media dilaksanakan dengan tujuan untuk menjamin keselamatan dan kemudahan akses informasi arsip, serta sebagai pengganti fungsi arsip fisik/asli sesuai dengan ketentuan peraturan perundang-undangan yang berlaku, khususnya Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala ANRI yang mengatur tentang pedoman alih media arsip.
+            </div>
+            <div style="text-align:justify; margin-bottom:8px; text-indent:36px; line-height:1.45; font-size:10.5pt;">
+              Arsip hasil alih media (reproduksi) disimpan secara terpisah dari arsip aslinya dan diperlakukan sesuai dengan kaidah pengelolaan arsip yang berlaku, sedangkan arsip asli tetap disimpan sebagai arsip pendukung/pembanding.
+            </div>
+            <div style="text-align:justify; margin-bottom:22px; text-indent:36px; line-height:1.45; font-size:10.5pt;">
+              Demikian Berita Acara ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.
+            </div>
+
+            <!-- Tanda Tangan Format 2 Kolom Sesuai Template DOCX -->
+            <div id="doc-ttd-container" style="display:flex; justify-content:space-between; margin-top:20px; font-size:10.5pt; page-break-inside:avoid;">
+              <!-- Kolom Kiri: Kepala Dinas -->
+              <div id="doc-block-kadis" style="width:47%; text-align:center;">
+                <div>Mengetahui,</div>
+                <div style="font-weight:bold; margin-top:2px;">Kepala Dinas Kearsipan dan Perpustakaan<br>Kabupaten Manggarai Barat,</div>
+                <div style="height:65px;"></div>
+                <div style="font-weight:bold; text-decoration:underline;" id="doc-kadis-nama">Augustinus Rinus, S.Pd</div>
+                <div id="doc-kadis-pangkat">Pembina Utama Muda</div>
+                <div>NIP. <span id="doc-kadis-nip">19720219 199903 1 008</span></div>
+              </div>
+
+              <!-- Kolom Kanan: Pelaksana Alih Media -->
+              <div id="doc-block-pelaksana" style="width:47%; text-align:center;">
+                <div>Labuan Bajo, <span id="doc-tgl-surat">31 Desember 2025</span></div>
+                <div style="font-weight:bold; margin-top:2px;" id="doc-pelaksana-title">Pelaksana Alih Media,</div>
+                <div style="height:65px; display:flex; align-items:center; justify-content:center;">
+                  <img id="doc-pelaksana-ttd-img" src="" alt="TTD Pelaksana" style="max-height:60px; max-width:150px; object-fit:contain; display:none;">
+                </div>
+                <div style="font-weight:bold; text-decoration:underline;" id="doc-pelaksana-nama">Muhammad Dzaky Nathanegara, A.Md</div>
+                <div>NIP. <span id="doc-pelaksana-nip">19980508 202506 1 004</span></div>
               </div>
             </div>
-            <div style="border-bottom:3px solid #000; margin-top:14px;"></div>
-            <div style="border-bottom:1px solid #000; margin-top:2px;"></div>
           </div>
-
-          <!-- Judul Dokumen -->
-          <div style="text-align:center; margin-bottom:20px;">
-            <div style="font-size:13pt; font-weight:bold; text-decoration:underline;">BERITA ACARA ALIH MEDIA ARSIP</div>
-            <div style="font-size:11pt; margin-top:4px;">Nomor: <span id="doc-nomor-ba">....................................................</span></div>
-          </div>
-
-          <!-- Kalimat Pembuka -->
-          <div style="text-align:justify; margin-bottom:16px; text-indent:36px;">
-            Pada hari ini, <strong id="doc-hari">Kamis</strong>, tanggal <span id="doc-tgl-terbilang">delapan belas</span> bulan <span id="doc-bln-nama">Desember</span> tahun <span id="doc-thn-terbilang">dua ribu dua puluh lima</span> (<span id="doc-tgl-angka">18-12-2025</span>), bertempat di Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat, kami yang bertanda tangan di bawah ini telah melaksanakan kegiatan alih media arsip dengan keterangan sebagai berikut:
-          </div>
-
-          <!-- Rincian Parameter Tabel -->
-          <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12pt;">
-            <tr>
-              <td style="width:28%; vertical-align:top; padding:3px 0;">Jenis Kegiatan</td>
-              <td style="width:3%; vertical-align:top; padding:3px 0;">:</td>
-              <td style="vertical-align:top; padding:3px 0;">
-                Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)
-              </td>
-            </tr>
-            <tr>
-              <td style="vertical-align:top; padding:3px 0;">Jenis Arsip</td>
-              <td style="vertical-align:top; padding:3px 0;">:</td>
-              <td style="vertical-align:top; padding:3px 0;" id="doc-jenis-arsip-desc">
-                Arsip Statis berupa berkas administrasi pemerintahan (antara lain Fisik Pamong Praja, Sambutan Pejabat, dan dokumen terkait lainnya) periode tahun 1983-2000, sebagaimana rincian pada Daftar Arsip Hasil Alih Media Tahun <span class="doc-tahun-span">2026</span> terlampir
-              </td>
-            </tr>
-            <tr>
-              <td style="vertical-align:top; padding:3px 0;">Jumlah Arsip</td>
-              <td style="vertical-align:top; padding:3px 0;">:</td>
-              <td style="vertical-align:top; padding:3px 0;">
-                <strong id="doc-jml-angka">0</strong> (<span id="doc-jml-terbilang">nol</span>) item arsip
-              </td>
-            </tr>
-            <tr>
-              <td style="vertical-align:top; padding:3px 0;">Asal Arsip</td>
-              <td style="vertical-align:top; padding:3px 0;">:</td>
-              <td style="vertical-align:top; padding:3px 0;" id="doc-asal-arsip-desc">
-                Box 5 Kecamatan Komodo
-              </td>
-            </tr>
-            <tr>
-              <td style="vertical-align:top; padding:3px 0;">Dasar Pelaksanaan</td>
-              <td style="vertical-align:top; padding:3px 0;">:</td>
-              <td style="padding:3px 0;" id="doc-dasar-hukum">
-                Peraturan Bupati Manggarai Barat Nomor 31 Tahun 2024 tentang Pedoman Alih Media Arsip di Lingkungan Pemerintah Daerah Kabupaten Manggarai Barat
-              </td>
-            </tr>
-          </table>
-
-          <!-- Klausul Penutup -->
-          <div style="text-align:justify; margin-bottom:28px; text-indent:36px;">
-            Demikian Berita Acara Alih Media Arsip ini dibuat dengan sesungguhnya rangkap 2 (dua) untuk dipergunakan sebagaimana mestinya dan memiliki kekuatan hukum yang sah sesuai ketentuan Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala Arsip Nasional Republik Indonesia Nomor 9 Tahun 2018 tentang Pedoman Pemeliharaan Arsip Dinamis.
-          </div>
-
-          <!-- Tanda Tangan Format 2 Kolom (Dengan Id Blok Terpisah) -->
-          <div id="doc-ttd-container" style="display:flex; justify-content:space-between; margin-top:30px; font-size:11.5pt;">
-            <div id="doc-block-kadis" style="width:46%; text-align:center;">
-              <div>Mengetahui,</div>
-              <div style="font-weight:bold; margin-top:2px;">Kepala Dinas Kearsipan dan Perpustakaan<br>Kabupaten Manggarai Barat</div>
-              <div style="height:75px;"></div>
-              <div style="font-weight:bold; text-decoration:underline;" id="doc-kadis-nama">AUGUSTINUS RINUS, S.Pd</div>
-              <div id="doc-kadis-pangkat">Pembina Utama Muda</div>
-              <div>NIP. <span id="doc-kadis-nip">19720219 199903 1 008</span></div>
-            </div>
-
-            <div id="doc-block-pelaksana" style="width:46%; text-align:center;">
-              <div>Labuan Bajo, <span id="doc-tgl-surat">18 September 2026</span></div>
-              <div style="font-weight:bold; margin-top:2px;" id="doc-pelaksana-title">Pelaksana Alih Media,</div>
-              <div style="height:75px; display:flex; align-items:center; justify-content:center;">
-                <img id="doc-pelaksana-ttd-img" src="" alt="TTD Pelaksana" style="max-height:70px; max-width:160px; object-fit:contain; display:none;">
-              </div>
-              <div style="font-weight:bold; text-decoration:underline;" id="doc-pelaksana-nama">MUHAMMAD DZAKY NATHANEGARA, A.Md</div>
-              <div id="doc-pelaksana-jabatan">Pengelola Kearsipan</div>
-              <div>NIP. <span id="doc-pelaksana-nip">19980508 202506 1 004</span></div>
-            </div>
-          </div>
-        </div></div></div>
+        </div>
+      </div>
       <div class="modal-footer" style="background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between;">
         <div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center;">
           📌 Sesuai format fisik resmi Dinas Kearsipan & Perpustakaan Kab. Manggarai Barat
@@ -649,43 +690,77 @@ function populateFormalBAModal(d) {
   if (logoEl) logoEl.src = window._logoMabar || '';
   safeSetText('doc-alamat-kop', d.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT');
   safeSetText('doc-nomor-ba', d.nomorBA || '....................................................');
-  safeSetText('doc-hari', d.hariNama || 'Kamis');
+  safeSetText('doc-hari', d.hariNama || 'Rabu');
   
-  var tglNum = (d.tanggalAngka !== undefined && d.tanggalAngka !== null && !isNaN(d.tanggalAngka)) ? parseInt(d.tanggalAngka) : 18;
-  var blnNum = (d.bulanAngka !== undefined && d.bulanAngka !== null && !isNaN(d.bulanAngka)) ? parseInt(d.bulanAngka) : ((d.bulan !== undefined && !isNaN(d.bulan)) ? (parseInt(d.bulan) + 1) : 6);
-  var thnNum = d.tahunAngka || d.tahun || 2026;
+  var tglNum = (d.tanggalAngka !== undefined && d.tanggalAngka !== null && !isNaN(d.tanggalAngka)) ? parseInt(d.tanggalAngka) : 31;
+  var blnNama = d.bulanNama || 'Desember';
+  var thnNum = d.tahunAngka || d.tahun || 2025;
   
-  safeSetText('doc-tgl-angka', d.tanggalAngkaLengkap || (padZero(tglNum) + '-' + padZero(blnNum) + '-' + thnNum));
-  safeSetText('doc-tgl-terbilang', d.tanggalTerbilang || 'delapan belas');
-  safeSetText('doc-bln-nama', d.bulanNama || 'Desember');
-  safeSetText('doc-thn-terbilang', d.tahunTerbilang || 'dua ribu dua puluh enam');
-  
-  safeSetText('doc-jenis-arsip-desc', d.jenisArsip);
-  safeSetText('doc-jml-angka', (d.jumlahArsip !== undefined && d.jumlahArsip !== null) ? d.jumlahArsip : 0);
-  safeSetText('doc-jml-terbilang', d.jumlahArsipTerbilang || 'nol');
-  safeSetText('doc-asal-arsip-desc', d.asalArsip);
-  safeSetText('doc-dasar-hukum', d.dasarPelaksanaan);
+  safeSetText('doc-tgl-angka', tglNum);
+  safeSetText('doc-bln-nama', blnNama);
+  safeSetText('doc-thn-angka', thnNum);
 
-  // Update span tahun jika ada
-  document.querySelectorAll('.doc-tahun-span').forEach(function(el) {
-    el.textContent = thnNum;
-  });
+  // 1. Tabel 1: Ringkasan Kegiatan Sesuai Template DOCX
+  safeSetText('doc-jenis-kegiatan', d.jenisKegiatan || 'Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)');
+  safeSetText('doc-periode-ba', d.periodePelaksanaan || ('Bulan ' + blnNama + ' ' + thnNum));
+  safeSetText('doc-jenis-arsip', d.jenisArsip || 'Arsip Statis Terbuka');
+  
+  var jmlBerkas = (d.jumlahBerkas !== undefined && d.jumlahBerkas !== null) ? d.jumlahBerkas : ((d.arsipList && d.arsipList.length) ? d.arsipList.length : 0);
+  var jmlLembar = (d.totalLembar !== undefined && d.totalLembar !== null) ? d.totalLembar : (d.jumlahLembar || 0);
+  
+  safeSetText('doc-jml-berkas', jmlBerkas);
+  safeSetText('doc-jml-lembar', jmlLembar);
+  
+  var pelaksanaNama = (d.pelaksana && d.pelaksana.nama) ? d.pelaksana.nama : (d.namaPetugas || 'Muhammad Dzaky Nathanegara, A.Md');
+  safeSetText('doc-pelaksana-tabel', pelaksanaNama);
+  safeSetText('doc-lokasi-simpan', d.lokasiSimpan || 'Depo Arsip DKP Kab. Manggarai Barat');
+
+  // 2. Tabel 2: Daftar Arsip Hasil Alih Media
+  var tbody = document.getElementById('doc-ba-arsip-tbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    var list = d.arsipList || [];
+    if (list.length === 0) {
+      var trEmpty = document.createElement('tr');
+      trEmpty.innerHTML = '<td colspan="6" style="border:1px solid #000; padding:10px; text-align:center; font-style:italic; color:#64748b;">(Belum ada data rincian arsip yang terdaftar pada periode ini)</td>';
+      tbody.appendChild(trEmpty);
+    } else {
+      list.forEach(function(item, idx) {
+        var tr = document.createElement('tr');
+        var no = item.no || (idx + 1);
+        var kode = typeof escapeHtml === 'function' ? escapeHtml(item.kode_unik || '-') : (item.kode_unik || '-');
+        var jenis = typeof escapeHtml === 'function' ? escapeHtml(item.jenis_arsip || 'Arsip Statis Terbuka') : (item.jenis_arsip || 'Arsip Statis Terbuka');
+        var uraian = typeof escapeHtml === 'function' ? escapeHtml(item.uraian || item.deskripsi || '-') : (item.uraian || item.deskripsi || '-');
+        var kurun = typeof escapeHtml === 'function' ? escapeHtml(item.kurun_waktu || '-') : (item.kurun_waktu || '-');
+        var lembar = (parseInt(item.jumlah_lembar) || 1) + ' lembar';
+        
+        tr.innerHTML = 
+          '<td style="border:1px solid #000; padding:5px 4px; text-align:center;">' + no + '</td>' +
+          '<td style="border:1px solid #000; padding:5px 6px; text-align:center; font-family:monospace; font-size:9pt;">' + kode + '</td>' +
+          '<td style="border:1px solid #000; padding:5px 6px; text-align:center;">' + jenis + '</td>' +
+          '<td style="border:1px solid #000; padding:5px 8px; text-align:left;">' + uraian + '</td>' +
+          '<td style="border:1px solid #000; padding:5px 6px; text-align:center;">' + kurun + '</td>' +
+          '<td style="border:1px solid #000; padding:5px 6px; text-align:center;">' + lembar + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+  }
+  safeSetText('doc-ba-total-lembar', jmlLembar + ' lembar');
 
   // Tanggal TTD
-  safeSetText('doc-tgl-surat', (d.tanggalAngka || tglNum) + ' ' + (d.bulanNama || 'Desember') + ' ' + thnNum);
+  safeSetText('doc-tgl-surat', (d.tanggalSurat || (tglNum + ' ' + blnNama + ' ' + thnNum)));
 
   // Kadis
   if (d.kadis) {
-    safeSetText('doc-kadis-nama', (d.kadis.NAMA || 'AUGUSTINUS RINUS, S.Pd').toUpperCase());
+    safeSetText('doc-kadis-nama', d.kadis.NAMA || 'Augustinus Rinus, S.Pd');
     safeSetText('doc-kadis-pangkat', d.kadis.PANGKAT || 'Pembina Utama Muda');
     safeSetText('doc-kadis-nip', d.kadis.NIP || '19720219 199903 1 008');
   }
 
   // Pelaksana
   if (d.pelaksana) {
-    safeSetText('doc-pelaksana-nama', (d.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md').toUpperCase());
-    safeSetText('doc-pelaksana-jabatan', d.pelaksana.jabatan || 'Pelaksana Alih Media');
-    safeSetText('doc-pelaksana-nip', d.pelaksana.nip || '-');
+    safeSetText('doc-pelaksana-nama', d.pelaksana.nama || 'Muhammad Dzaky Nathanegara, A.Md');
+    safeSetText('doc-pelaksana-nip', d.pelaksana.nip || '19980508 202506 1 004');
     safeSetText('doc-pelaksana-title', (d.tipe === 'gabungan' ? 'Koordinator Pelaksana Alih Media,' : 'Pelaksana Alih Media,'));
 
     var ttdImg = document.getElementById('doc-pelaksana-ttd-img');

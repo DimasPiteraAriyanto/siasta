@@ -382,6 +382,21 @@ function getBeritaAcaraFormalDetail(params) {
     var jumlahArsip = filteredArsip.length;
     var jumlahArsipTerbilang = angkaTerbilang(jumlahArsip);
     
+    var mappedArsipList = filteredArsip.map(function(a, idx) {
+      var kurunWaktu = a.kurun_waktu || '';
+      if (!kurunWaktu && a.kurun_waktu_mulai) {
+        kurunWaktu = a.kurun_waktu_akhir ? (a.kurun_waktu_mulai + ' - ' + a.kurun_waktu_akhir) : a.kurun_waktu_mulai;
+      }
+      return {
+        no: idx + 1,
+        kode_unik: a.kode_unik || '-',
+        jenis_arsip: a.jenis_arsip || 'Arsip Statis Terbuka',
+        uraian: a.deskripsi || a.uraian || a.judul || 'Berkas Arsip Alih Media',
+        kurun_waktu: kurunWaktu || '-',
+        jumlah_lembar: parseInt(a.jumlah_lembar) || 1
+      };
+    });
+
     var dataFormal = {
       baId: baRecord ? baRecord.id : '',
       nomorBA: (baRecord && baRecord.nomor_ba) ? baRecord.nomor_ba : '....................................................',
@@ -395,15 +410,22 @@ function getBeritaAcaraFormalDetail(params) {
       tahunAngka: thn,
       tahunTerbilang: thnTerbilang,
       tanggalAngkaLengkap: tglStr + '-' + blnStr + '-' + thn,
+      tanggalSurat: tglAngka + ' ' + getNamaBulan(blnIndex) + ' ' + thn,
       tanggalPelaksanaanFormatted: namaHari + ', ' + tglAngka + ' ' + getNamaBulan(blnIndex) + ' ' + thn,
       jenisKegiatan: 'Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)',
-      jenisArsip: 'Arsip Statis berupa berkas administrasi pemerintahan (antara lain berkas administrasi, keputusan, dan laporan terkait) periode tahun ' + kurunWaktuSummary + ', sebagaimana rincian pada Daftar Arsip Hasil Alih Media Tahun ' + thn + ' terlampir',
+      periodePelaksanaan: 'Bulan ' + getNamaBulan(blnIndex) + ' ' + thn,
+      jenisArsip: 'Arsip Statis Terbuka',
+      jumlahBerkas: jumlahArsip,
       jumlahArsip: jumlahArsip,
       jumlahArsipTerbilang: jumlahArsipTerbilang,
+      jumlahLembar: totalLembar,
       totalLembar: totalLembar,
+      namaPetugas: pelaksana.nama,
+      nipPetugas: pelaksana.nip,
+      lokasiSimpan: (boxSummary ? (boxSummary + ', ') : '') + 'Depo Arsip DKP Kab. Manggarai Barat',
       asalArsip: boxSummary + ' ' + asalSummary,
       dasarPelaksanaan: (CONFIG.TEMPLATE_BA && CONFIG.TEMPLATE_BA.DASAR_HUKUM) ? CONFIG.TEMPLATE_BA.DASAR_HUKUM : 'Peraturan Bupati Manggarai Barat Nomor 31 Tahun 2024 tentang Pedoman Alih Media Arsip di Lingkungan Pemerintah Daerah Kabupaten Manggarai Barat',
-      tempatPelaksanaan: (CONFIG.TEMPLATE_BA && CONFIG.TEMPLATE_BA.TEMPAT) ? CONFIG.TEMPLATE_BA.TEMPAT : 'Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat',
+      tempatPelaksanaan: (CONFIG.TEMPLATE_BA && CONFIG.TEMPLATE_BA.TEMPAT) ? CONFIG.TEMPLATE_BA.TEMPAT : 'Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat',
       kota: (CONFIG.TEMPLATE_BA && CONFIG.TEMPLATE_BA.KOTA) ? CONFIG.TEMPLATE_BA.KOTA : 'Labuan Bajo',
       kadis: (CONFIG.PEJABAT && CONFIG.PEJABAT.KADIS) ? CONFIG.PEJABAT.KADIS : {
         NAMA: 'Augustinus Rinus, S.Pd',
@@ -422,10 +444,7 @@ function getBeritaAcaraFormalDetail(params) {
       pelaksanaTtd: (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : ''),
       tipe: tipe,
       tipeLabel: tipe === 'per_staf' ? 'Per Staf (' + pelaksana.nama + ')' : 'Gabungan (Seluruh Tim Alih Media)',
-      watermarkLine1: (CONFIG.WATERMARK && CONFIG.WATERMARK.LINE1) ? CONFIG.WATERMARK.LINE1 : 'ARSIP HASIL ALIH MEDIA',
-      watermarkLine2: (CONFIG.WATERMARK && CONFIG.WATERMARK.LINE2) ? CONFIG.WATERMARK.LINE2 : 'DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH',
-      watermarkLine3: (CONFIG.WATERMARK && CONFIG.WATERMARK.LINE3) ? CONFIG.WATERMARK.LINE3 : 'KABUPATEN MANGGARAI BARAT',
-      arsipList: filteredArsip
+      arsipList: mappedArsipList
     };
     
     return jsonResponse(true, dataFormal);
@@ -460,7 +479,7 @@ function deleteBeritaAcara(baId) {
 }
 
 /**
- * Export Berita Acara ke Google Docs (DocumentApp)
+ * Export Berita Acara ke Google Docs (DocumentApp) sesuai Template DOCX Resmi
  * @param {Object} payload
  * @returns {Object} jsonResponse with doc URL
  */
@@ -472,7 +491,7 @@ function exportBAToGoogleDoc(payload) {
     var doc = DocumentApp.create(docName);
     var body = doc.getBody();
     
-    // Page setup (A4 Portrait, margin)
+    // Page setup (A4 Portrait, margin 2cm / ~56.7pt)
     body.setPageWidth(595.28);
     body.setPageHeight(841.89);
     body.setMarginTop(54);
@@ -480,7 +499,7 @@ function exportBAToGoogleDoc(payload) {
     body.setMarginLeft(54);
     body.setMarginRight(54);
     
-    // 1. Kop Surat
+    // 1. Kop Surat Resmi
     var p1 = body.appendParagraph('PEMERINTAH KABUPATEN MANGGARAI BARAT');
     p1.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     p1.setFontFamily('Times New Roman').setFontSize(13).setBold(true);
@@ -489,7 +508,7 @@ function exportBAToGoogleDoc(payload) {
     p2.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     p2.setFontFamily('Times New Roman').setFontSize(15).setBold(true);
     
-    var p3 = body.appendParagraph(payload.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT');
+    var p3 = body.appendParagraph(payload.alamatKop || 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu\nLabuan Bajo - Flores - NTT');
     p3.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     p3.setFontFamily('Times New Roman').setFontSize(9.5).setItalic(true);
     
@@ -499,7 +518,7 @@ function exportBAToGoogleDoc(payload) {
     
     body.appendParagraph('');
     
-    // 2. Judul
+    // 2. Judul Dokumen
     var pJudul = body.appendParagraph('BERITA ACARA ALIH MEDIA ARSIP');
     pJudul.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     pJudul.setFontFamily('Times New Roman').setFontSize(13).setBold(true).setUnderline(true);
@@ -512,44 +531,145 @@ function exportBAToGoogleDoc(payload) {
     
     // 3. Paragraf Pembuka
     var pBuka = body.appendParagraph(
-      'Pada hari ini, ' + (payload.hariNama || 'Kamis') + ', tanggal ' + (payload.tanggalTerbilang || 'delapan belas') + 
-      ' bulan ' + (payload.bulanNama || 'Desember') + ' tahun ' + (payload.tahunTerbilang || 'dua ribu dua puluh lima') + 
-      ' (' + (payload.tanggalAngkaLengkap || '18-12-2025') + '), bertempat di Dinas Kearsipan dan Perpustakaan Kabupaten Manggarai Barat, ' +
-      'kami yang bertanda tangan di bawah ini telah melaksanakan kegiatan alih media arsip dengan keterangan sebagai berikut:'
+      'Pada hari ini, ' + (payload.hariNama || 'Rabu') + ', tanggal ' + (payload.tanggalAngka || '31') + ' ' + 
+      (payload.bulanNama || 'Desember') + ' ' + (payload.tahunAngka || 2025) + 
+      ', bertempat di Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat, telah dilaksanakan kegiatan alih media arsip dari media fisik ke media digital dengan keterangan sebagai berikut:'
     );
     pBuka.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
-    pBuka.setFontFamily('Times New Roman').setFontSize(11.5).setLineSpacing(1.3);
+    pBuka.setFontFamily('Times New Roman').setFontSize(11).setLineSpacing(1.25);
     
-    // 4. Tabel Rincian
-    var tableData = [
-      ['Jenis Kegiatan', ':', 'Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)'],
-      ['Jenis Arsip', ':', payload.jenisArsip || 'Arsip Statis berupa berkas administrasi pemerintahan periode tahun 1983-2000'],
-      ['Jumlah Arsip', ':', (payload.jumlahArsip || '0') + ' (' + (payload.jumlahArsipTerbilang || 'nol') + ') item arsip'],
-      ['Asal Arsip', ':', payload.asalArsip || 'Box 5 Kecamatan Komodo'],
-      ['Dasar Pelaksanaan', ':', payload.dasarPelaksanaan || 'Peraturan Bupati Manggarai Barat Nomor 31 Tahun 2024 tentang Pedoman Alih Media Arsip di Lingkungan Pemerintah Daerah Kabupaten Manggarai Barat']
+    // 4. Tabel 1: Ringkasan Kegiatan (Table Grid ber-border)
+    var jmlBerkas = payload.jumlahBerkas || (payload.arsipList ? payload.arsipList.length : 0);
+    var jmlLembar = payload.totalLembar || payload.jumlahLembar || 0;
+    var pelaksanaNama = payload.pelaksana ? payload.pelaksana.nama : (payload.namaPetugas || 'Muhammad Dzaky Nathanegara, A.Md');
+    
+    var t1Data = [
+      ['Uraian', 'Keterangan'],
+      ['Jenis Kegiatan', payload.jenisKegiatan || 'Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)'],
+      ['Periode Pelaksanaan', payload.periodePelaksanaan || ('Bulan ' + (payload.bulanNama || 'Desember') + ' ' + (payload.tahunAngka || 2025))],
+      ['Jenis Arsip', payload.jenisArsip || 'Arsip Statis Terbuka'],
+      ['Jumlah Berkas', jmlBerkas + ' berkas'],
+      ['Jumlah Lembar', jmlLembar + ' lembar'],
+      ['Pelaksana Alih Media', pelaksanaNama],
+      ['Lokasi Simpan Fisik', payload.lokasiSimpan || 'Depo Arsip DKP Kab. Manggarai Barat']
     ];
     
-    var table = body.appendTable(tableData);
-    table.setBorderWidth(0);
-    for (var r = 0; r < tableData.length; r++) {
-      var row = table.getRow(r);
-      row.getCell(0).setWidth(130).getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(11);
-      row.getCell(1).setWidth(15).getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(11);
-      row.getCell(2).setWidth(340).getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(11);
+    var table1 = body.appendTable(t1Data);
+    table1.setBorderWidth(1);
+    table1.setBorderColor('#000000');
+    
+    // Format Header Tabel 1
+    var t1HeaderRow = table1.getRow(0);
+    t1HeaderRow.getCell(0).setWidth(150).setBackgroundColor('#F1F5F9').getChild(0).asParagraph()
+      .setFontFamily('Times New Roman').setFontSize(10.5).setBold(true);
+    t1HeaderRow.getCell(1).setWidth(337).setBackgroundColor('#F1F5F9').getChild(0).asParagraph()
+      .setFontFamily('Times New Roman').setFontSize(10.5).setBold(true);
+      
+    // Format Isi Tabel 1
+    for (var r1 = 1; r1 < t1Data.length; r1++) {
+      var row1 = table1.getRow(r1);
+      row1.getCell(0).setWidth(150).getChild(0).asParagraph()
+        .setFontFamily('Times New Roman').setFontSize(10.5).setBold(true);
+      row1.getCell(1).setWidth(337).getChild(0).asParagraph()
+        .setFontFamily('Times New Roman').setFontSize(10.5);
     }
     
     body.appendParagraph('');
     
-    // 5. Klausul Penutup
-    var pTutup = body.appendParagraph(
-      'Demikian Berita Acara Alih Media Arsip ini dibuat dengan sesungguhnya rangkap 2 (dua) untuk dipergunakan sebagaimana mestinya dan memiliki kekuatan hukum yang sah sesuai ketentuan Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala Arsip Nasional Republik Indonesia Nomor 9 Tahun 2018 tentang Pedoman Pemeliharaan Arsip Dinamis.'
-    );
-    pTutup.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
-    pTutup.setFontFamily('Times New Roman').setFontSize(11.5).setLineSpacing(1.3);
+    // 5. Paragraf Pengantar Rincian Arsip
+    var pPengantar = body.appendParagraph('Arsip yang telah dilaksanakan alih media pada periode sebagaimana tersebut di atas adalah sebagai berikut:');
+    pPengantar.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+    pPengantar.setFontFamily('Times New Roman').setFontSize(11).setLineSpacing(1.25);
+    
+    // 6. Tabel 2: Daftar Rincian Arsip (Table Grid ber-border)
+    var arsipList = payload.arsipList || [];
+    var t2Data = [
+      ['No', 'Kode Unik', 'Jenis Arsip', 'Uraian Arsip', 'Kurun Waktu', 'Jumlah Lembar']
+    ];
+    
+    if (arsipList.length === 0) {
+      t2Data.push(['1', '-', 'Arsip Statis Terbuka', 'Berkas Arsip Alih Media Periode ' + (payload.periodePelaksanaan || ''), '-', jmlLembar + ' lembar']);
+    } else {
+      for (var aIdx = 0; aIdx < arsipList.length; aIdx++) {
+        var item = arsipList[aIdx];
+        t2Data.push([
+          String(item.no || (aIdx + 1)),
+          item.kode_unik || '-',
+          item.jenis_arsip || 'Arsip Statis Terbuka',
+          item.uraian || '-',
+          item.kurun_waktu || '-',
+          (item.jumlah_lembar || 1) + ' lembar'
+        ]);
+      }
+    }
+    // Baris Total
+    t2Data.push(['', '', '', '', 'TOTAL', jmlLembar + ' lembar']);
+    
+    var table2 = body.appendTable(t2Data);
+    table2.setBorderWidth(1);
+    table2.setBorderColor('#000000');
+    
+    // Format Header Tabel 2
+    var t2HeaderRow = table2.getRow(0);
+    var colWidths = [30, 90, 85, 155, 65, 62];
+    for (var c = 0; c < 6; c++) {
+      var hCell = t2HeaderRow.getCell(c);
+      hCell.setWidth(colWidths[c]).setBackgroundColor('#F1F5F9');
+      var pHead = hCell.getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(9.5).setBold(true);
+      pHead.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    }
+    
+    // Format Baris Data Tabel 2
+    for (var r2 = 1; r2 < t2Data.length - 1; r2++) {
+      var row2 = table2.getRow(r2);
+      for (var c2 = 0; c2 < 6; c2++) {
+        var bCell = row2.getCell(c2);
+        bCell.setWidth(colWidths[c2]);
+        var pBody = bCell.getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(9);
+        if (c2 === 0 || c2 === 1 || c2 === 4 || c2 === 5) {
+          pBody.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        } else {
+          pBody.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
+        }
+      }
+    }
+    
+    // Format Baris Total Tabel 2
+    var lastRowIdx = t2Data.length - 1;
+    var rowTotal = table2.getRow(lastRowIdx);
+    for (var ct = 0; ct < 6; ct++) {
+      var totCell = rowTotal.getCell(ct);
+      totCell.setWidth(colWidths[ct]).setBackgroundColor('#FAFAFA');
+      var pTot = totCell.getChild(0).asParagraph().setFontFamily('Times New Roman').setFontSize(9.5).setBold(true);
+      if (ct === 4) {
+        pTot.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+      } else if (ct === 5) {
+        pTot.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      }
+    }
     
     body.appendParagraph('');
     
-    // 6. Tanda Tangan (2 Kolom Tabel Tanpa Border)
+    // 7. Paragraf Klausul Hukum ANRI & Penutup
+    var pKlausul1 = body.appendParagraph(
+      'Kegiatan alih media dilaksanakan dengan tujuan untuk menjamin keselamatan dan kemudahan akses informasi arsip, serta sebagai pengganti fungsi arsip fisik/asli sesuai dengan ketentuan peraturan perundang-undangan yang berlaku, khususnya Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala ANRI yang mengatur tentang pedoman alih media arsip.'
+    );
+    pKlausul1.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+    pKlausul1.setFontFamily('Times New Roman').setFontSize(10.5).setLineSpacing(1.25);
+    
+    var pKlausul2 = body.appendParagraph(
+      'Arsip hasil alih media (reproduksi) disimpan secara terpisah dari arsip aslinya dan diperlakukan sesuai dengan kaidah pengelolaan arsip yang berlaku, sedangkan arsip asli tetap disimpan sebagai arsip pendukung/pembanding.'
+    );
+    pKlausul2.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+    pKlausul2.setFontFamily('Times New Roman').setFontSize(10.5).setLineSpacing(1.25);
+    
+    var pPenutup = body.appendParagraph('Demikian Berita Acara ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.');
+    pPenutup.setAlignment(DocumentApp.HorizontalAlignment.JUSTIFY);
+    pPenutup.setFontFamily('Times New Roman').setFontSize(10.5).setLineSpacing(1.25);
+    
+    body.appendParagraph('');
+    
+    // 8. Tanda Tangan (2 Kolom Tabel Tanpa Border)
     var useKadis = payload.useKadis !== false;
     var usePelaksana = payload.usePelaksana !== false;
     
@@ -564,15 +684,15 @@ function exportBAToGoogleDoc(payload) {
       if (useKadis) {
         var pK1 = cellKadis.getChild(0).asParagraph();
         pK1.setText('Mengetahui,').setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11);
-        var pK2 = cellKadis.appendParagraph('Kepala Dinas Kearsipan dan Perpustakaan\nKabupaten Manggarai Barat');
+        var pK2 = cellKadis.appendParagraph('Kepala Dinas Kearsipan dan Perpustakaan\nKabupaten Manggarai Barat,');
         pK2.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true);
         cellKadis.appendParagraph('\n\n\n');
-        var pK3 = cellKadis.appendParagraph(payload.kadis ? (payload.kadis.NAMA || 'AUGUSTINUS RINUS, S.Pd') : 'AUGUSTINUS RINUS, S.Pd');
+        var pK3 = cellKadis.appendParagraph(payload.kadis ? (payload.kadis.NAMA || 'Augustinus Rinus, S.Pd') : 'Augustinus Rinus, S.Pd');
         pK3.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true).setUnderline(true);
         var pK4 = cellKadis.appendParagraph(payload.kadis ? (payload.kadis.PANGKAT || 'Pembina Utama Muda') : 'Pembina Utama Muda');
-        pK4.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+        pK4.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10);
         var pK5 = cellKadis.appendParagraph('NIP. ' + (payload.kadis ? (payload.kadis.NIP || '19720219 199903 1 008') : '19720219 199903 1 008'));
-        pK5.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+        pK5.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10);
       } else {
         cellKadis.getChild(0).asParagraph().setText('');
       }
@@ -581,18 +701,16 @@ function exportBAToGoogleDoc(payload) {
       var cellPelaksana = ttdRow.appendTableCell();
       cellPelaksana.setWidth(245);
       if (usePelaksana) {
-        var tglSurat = 'Labuan Bajo, ' + (payload.tanggalAngka || '18') + ' ' + (payload.bulanNama || 'Desember') + ' ' + (payload.tahunAngka || '2025');
+        var tglSurat = 'Labuan Bajo, ' + (payload.tanggalSurat || ((payload.tanggalAngka || '31') + ' ' + (payload.bulanNama || 'Desember') + ' ' + (payload.tahunAngka || 2025)));
         var pP1 = cellPelaksana.getChild(0).asParagraph();
         pP1.setText(tglSurat).setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11);
         var pP2 = cellPelaksana.appendParagraph((payload.tipe === 'gabungan' ? 'Koordinator Pelaksana Alih Media,' : 'Pelaksana Alih Media,'));
         pP2.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true);
         cellPelaksana.appendParagraph('\n\n\n');
-        var pP3 = cellPelaksana.appendParagraph(payload.pelaksana ? (payload.pelaksana.nama || 'MUHAMMAD DZAKY NATHANEGARA, A.Md') : 'MUHAMMAD DZAKY NATHANEGARA, A.Md');
+        var pP3 = cellPelaksana.appendParagraph(payload.pelaksana ? (payload.pelaksana.nama || 'Muhammad Dzaky Nathanegara, A.Md') : 'Muhammad Dzaky Nathanegara, A.Md');
         pP3.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(11).setBold(true).setUnderline(true);
-        var pP4 = cellPelaksana.appendParagraph(payload.pelaksana ? (payload.pelaksana.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan');
-        pP4.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
-        var pP5 = cellPelaksana.appendParagraph('NIP. ' + (payload.pelaksana ? (payload.pelaksana.nip || '19980508 202506 1 004') : '19980508 202506 1 004'));
-        pP5.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10.5);
+        var pP4 = cellPelaksana.appendParagraph('NIP. ' + (payload.pelaksana ? (payload.pelaksana.nip || '19980508 202506 1 004') : '19980508 202506 1 004'));
+        pP4.setAlignment(DocumentApp.HorizontalAlignment.CENTER).setFontFamily('Times New Roman').setFontSize(10);
       } else {
         cellPelaksana.getChild(0).asParagraph().setText('');
       }

@@ -7,7 +7,7 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 44 (Deployment @62)**
+- **Versi Terakhir**: **Versi 45 (Deployment @63)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
@@ -15,13 +15,53 @@
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
 
-### Versi 44 — Penghapusan Watermark pada Dokumen Berita Acara Alih Media
-- **Latar Belakang**: Menindaklanjuti permintaan pengguna agar cap watermark pada dokumen Berita Acara Alih Media dihilangkan sepenuhnya, sehingga dokumen Berita Acara tampil bersih dan murni sebagai naskah dinas resmi hukum pemerintahan tanpa latar belakang tulisan watermark.
+### Versi 45 — Penerapan Template Resmi Berita Acara Alih Media DOCX (Dinas Kearsipan Kab. Manggarai Barat)
+- **Latar Belakang**: Menerapkan berkas template naskah dinas resmi kearsipan `Tempate Berita Acara untuk SIASTA.docx` secara penuh ke dalam sistem SIASTA dengan data dinamis yang terintegrasi langsung dengan database arsip dan riwayat Berita Acara.
+- **Hasil Analisis & Penerapan Format Template**:
+  1. **Kop Surat Resmi Naskah Dinas**:
+     - Logo Pemkab Manggarai Barat di sebelah kiri.
+     - Teks instansi: `PEMERINTAH KABUPATEN MANGGARAI BARAT`, `DINAS KEARSIPAN DAN PERPUSTAKAAN`, `Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT`.
+     - Garis ganda pembatas kop surat (tebal 3px dan 1px).
+  2. **Judul Dokumen & Nomor Dinamis**:
+     - `BERITA ACARA ALIH MEDIA ARSIP` (Center, Bold, Underline).
+     - `Nomor: [NOMOR_BA]` (menggunakan format penomoran resmi naskah dinas otomatis atau nomor tersimpan).
+  3. **Paragraf Pembuka**:
+     - Format: `Pada hari ini, [HARI], tanggal [TANGGAL] [BULAN] [TAHUN], bertempat di Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat, telah dilaksanakan kegiatan alih media arsip dari media fisik ke media digital dengan keterangan sebagai berikut:`
+  4. **Tabel 1: Ringkasan Kegiatan (Table Grid Ber-border 1px Solid Hitam)**:
+     - Header: `Uraian` | `Keterangan`
+     - Baris 1: `Jenis Kegiatan` -> `Alih Media Arsip dari media kertas (fisik) ke media digital (softcopy/PDF)`
+     - Baris 2: `Periode Pelaksanaan` -> Dinamis (`Bulan [Bulan] [Tahun]`)
+     - Baris 3: `Jenis Arsip` -> Dinamis (`Arsip Statis Terbuka`)
+     - Baris 4: `Jumlah Berkas` -> Dinamis (`[N] berkas`)
+     - Baris 5: `Jumlah Lembar` -> Dinamis (`[N] lembar`, akumulasi total lembar fisik arsip)
+     - Baris 6: `Pelaksana Alih Media` -> Dinamis (`Muhammad Dzaky Nathanegara, A.Md` / nama pelaksana tim)
+     - Baris 7: `Lokasi Simpan Fisik` -> Dinamis (`Depo Arsip DKP Kab. Manggarai Barat`)
+  5. **Paragraf Pengantar Rincian Arsip**:
+     - Format: `Arsip yang telah dilaksanakan alih media pada periode sebagaimana tersebut di atas adalah sebagai berikut:`
+  6. **Tabel 2: Daftar Arsip Hasil Alih Media (Table Grid Ber-border 1px Solid Hitam)**:
+     - Kolom: `No` | `Kode Unik` | `Jenis Arsip` | `Uraian Arsip` | `Kurun Waktu` | `Jumlah Lembar`
+     - Baris data dinamis hasil mapping per item arsip periode terkait (`d.arsipList`).
+     - Baris Footer Total: Kolom 1-5 `TOTAL`, Kolom 6 `[TOTAL_LEMBAR] lembar`.
+  7. **Klausul Hukum ANRI & UU 43/2009 (2 Paragraf) + Penutup**:
+     - Paragraf 1: *"Kegiatan alih media dilaksanakan dengan tujuan untuk menjamin keselamatan dan kemudahan akses informasi arsip, serta sebagai pengganti fungsi arsip fisik/asli sesuai dengan ketentuan peraturan perundang-undangan yang berlaku, khususnya Undang-Undang Nomor 43 Tahun 2009 tentang Kearsipan serta Peraturan Kepala ANRI yang mengatur tentang pedoman alih media arsip."*
+     - Paragraf 2: *"Arsip hasil alih media (reproduksi) disimpan secara terpisah dari arsip aslinya dan diperlakukan sesuai dengan kaidah pengelolaan arsip yang berlaku, sedangkan arsip asli tetap disimpan sebagai arsip pendukung/pembanding."*
+     - Paragraf 3: *"Demikian Berita Acara ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya."*
+  8. **Tanda Tangan 2 Kolom (Sesuai Pejabat Resmi)**:
+     - Kolom Kiri: Mengetahui, Kepala Dinas Kearsipan dan Perpustakaan Kab. Manggarai Barat (**Augustinus Rinus, S.Pd** / Pembina Utama Muda / NIP. 19720219 199903 1 008).
+     - Kolom Kanan: `Labuan Bajo, [Tanggal]`, Pelaksana Alih Media (**Muhammad Dzaky Nathanegara, A.Md** / NIP. 19980508 202506 1 004).
 - **Modifikasi Berkas**:
-  1. `DashboardBA.html`:
-     - Menghapus layer markup `#doc-ba-watermark` dari kertas dokumen `#ba-print-sheet`.
-     - Menghapus checkbox kontrol watermark dari bilah toolbar pratinjau.
-     - Menghapus fungsi skrip `toggleBAWatermark(show)` dan kode inisialisasinya pada `populateFormalBAModal()`.
+  1. `BeritaAcaraService.gs`:
+     - Memperbarui `getBeritaAcaraFormalDetail()` agar memetakan seluruh data dinamis (`periodePelaksanaan`, `jumlahBerkas`, `jumlahLembar`, `totalLembar`, `namaPetugas`, `nipPetugas`, `lokasiSimpan`, `arsipList`).
+     - Memperbarui `exportBAToGoogleDoc()` agar menghasilkan berkas Google Docs berstruktur identik (Kop surat, Tabel 1 ber-border, Paragraf pengantar, Tabel 2 rincian arsip ber-border lengkap dengan footer TOTAL, 2 klausul hukum ANRI & penutup, dan tabel TTD 2 kolom).
+  2. `DashboardBA.html`:
+     - Memperbarui elemen dokumen cetak `#ba-print-sheet` dengan markup Tabel 1 (Ringkasan) dan Tabel 2 (Daftar Rincian Arsip) ber-border hitam rapi dan klausul hukum ANRI persis template DOCX.
+     - Memperbarui `populateFormalBAModal(d)` untuk merender baris-baris arsip dinamis ke `#doc-ba-arsip-tbody` serta menghitung total lembar dan mengisi seluruh parameter Tabel 1.
+  3. `Styles.html`:
+     - Memastikan styling cetak `@media print` untuk Berita Acara memiliki batas garis tabel yang tegas (`border: 1px solid #000; border-collapse: collapse;`) dan terpaginasi dengan rapi (`page-break-inside: avoid;`).
+
+---
+
+### Versi 44 — Penghapusan Watermark pada Dokumen Berita Acara Alih Media
 
 ---
 
