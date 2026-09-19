@@ -204,7 +204,7 @@
         </div>
         <div style="display:flex; gap:8px;">
           <button class="btn btn-gold btn-sm" onclick="printRekapDoc()" style="display:flex; align-items:center; gap:6px;">
-            🖨️ Cetak Dokumen
+            🖨️ Cetak Dokumen (Tab Baru)
           </button>
           <button class="modal-close" onclick="closeModal('modal-preview-rekap-print')" style="color:#fff;">✕</button>
         </div>
@@ -229,7 +229,7 @@
             </label>
           </div>
           <button type="button" class="btn btn-sm btn-gold" onclick="printRekapDoc()" style="display:flex; align-items:center; gap:5px;">
-            🖨️ Cetak Dokumen
+            🖨️ Cetak Dokumen (Tab Baru)
           </button>
         </div>
 
@@ -270,22 +270,22 @@
               <thead>
                 <tr style="background:#f2f2f2; text-align:center; font-weight:bold;">
                   <th style="width:20px; border:1px solid #000; padding:3px 2px;">No</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kode Unik</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Status Keterbukaan</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Kode Unik</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Status Keterbukaan</th>
                   <th style="border:1px solid #000; padding:3px 2px;">Asal Arsip</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kode Asal</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Nomor Box</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Nomor Urut</th>
-                  <th style="border:1px solid #000; padding:3px 2px; min-width:110px;">Deskripsi</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Jenis Arsip</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kategori Urusan</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kode Klasifikasi</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Nomor Asli</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Jumlah Lembar</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Jumlah Berkas</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Rangkap Ke</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kondisi Fisik</th>
-                  <th style="border:1px solid #000; padding:3px 2px; white-space:nowrap;">Kurun Waktu (Tahun Pembuatan)</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Kode Asal</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Nomor Box</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Nomor Urut</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Deskripsi</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Jenis Arsip</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Kategori Urusan</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Kode Klasifikasi</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Nomor Asli</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Jumlah Lembar</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Jumlah Berkas</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Rangkap Ke</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Kondisi Fisik</th>
+                  <th style="border:1px solid #000; padding:3px 2px;">Kurun Waktu (Tahun Pembuatan)</th>
                   <th style="border:1px solid #000; padding:3px 2px;">Unit Pengelola</th>
                   <th style="border:1px solid #000; padding:3px 2px;">Lokasi Simpan</th>
                   <th style="border:1px solid #000; padding:3px 2px;">Keterangan</th>
@@ -334,7 +334,7 @@
         </div>
         <div style="display:flex; gap:8px;">
           <button type="button" class="btn btn-outline" onclick="closeModal('modal-preview-rekap-print')">Tutup</button>
-          <button type="button" class="btn btn-primary" onclick="printRekapDoc()">🖨️ Cetak Dokumen</button>
+          <button type="button" class="btn btn-primary" onclick="printRekapDoc()">🖨️ Cetak Dokumen (Tab Baru)</button>
         </div>
       </div>
     </div>
@@ -741,26 +741,26 @@ function populateRekapPrintModal(d) {
   var html = '';
   d.items.forEach(function(item) {
     html += '<tr style="vertical-align:top; font-size:6.5pt;">' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.no + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; font-weight:600; white-space:nowrap;">' + escapeHtml(item.kodeUnik) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.statusKeterbukaan) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.asalArsip) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kodeAsal) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.nomorBox) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.nomorUrut) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 3px; text-align:left;">' + escapeHtml(item.deskripsi) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.jenisArsip) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kategoriUrusan) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kodeKlasifikasi) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.nomorAsli) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.jumlahLembar + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.jumlahBerkas + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px;">' + item.rangkapKe + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kondisiFisik) + '</td>' +
-      '<td style="text-align:center; border:1px solid #000; padding:2px 3px; white-space:nowrap;">' + escapeHtml(item.kurunWaktu) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.unitPengelola) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.lokasiSimpan) + '</td>' +
-      '<td style="border:1px solid #000; padding:2px 3px;">' + escapeHtml(item.keterangan) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.no + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px; font-weight:600;">' + escapeHtml(item.kodeUnik) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.statusKeterbukaan) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.asalArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kodeAsal) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.nomorBox) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.nomorUrut) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 2px; text-align:left;">' + escapeHtml(item.deskripsi) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.jenisArsip) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kategoriUrusan) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kodeKlasifikasi) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.nomorAsli) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.jumlahLembar + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.jumlahBerkas + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + item.rangkapKe + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kondisiFisik) + '</td>' +
+      '<td style="text-align:center; border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.kurunWaktu) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.unitPengelola) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.lokasiSimpan) + '</td>' +
+      '<td style="border:1px solid #000; padding:2px 2px;">' + escapeHtml(item.keterangan) + '</td>' +
     '</tr>';
   });
   tbody.innerHTML = html;
@@ -819,17 +819,229 @@ function toggleRekapSignerBlock(signer, isChecked) {
   }
 }
 
-// CETAK DOKUMEN REKAPITULASI RESMI (A4 LANDSCAPE)
+// CETAK DOKUMEN REKAPITULASI RESMI (BUKA DI TAB BARU AGAR TIDAK TERPOTONG)
 function printRekapDoc() {
-  if (typeof siastaPrint === 'function') {
-    siastaPrint('rekap-print-sheet', {
-      orientation: 'landscape',
-      margin: '12mm 10mm',
-      className: 'siasta-print-section-rekap'
-    });
-  } else {
-    window.print();
+  var printContent = document.getElementById('rekap-print-sheet');
+  if (!printContent) {
+    if (typeof showSwalError === 'function') {
+      showSwalError('Dokumen rekapitulasi belum dimuat.');
+    } else {
+      alert('Dokumen rekapitulasi belum dimuat.');
+    }
+    return;
   }
+
+  // Buka jendela / tab baru
+  var printWin = window.open('', '_blank');
+  if (!printWin) {
+    if (typeof showSwalWarning === 'function') {
+      showSwalWarning('Jendela cetak terblokir oleh browser. Harap izinkan pop-up untuk situs ini agar lembar cetak dapat terbuka di tab baru.');
+    } else {
+      alert('Jendela cetak terblokir oleh browser. Harap izinkan pop-up untuk situs ini.');
+    }
+    return;
+  }
+
+  if (typeof showToast === 'function') {
+    showToast('Membuka lembar cetak dokumen di tab baru...', 'info');
+  }
+
+  var contentHtml = printContent.innerHTML;
+
+  var docHtml = '<!DOCTYPE html>\n' +
+    '<html lang="id">\n' +
+    '<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+    '  <title>Daftar Rekapitulasi Alih Media Arsip - SIASTA</title>\n' +
+    '  <style>\n' +
+    '    @page {\n' +
+    '      size: A4 landscape;\n' +
+    '      margin: 6mm 6mm 6mm 6mm;\n' +
+    '    }\n' +
+    '    *, *::before, *::after {\n' +
+    '      box-sizing: border-box;\n' +
+    '      -webkit-print-color-adjust: exact !important;\n' +
+    '      print-color-adjust: exact !important;\n' +
+    '    }\n' +
+    '    html, body {\n' +
+    '      margin: 0;\n' +
+    '      padding: 0;\n' +
+    '      background: #f1f5f9;\n' +
+    '      font-family: "Times New Roman", Times, serif;\n' +
+    '      color: #000;\n' +
+    '      width: 100%;\n' +
+    '    }\n' +
+    '    .no-print-toolbar {\n' +
+    '      position: sticky;\n' +
+    '      top: 0;\n' +
+    '      background: #1B2A4A;\n' +
+    '      color: #ffffff;\n' +
+    '      padding: 10px 24px;\n' +
+    '      display: flex;\n' +
+    '      justify-content: space-between;\n' +
+    '      align-items: center;\n' +
+    '      box-shadow: 0 2px 10px rgba(0,0,0,0.2);\n' +
+    '      z-index: 99999;\n' +
+    '      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n' +
+    '    }\n' +
+    '    .no-print-toolbar .doc-title {\n' +
+    '      font-size: 14px;\n' +
+    '      font-weight: 600;\n' +
+    '      display: flex;\n' +
+    '      align-items: center;\n' +
+    '      gap: 8px;\n' +
+    '    }\n' +
+    '    .no-print-toolbar .actions {\n' +
+    '      display: flex;\n' +
+    '      gap: 10px;\n' +
+    '    }\n' +
+    '    .btn-act {\n' +
+    '      padding: 7px 16px;\n' +
+    '      font-size: 13px;\n' +
+    '      font-weight: 600;\n' +
+    '      border-radius: 6px;\n' +
+    '      border: none;\n' +
+    '      cursor: pointer;\n' +
+    '      display: inline-flex;\n' +
+    '      align-items: center;\n' +
+    '      gap: 6px;\n' +
+    '      transition: all 0.2s;\n' +
+    '    }\n' +
+    '    .btn-print {\n' +
+    '      background: #D4AF37;\n' +
+    '      color: #1B2A4A;\n' +
+    '    }\n' +
+    '    .btn-print:hover {\n' +
+    '      background: #bfa02e;\n' +
+    '    }\n' +
+    '    .btn-close {\n' +
+    '      background: rgba(255,255,255,0.15);\n' +
+    '      color: #fff;\n' +
+    '    }\n' +
+    '    .btn-close:hover {\n' +
+    '      background: rgba(255,255,255,0.25);\n' +
+    '    }\n' +
+    '    .print-paper {\n' +
+    '      position: relative;\n' +
+    '      width: 100%;\n' +
+    '      max-width: 288mm;\n' +
+    '      margin: 16px auto 40px auto;\n' +
+    '      background: #fff;\n' +
+    '      padding: 8mm 8mm;\n' +
+    '      box-shadow: 0 4px 20px rgba(0,0,0,0.15);\n' +
+    '      min-height: 195mm;\n' +
+    '      overflow: hidden;\n' +
+    '    }\n' +
+    '    div[style*="overflow-x"] {\n' +
+    '      overflow: visible !important;\n' +
+    '      width: 100% !important;\n' +
+    '    }\n' +
+    '    table {\n' +
+    '      width: 100% !important;\n' +
+    '      border-collapse: collapse !important;\n' +
+    '      table-layout: auto !important;\n' +
+    '      margin-bottom: 16px !important;\n' +
+    '    }\n' +
+    '    table th, table td {\n' +
+    '      border: 1px solid #000000 !important;\n' +
+    '      padding: 2px 2px !important;\n' +
+    '      font-size: 5.8pt !important;\n' +
+    '      line-height: 1.15 !important;\n' +
+    '      word-break: break-word !important;\n' +
+    '      white-space: normal !important;\n' +
+    '    }\n' +
+    '    table th {\n' +
+    '      background-color: #f1f5f9 !important;\n' +
+    '      font-weight: bold !important;\n' +
+    '      text-align: center !important;\n' +
+    '      font-size: 6pt !important;\n' +
+    '      padding: 3px 1.5px !important;\n' +
+    '      vertical-align: middle !important;\n' +
+    '    }\n' +
+    '    .watermark-pdf-overlay {\n' +
+    '      position: absolute;\n' +
+    '      top: 50%;\n' +
+    '      left: 50%;\n' +
+    '      transform: translate(-50%, -50%) rotate(-25deg);\n' +
+    '      pointer-events: none;\n' +
+    '      user-select: none;\n' +
+    '      z-index: 0;\n' +
+    '      text-align: center;\n' +
+    '      width: 140%;\n' +
+    '      white-space: nowrap;\n' +
+    '    }\n' +
+    '    #rekap-ttd-container {\n' +
+    '      display: flex !important;\n' +
+    '      justify-content: space-between !important;\n' +
+    '      margin-top: 20px !important;\n' +
+    '      page-break-inside: avoid !important;\n' +
+    '      break-inside: avoid !important;\n' +
+    '      font-size: 9.5pt !important;\n' +
+    '    }\n' +
+    '    #rekap-block-kabid, #rekap-block-pelaksana {\n' +
+    '      width: 48% !important;\n' +
+    '      text-align: center !important;\n' +
+    '      page-break-inside: avoid !important;\n' +
+    '    }\n' +
+    '    @media print {\n' +
+    '      html, body {\n' +
+    '        background: #fff !important;\n' +
+    '        margin: 0 !important;\n' +
+    '        padding: 0 !important;\n' +
+    '      }\n' +
+    '      .no-print-toolbar {\n' +
+    '        display: none !important;\n' +
+    '      }\n' +
+    '      .print-paper {\n' +
+    '        margin: 0 !important;\n' +
+    '        padding: 0 !important;\n' +
+    '        max-width: 100% !important;\n' +
+    '        width: 100% !important;\n' +
+    '        box-shadow: none !important;\n' +
+    '        min-height: auto !important;\n' +
+    '      }\n' +
+    '      table {\n' +
+    '        font-size: 5.8pt !important;\n' +
+    '        page-break-inside: auto !important;\n' +
+    '      }\n' +
+    '      tr {\n' +
+    '        page-break-inside: avoid !important;\n' +
+    '        page-break-after: auto !important;\n' +
+    '      }\n' +
+    '      thead {\n' +
+    '        display: table-header-group !important;\n' +
+    '      }\n' +
+    '      tfoot {\n' +
+    '        display: table-footer-group !important;\n' +
+    '      }\n' +
+    '    }\n' +
+    '  </style>\n' +
+    '</head>\n' +
+    '<body>\n' +
+    '  <div class="no-print-toolbar">\n' +
+    '    <div class="doc-title">📄 <strong>Daftar Rekapitulasi Alih Media Arsip (A4 Landscape)</strong></div>\n' +
+    '    <div class="actions">\n' +
+    '      <button type="button" class="btn-act btn-print" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>\n' +
+    '      <button type="button" class="btn-act btn-close" onclick="window.close()">✕ Tutup Tab</button>\n' +
+    '    </div>\n' +
+    '  </div>\n' +
+    '  <div class="print-paper">\n' +
+    '    ' + contentHtml + '\n' +
+    '  </div>\n' +
+    '  <script>\n' +
+    '    window.onload = function() {\n' +
+    '      setTimeout(function() {\n' +
+    '        window.print();\n' +
+    '      }, 400);\n' +
+    '    };\n' +
+    '  <\/script>\n' +
+    '</body>\n' +
+    '</html>';
+
+  printWin.document.open();
+  printWin.document.write(docHtml);
+  printWin.document.close();
 }
 
 if (typeof init_daftar_arsip === 'function') init_daftar_arsip();

@@ -7,7 +7,7 @@
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
 - **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 47 (Deployment @65)**
+- **Versi Terakhir**: **Versi 47 (Deployment @66)**
 - **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
 - **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
 
@@ -16,7 +16,7 @@
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
 
 ### Versi 47 — Penyelarasan Judul Kolom & Format Tabel Rekapitulasi Alih Media Sesuai Master Arsip
-- **Latar Belakang**: Menindaklanjuti permintaan revisi pada dokumen instruksi (Google Docs `1Nma2GuO4o0uC10wVuWSSws35fRhYFj932u198Mq2D_s`) mengenai tampilan format cetak rekapitulasi pada menu **Daftar Arsip -> Export -> Cetak Rekap Resmi**, di mana sebelumnya terdapat ketidaksinkronan jumlah kolom antara header (14 kolom) dan baris data (16 kolom) sehingga terdapat kolom yang tidak memiliki judul.
+- **Latar Belakang**: Menindaklanjuti permintaan revisi pada dokumen instruksi (Google Docs `1Nma2GuO4o0uC10wVuWSSws35fRhYFj932u198Mq2D_s`) mengenai tampilan format cetak rekapitulasi pada menu **Daftar Arsip -> Export -> Cetak Rekap Resmi**, di mana sebelumnya terdapat ketidaksinkronan jumlah kolom antara header (14 kolom) dan baris data (16 kolom) sehingga terdapat kolom yang tidak memiliki judul, serta mengoptimalkan proses cetak agar tidak terpotong dengan membuka lembar dokumen cetak di tab baru.
 - **Rincian Perubahan yang Diimplementasikan**:
   1. **Struktur Kolom Tabel Lengkap (20 Kolom)**:
      - Menyelaraskan susunan judul kolom `<thead>`, baris data `<tbody>`, dan ekspor CSV agar persis mengikuti urutan 19 field dari sheet `master_arsip` (mulai dari `kode_unik` hingga `keterangan`) ditambah kolom `No` di kolom pertama:
@@ -45,10 +45,14 @@
   3. **Antarmuka Pratinjau & Cetak (`DaftarArsip.html`)**:
      - Memperbarui elemen tabel `#rekap-print-sheet` dengan 20 `<th>` yang memiliki judul jelas dan proporsional.
      - Memperbarui `<tfoot>` dengan `colspan="12"` untuk label total, sel total lembar, sel total berkas, dan `colspan="6"` penutup sehingga total kolom pas 20 kolom.
-     - Memperbarui fungsi `populateRekapPrintModal(d)` untuk merender 20 elemen `<td>` per baris sesuai urutan field.
+     - Memperbarui fungsi `populateRekapPrintModal(d)` untuk merender 20 elemen `<td>` per baris sesuai urutan field tanpa pembatasan nowrap kaku.
      - Memperbarui fungsi `generateAndDownloadCSV(d)` agar header dan baris CSV ekspor Excel juga selaras dengan ke-20 kolom tersebut.
   4. **Tata Letak Cetak A4 Landscape (`Styles.html`)**:
      - Mengatur styling cetak `#siasta-print-section.siasta-print-section-rekap` dengan font 6.5pt dan padding 2px–2.5px agar seluruh 20 kolom tercetak secara rapi, proporsional, dan tidak meluap di lembar A4 Landscape.
+  5. **Mekanisme Cetak di Tab Baru Khusus (`printRekapDoc`)**:
+     - Mengubah alur cetak dokumen rekapitulasi agar otomatis membuka jendela/tab baru (`window.open('', '_blank')`) dengan dokumen standalone A4 Landscape ber-margin 6mm.
+     - Menyelesaikan tuntas kendala dokumen terpotong akibat batasan viewport/iframe aplikasi web Google Apps Script.
+     - Menyediakan floating toolbar khusus non-cetak pada tab baru (tombol *🖨️ Cetak / Simpan PDF* dan *✕ Tutup Tab*) serta otomatis memicu dialog cetak browser (`window.print()`).
 
 ---
 
