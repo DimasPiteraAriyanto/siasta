@@ -516,18 +516,20 @@ function confirmDeleteArsip() {
   
   showSwalConfirm(
     'Konfirmasi Hapus Arsip',
-    'Apakah Anda yakin ingin menghapus arsip <strong>' + d.kode_unik + '</strong>?<br><span style="font-size:12px;color:#64748B;">Sesuai regulasi ANRI, arsip akan diarsipkan ke audit log dan dikeluarkan dari inventaris aktif.</span>',
-    'Ya, Hapus Arsip',
+    'Apakah Anda yakin ingin menghapus arsip <strong>' + d.kode_unik + '</strong>?<br><span style="font-size:12px;color:#ef4444;font-weight:600;">⚠️ Baris data arsip akan dihapus permanen dari spreadsheet dan Google Drive. Tindakan ini tidak dapat dibatalkan.</span>',
+    'Ya, Hapus Permanen',
     'Batal'
   ).then(function(confirmed) {
     if (!confirmed) return;
     
-    showProcessLoading('Menghapus Arsip...', 'Sedang memproses soft-delete sesuai standar ANRI...');
+    showProcessLoading('Menghapus Arsip...', 'Sedang menghapus baris data dari spreadsheet dan Drive...');
     google.script.run
       .withSuccessHandler(function(response) {
         hideProcessLoading();
         if (response.success) {
-          showSwalSuccess('Arsip ' + d.kode_unik + ' telah berhasil dihapus.', 'Berhasil Dihapus');
+          showSwalSuccess('Arsip ' + d.kode_unik + ' telah berhasil dihapus permanen dari spreadsheet.', 'Berhasil Dihapus');
+          delete _pageHtmlCache['daftar-arsip'];
+          delete _pageHtmlCache['dashboard'];
           navigateTo('daftar-arsip');
         } else {
           showSwalError(response.message || 'Gagal menghapus arsip.', 'Gagal');

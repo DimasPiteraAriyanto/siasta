@@ -469,13 +469,23 @@ function deleteBeritaAcara(baId) {
       return jsonResponse(false, null, 'Berita acara tidak ditemukan.');
     }
     
+    // Hapus file fisik di Drive jika ada
+    if (target.file_id) {
+      try {
+        var file = DriveApp.getFileById(target.file_id);
+        if (file) file.setTrashed(true);
+      } catch (eDrive) {
+        Logger.log('Notice: Gagal menghapus file BA di Drive: ' + eDrive.message);
+      }
+    }
+    
     var sheet = getSheet(CONFIG.SHEETS.BERITA_ACARA);
     var rowIndex = target._rowIndex;
     if (rowIndex && rowIndex > 1) {
       sheet.deleteRow(rowIndex);
       invalidateSheetCache(CONFIG.SHEETS.BERITA_ACARA);
       logActivity('DELETE_BA', 'BeritaAcara', 'Menghapus Berita Acara: ' + baId);
-      return jsonResponse(true, null, 'Berita acara berhasil dihapus.');
+      return jsonResponse(true, null, 'Berita acara berhasil dihapus dari spreadsheet.');
     }
     return jsonResponse(false, null, 'Baris data tidak ditemukan.');
   } catch (e) {

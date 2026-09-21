@@ -6,9 +6,9 @@
 
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
-- **ID Deployment Aktif**: `AKfycbxMxpj7Onuule7bxGssVP3ndXmvf0Fd6q3c0gdpVXRSSD8XgseW1qpeIy_wEx22izWvzQ`
-- **Versi Terakhir**: **Versi 52 (Deployment @10 Baru)**
-- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxMxpj7Onuule7bxGssVP3ndXmvf0Fd6q3c0gdpVXRSSD8XgseW1qpeIy_wEx22izWvzQ/exec](https://script.google.com/macros/s/AKfycbxMxpj7Onuule7bxGssVP3ndXmvf0Fd6q3c0gdpVXRSSD8XgseW1qpeIy_wEx22izWvzQ/exec)
+- **ID Deployment Aktif**: `AKfycbx27qHUjbvuxreI-aTb5ZDX6WXALdFbNM1im9-sHlU-zE9AXvrhxK2EOjNzEYiUVfod3g`
+- **Versi Terakhir**: **Versi 53 (Deployment @12 Baru)**
+- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbx27qHUjbvuxreI-aTb5ZDX6WXALdFbNM1im9-sHlU-zE9AXvrhxK2EOjNzEYiUVfod3g/exec](https://script.google.com/macros/s/AKfycbx27qHUjbvuxreI-aTb5ZDX6WXALdFbNM1im9-sHlU-zE9AXvrhxK2EOjNzEYiUVfod3g/exec)
 - **ID Proyek GAS Baru**: `1BA5rFvxRcszqyltzolfb8zp0xzC5vWwe1v1UqTI7FE4deBjT-cnSQt9I`
 - **ID Basis Data (Spreadsheet Baru)**: `1c3caYKmVd1nt46lmqxxAEm8wVPQWwMsybqrz4OzBoSM`
 - **Cadangan Konfigurasi Lama**: Tersimpan di file [CONFIG_OLD_BACKUP.md](file:///d:/Antigravity/GAS/CONFIG_OLD_BACKUP.md)
@@ -16,6 +16,22 @@
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 53 — Sinkronisasi Penghapusan Fisik Permanen (Hard Delete) dari Google Sheets (Deployment @12)
+- **Latar Belakang**: Permintaan pengguna agar saat data arsip dihapus di aplikasi SIASTA, baris datanya di Google Spreadsheet juga benar-benar ikut terhapus secara fisik (`sheet.deleteRow()`) dan berkas digital di Google Drive dibersihkan.
+- **Rincian Perubahan yang Diimplementasikan**:
+  1. **Penghapusan Fisik Baris Data (`deleteArsip` di `ArsipService.gs`)**:
+     - Mengubah mekanisme dari *soft-delete* (yang sebelumnya hanya menandai status `"Dihapus"`) menjadi **Hard Delete** langsung menggunakan `sheet.deleteRow(rowIndex)`.
+     - Baris data pada sheet `master_arsip` langsung terhapus bersih seketika dari Google Sheets.
+  2. **Pembersihan Berkas Fisik di Google Drive**:
+     - Sistem otomatis mencari ID berkas digital terkait (`file_pelestarian_id`, `file_akses_id`, dan `file_id`), kemudian memindahkannya ke tong sampah / Trash (`DriveApp.getFileById(fid).setTrashed(true)`) agar tidak meninggalkan berkas yatim (*orphaned files*).
+  3. **Penyempurnaan Berita Acara (`deleteBeritaAcara` di `BeritaAcaraService.gs`)**:
+     - Memastikan berkas dokumen Berita Acara di Drive (`target.file_id`) juga dipindahkan ke tong sampah saat BA dihapus dari sheet `berita_acara`.
+  4. **Pembaruan Dialog Antarmuka Pengguna (`DetailArsip.html`)**:
+     - Dialog konfirmasi SweetAlert diperjelas: *"⚠️ Baris data arsip akan dihapus permanen dari spreadsheet dan Google Drive. Tindakan ini tidak dapat dibatalkan."*
+     - Setelah penghapusan, cache halaman dibersihkan (`delete _pageHtmlCache['daftar-arsip']` & `delete _pageHtmlCache['dashboard']`) sehingga data yang telah terhapus langsung hilang seketika saat kembali ke Daftar Arsip.
+  5. **Helper Fungsi Database Baru (`Database.gs`)**:
+     - Menambahkan fungsi `hardDeleteRow(sheetName, rowNumber)` dan `purgeDeletedRows(sheetName)`.
 
 ### Versi 52 — Penyesuaian Batas Waktu Sesi Inaktif Menjadi 1 Jam (60 Menit) (Deployment @10)
 - **Latar Belakang**: Permintaan pengguna untuk menyesuaikan durasi timeout sesi dari 5 menit menjadi **1 jam (60 menit)** agar staf memiliki waktu yang cukup leluasa dalam menginput data arsip panjang atau mengunggah berkas tanpa terputus sesi login secara mendadak.

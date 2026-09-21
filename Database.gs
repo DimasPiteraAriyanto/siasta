@@ -242,6 +242,51 @@ function softDelete(sheetName, rowNumber, statusColumn) {
 }
 
 /**
+ * Hapus baris fisik dari sheet (Hard delete langsung dari Google Sheets)
+ * @param {string} sheetName
+ * @param {number} rowNumber - 1-based index (wajib > 1 agar tidak menghapus header)
+ * @returns {boolean}
+ */
+function hardDeleteRow(sheetName, rowNumber) {
+  const sheet = getSheet(sheetName);
+  if (!sheet || rowNumber <= 1 || rowNumber > sheet.getLastRow()) return false;
+  sheet.deleteRow(rowNumber);
+  invalidateSheetCache(sheetName);
+  return true;
+}
+
+/**
+ * Bersihkan baris yang berstatus 'Dihapus' dari sheet secara permanen
+ * @param {string} sheetName
+ * @returns {number} Jumlah baris yang dihapus
+ */
+function purgeDeletedRows(sheetName) {
+  try {
+    var sheet = getSheet(sheetName);
+    if (!sheet || sheet.getLastRow() < 2) return 0;
+    var allData = readAllData(sheetName);
+    var deletedCount = 0;
+    // Loop mundur dari bawah ke atas agar nomor baris tidak bergeser
+    for (var i = allData.length - 1; i >= 0; i--) {
+      if (allData[i].status === 'Dihapus') {
+        var rowNum = allData[i]._rowIndex;
+        if (rowNum && rowNum > 1) {
+          sheet.deleteRow(rowNum);
+          deletedCount++;
+        }
+      }
+    }
+    if (deletedCount > 0) {
+      invalidateSheetCache(sheetName);
+    }
+    return deletedCount;
+  } catch (e) {
+    Logger.log('Error purgeDeletedRows: ' + e.message);
+    return 0;
+  }
+}
+
+/**
  * Count data di sheet
  * @param {string} sheetName
  * @returns {number}

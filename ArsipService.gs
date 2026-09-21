@@ -627,27 +627,51 @@ function getKodeAsalList() {
 }
 
 /**
- * Hapus arsip (Soft delete sesuai standar kearsipan ANRI)
+ * Hapus arsip secara permanen (Hard delete dari spreadsheet master_arsip & hapus file di Google Drive)
  * @param {string} arsipId
  */
 function deleteArsip(arsipId) {
   try {
-    var user = getCurrentUser() || { id: 'SYSTEM', nama: 'Petugas' };
-    var arsip = findOneByColumn(CONFIG.SHEETS.MASTER_ARSIP, 'id', arsipId);
+    if (!arsipId) return jsonResponse(false, null, 'ID arsip wajib disertakan.');
+    var sheet = getSheet(CONFIG.SHEETS.MASTER_ARSIP);
+    if (!sheet) return jsonResponse(false, null, 'Sheet master_arsip tidak ditemukan.');
+    
+    // Cari data arsip di sheet
+    var allData = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
+    var arsip = allData.find(function(a) { return a.id === arsipId; });
     if (!arsip) return jsonResponse(false, null, 'Arsip tidak ditemukan.');
     
-    updateData(CONFIG.SHEETS.MASTER_ARSIP, arsip._rowIndex, {
-      status: 'Dihapus',
-      tanggal_update: new Date()
+    var rowIndex = arsip._rowIndex;
+    if (!rowIndex || rowIndex <= 1) {
+      return jsonResponse(false, null, 'Baris data arsip tidak valid.');
+    }
+    
+    // 1. Pindahkan berkas digital fisik di Google Drive ke Trash jika ada
+    var fileIds = [arsip.file_pelestarian_id, arsip.file_akses_id, arsip.file_id];
+    fileIds.forEach(function(fid) {
+      if (fid && typeof fid === 'string' && fid.trim().length > 5) {
+        try {
+          var file = DriveApp.getFileById(fid.trim());
+          if (file) file.setTrashed(true);
+        } catch (eDrive) {
+          Logger.log('Notice: Gagal memindahkan berkas Drive ' + fid + ' ke trash: ' + eDrive.message);
+        }
+      }
     });
     
-    logActivity('DELETE_ARSIP', 'Arsip', 'Hapus arsip: ' + arsip.kode_unik + ' - ' + (arsip.deskripsi || ''));
+    // 2. Hapus baris data secara fisik langsung dari Google Sheets
+    sheet.deleteRow(rowIndex);
     
+    // 3. Catat audit trail di log aktivitas
+    logActivity('DELETE_ARSIP', 'Arsip', 'Hapus permanen arsip: ' + arsip.kode_unik + ' - ' + (arsip.deskripsi || ''));
+    
+    // 4. Invalidate cache agar tabel dan statistik langsung sinkron
     invalidateSheetCache(CONFIG.SHEETS.MASTER_ARSIP);
     clearCache('CACHE_DASHBOARD_STATS');
     
-    return jsonResponse(true, { id: arsipId, kodeUnik: arsip.kode_unik }, 'Arsip ' + arsip.kode_unik + ' berhasil dihapus.');
+    return jsonResponse(true, { id: arsipId, kodeUnik: arsip.kode_unik }, 'Arsip ' + arsip.kode_unik + ' berhasil dihapus permanen dari sistem dan spreadsheet.');
   } catch (e) {
+    Logger.log('Error deleteArsip: ' + e.message);
     return jsonResponse(false, null, 'Error menghapus arsip: ' + e.message);
   }
 }
@@ -1031,7 +1055,7 @@ function runFullCRUDTestSuite() {
     recordTest('17. Pengaturan Sistem & Watermark', false, new Date().getTime() - t17Start, {}, { error: e17.message }, 'Gagal: ' + e17.message);
   }
 
-  // ============ 18. DELETE (SOFT-DELETE SESUAI STANDAR ANRI) ============
+  // ============ 18. DELETE (HARD DELETE DARI SPREADSHEET) ============
   if (testRecordId) {
     var t18Start = new Date().getTime();
     try {
@@ -1043,15 +1067,15 @@ function runFullCRUDTestSuite() {
          !verifyDelList.data.data.some(function(item) { return item.id === testRecordId; }));
       var delPass = delRes.success && notInActiveList;
       recordTest(
-        '18. DELETE (Soft-Delete & Retensi ANRI)',
+        '18. DELETE (Hapus Baris Permanen Spreadsheet)',
         delPass,
         t18Dur,
         { id: testRecordId, kodeUnik: testKodeUnik },
         { success: delRes.success, message: delRes.message, excludedFromActiveList: notInActiveList },
-        'Arsip berhasil di-soft delete, status berubah jadi Dihapus, dan data keluar dari daftar aktif.'
+        'Baris data arsip berhasil dihapus langsung dari sheet master_arsip.'
       );
     } catch (e18) {
-      recordTest('18. DELETE (Soft-Delete & Retensi ANRI)', false, new Date().getTime() - t18Start, {}, { error: e18.message }, 'Gagal: ' + e18.message);
+      recordTest('18. DELETE (Hapus Baris Permanen Spreadsheet)', false, new Date().getTime() - t18Start, {}, { error: e18.message }, 'Gagal: ' + e18.message);
     }
   }
 
