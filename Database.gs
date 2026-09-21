@@ -699,8 +699,8 @@ function getDummyStaffList() {
       jabatan: 'Pengelola Kearsipan / Pelaksana Alih Media',
       email: 'dzaky.nathanegara@manggaraibaratkab.go.id',
       status: 'Aktif',
-      tanda_tangan_id: 'TTD-DEFAULT-005',
-      tanda_tangan_url: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyODAgMTAwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjEwMCI+PHBhdGggZD0iTTI1LDY1IEM0MCwyNSA1NSwyMCA2NSw0NSBDNzUsNzAgNjAsODUgODAsNjAgQzEwMCwzNSAxMjAsNDAgMTM1LDU1IEMxNTAsNzAgMTYwLDM1IDE3NSw1MCBDMTkwLDY1IDIxMCw0MCAyMjUsNTUgQzIzNSw2NSAyNDUsNTUgMjYwLDUwIE0zNSw4MCBDOTUsNzIgMTcwLDc1IDI1NSw3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMWE0ZmEwIiBzdHJva2Utd2lkdGg9IjMuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+",
+      tanda_tangan_id: '',
+      tanda_tangan_url: '',
       tanggal_dibuat: new Date()
     },
     {
@@ -709,6 +709,28 @@ function getDummyStaffList() {
       nip: '19720219 199903 1 008',
       jabatan: 'Kepala Dinas Kearsipan dan Perpustakaan',
       email: 'augustinus.rinus@manggaraibaratkab.go.id',
+      status: 'Aktif',
+      tanda_tangan_id: '',
+      tanda_tangan_url: '',
+      tanggal_dibuat: new Date()
+    },
+    {
+      id: 'STAF-007',
+      nama: 'Fatima Melani Rambing, SAP',
+      nip: '197305231992122003',
+      jabatan: 'Kepala Bidang Layanan dan Perlindungan Arsip',
+      email: 'fatima.rambing@manggaraibaratkab.go.id',
+      status: 'Aktif',
+      tanda_tangan_id: '',
+      tanda_tangan_url: '',
+      tanggal_dibuat: new Date()
+    },
+    {
+      id: 'STAF-008',
+      nama: 'Angela Ivonita Pareira',
+      nip: '198008162025212006',
+      jabatan: 'Penanggung Jawab Kegiatan Alih Media Arsip Statis',
+      email: 'angela.pareira@manggaraibaratkab.go.id',
       status: 'Aktif',
       tanda_tangan_id: '',
       tanda_tangan_url: '',

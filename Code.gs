@@ -17,6 +17,20 @@
  * Ini dipanggil saat user mengakses URL Web App
  */
 function doGet(e) {
+  // Support direct init/setup trigger via URL parameter ?action=init
+  if (e && e.parameter && (e.parameter.action === 'init' || e.parameter.action === 'init_database')) {
+    var initSheetsRes = initializeAllSheets();
+    var seedRes = seedInitialData();
+    var driveRes = createFolderStructure();
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      initSheets: initSheetsRes,
+      seedData: seedRes,
+      driveFolder: driveRes,
+      spreadsheetId: (CONFIG && CONFIG.SPREADSHEET_ID) ? CONFIG.SPREADSHEET_ID : ''
+    }, null, 2)).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Support direct seed trigger via URL parameter ?action=seed
   if (e && e.parameter && (e.parameter.action === 'seed' || e.parameter.seed === 'true')) {
     var res = seedFullDummyData(true);

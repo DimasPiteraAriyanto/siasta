@@ -52,6 +52,7 @@
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Kurun Waktu</td><td style="padding:8px 0;"><?= initialDetail.kurun_waktu || initialDetail.kurun_waktu_mulai || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Unit Pengelola</td><td style="padding:8px 0;"><?= initialDetail.unit_pengelola || '-' ?></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Lokasi Simpan</td><td style="padding:8px 0;"><?= initialDetail.lokasi_simpan || '-' ?></td></tr>
+              <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Tanggal Input</td><td style="padding:8px 0;"><strong><?= initialDetail.tanggal_input_formatted || initialDetail.tanggal_input || '-' ?></strong></td></tr>
               <tr><td style="padding:8px 0;color:var(--text-secondary);font-weight:500;">Keterangan</td><td style="padding:8px 0;"><?= initialDetail.keterangan || '-' ?></td></tr>
             </table>
           </div>
@@ -151,6 +152,10 @@
       </div>
       <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
         <input type="hidden" id="edit-arsip-id">
+        <div class="form-group">
+          <label class="form-label">Tanggal Alih Media / Input</label>
+          <input type="date" class="form-control" id="edit-tanggal-input">
+        </div>
         <div class="form-group">
           <label class="form-label">Deskripsi / Uraian Informasi <span class="required">*</span></label>
           <textarea class="form-control" id="edit-deskripsi" rows="3"></textarea>
@@ -441,6 +446,24 @@ function openEditArsipModal() {
   document.getElementById('edit-lokasi-simpan').value = d.lokasi_simpan || '';
   document.getElementById('edit-keterangan').value = d.keterangan || '';
   
+  var editTgl = document.getElementById('edit-tanggal-input');
+  if (editTgl) {
+    if (d.tanggal_input) {
+      try {
+        var dObj = new Date(d.tanggal_input);
+        if (!isNaN(dObj.getTime())) {
+          editTgl.value = dObj.toISOString().split('T')[0];
+        } else {
+          editTgl.value = '';
+        }
+      } catch(eDate) {
+        editTgl.value = '';
+      }
+    } else {
+      editTgl.value = '';
+    }
+  }
+  
   openModal('modal-edit-arsip');
 }
 
@@ -454,6 +477,7 @@ function submitEditArsip() {
   }
   
   var editData = {
+    tanggal_input: document.getElementById('edit-tanggal-input') ? document.getElementById('edit-tanggal-input').value : '',
     deskripsi: deskripsi,
     status_keterbukaan: document.getElementById('edit-status-keterbukaan').value,
     jenis_arsip: document.getElementById('edit-jenis-arsip').value,

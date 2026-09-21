@@ -215,13 +215,23 @@ function getStaffList() {
     }
     
     var staffList = activeStaff.map(function(s) {
+      var ttd = s.tanda_tangan_url || '';
+      var tid = s.tanda_tangan_id || '';
+      if (!ttd && tid) {
+        ttd = 'https://drive.google.com/thumbnail?id=' + tid + '&sz=w600';
+      } else if (ttd && ttd.indexOf('drive.google.com') !== -1 && ttd.indexOf('/file/d/') !== -1) {
+        var m = ttd.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) ttd = 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w600';
+      }
       return {
         id: s.id,
         nama: s.nama,
         nip: s.nip,
         jabatan: s.jabatan,
         email: s.email || '',
-        status: s.status || 'Aktif'
+        status: s.status || 'Aktif',
+        tanda_tangan_id: tid,
+        tanda_tangan_url: ttd
       };
     });
     
@@ -235,7 +245,9 @@ function getStaffList() {
         nip: s.nip,
         jabatan: s.jabatan,
         email: s.email || '',
-        status: s.status || 'Aktif'
+        status: s.status || 'Aktif',
+        tanda_tangan_id: s.tanda_tangan_id || '',
+        tanda_tangan_url: s.tanda_tangan_url || ''
       };
     });
     return jsonResponse(true, dummyList);

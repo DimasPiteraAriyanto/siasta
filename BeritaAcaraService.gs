@@ -446,7 +446,7 @@ function getBeritaAcaraFormalDetail(params) {
       },
       alamatKop: (CONFIG.PEJABAT && CONFIG.PEJABAT.ALAMAT_KOP) ? CONFIG.PEJABAT.ALAMAT_KOP : 'Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT',
       pelaksana: pelaksana,
-      pelaksanaTtd: (pelaksana && pelaksana.tanda_tangan_url) ? pelaksana.tanda_tangan_url : ((CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : '')),
+      pelaksanaTtd: (pelaksana && pelaksana.tanda_tangan_url) ? pelaksana.tanda_tangan_url : '',
       tipe: tipe,
       tipeLabel: tipe === 'per_staf' ? 'Per Staf (' + pelaksana.nama + ')' : 'Gabungan (Seluruh Tim Alih Media)',
       arsipList: mappedArsipList

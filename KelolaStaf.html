@@ -41,7 +41,12 @@
                   <td><?= s.email || '-' ?></td>
                   <td><?!= ttdBadge ?></td>
                   <td><?!= statusBadge ?></td>
-                  <td><button class="btn btn-sm btn-outline" onclick="editStaf('<?= s.id ?>','<?= (s.nama || '').replace(/'/g, "\\'") ?>','<?= s.nip || '' ?>','<?= (s.jabatan || '').replace(/'/g, "\\'") ?>','<?= s.email || '' ?>','<?= isAktif ? 'Aktif' : 'Nonaktif' ?>','<?= (s.tanda_tangan_url || '').replace(/'/g, "\\'") ?>')">✏️ Edit</button></td>
+                  <td>
+                    <div style="display:flex; gap:6px;">
+                      <button class="btn btn-sm btn-outline" onclick="editStaf('<?= s.id ?>','<?= (s.nama || '').replace(/'/g, "\\'") ?>','<?= s.nip || '' ?>','<?= (s.jabatan || '').replace(/'/g, "\\'") ?>','<?= s.email || '' ?>','<?= isAktif ? 'Aktif' : 'Nonaktif' ?>','<?= (s.tanda_tangan_url || '').replace(/'/g, "\\'") ?>')">✏️ Edit</button>
+                      <button class="btn btn-sm btn-outline" style="color:#ef4444; border-color:#fca5a5;" onclick="confirmDeleteStaf('<?= s.id ?>','<?= (s.nama || '').replace(/'/g, "\\'") ?>')">🗑️ Hapus</button>
+                    </div>
+                  </td>
                 </tr>
               <? } ?>
             <? } else { ?>
@@ -151,13 +156,18 @@ function loadStafData() {
               '<td>' + escapeHtml(s.email || '-') + '</td>' +
               '<td>' + ttdBadge + '</td>' +
               '<td>' + statusBadge + '</td>' +
-              '<td><button class="btn btn-sm btn-outline" onclick="editStaf(\'' + s.id + '\',\'' +
-                escapeHtml(s.nama).replace(/'/g, "\\'") + '\',\'' +
-                escapeHtml(s.nip || '') + '\',\'' +
-                escapeHtml(s.jabatan || '').replace(/'/g, "\\'") + '\',\'' +
-                escapeHtml(s.email || '') + '\',\'' +
-                (isAktif ? 'Aktif' : 'Nonaktif') + '\',\'' +
-                escapeHtml(s.tanda_tangan_url || '').replace(/'/g, "\\'") + '\')">✏️ Edit</button></td>' +
+              '<td>' +
+                '<div style="display:flex; gap:6px;">' +
+                  '<button class="btn btn-sm btn-outline" onclick="editStaf(\'' + s.id + '\',\'' +
+                    escapeHtml(s.nama).replace(/'/g, "\\'") + '\',\'' +
+                    escapeHtml(s.nip || '') + '\',\'' +
+                    escapeHtml(s.jabatan || '').replace(/'/g, "\\'") + '\',\'' +
+                    escapeHtml(s.email || '') + '\',\'' +
+                    (isAktif ? 'Aktif' : 'Nonaktif') + '\',\'' +
+                    escapeHtml(s.tanda_tangan_url || '').replace(/'/g, "\\'") + '\')">✏️ Edit</button>' +
+                  '<button class="btn btn-sm btn-outline" style="color:#ef4444; border-color:#fca5a5;" onclick="confirmDeleteStaf(\'' + s.id + '\',\'' + escapeHtml(s.nama).replace(/'/g, "\\'") + '\')">🗑️ Hapus</button>' +
+                '</div>' +
+              '</td>' +
               '</tr>';
           });
         }
@@ -318,6 +328,60 @@ function saveStafForm() {
       showSwalError('Error: ' + err.message, 'Kesalahan');
     })
     .saveStaf(data);
+}
+
+function confirmDeleteStaf(stafId, stafNama) {
+  if (typeof showSwalConfirm === 'function') {
+    showSwalConfirm(
+      'Hapus Data Staf?',
+      'Apakah Anda yakin ingin menghapus staf <strong>' + stafNama + '</strong> dari sistem? Tindakan ini tidak dapat dibatalkan.',
+      'Ya, Hapus Staf',
+      'Batal'
+    ).then(function(confirmed) {
+      if (confirmed) {
+        executeDeleteStaf(stafId, stafNama);
+      }
+    });
+  } else if (confirm('Apakah Anda yakin ingin menghapus staf ' + stafNama + '?')) {
+    executeDeleteStaf(stafId, stafNama);
+  }
+}
+
+function executeDeleteStaf(stafId, stafNama) {
+  startProgressBar();
+  if (typeof showProcessLoading === 'function') {
+    showProcessLoading('Menghapus Staf...', 'Menghapus data ' + stafNama + ' dari sistem...');
+  }
+  google.script.run
+    .withSuccessHandler(function(resp) {
+      finishProgressBar();
+      if (typeof hideProcessLoading === 'function') hideProcessLoading();
+      if (resp && resp.success) {
+        if (typeof showSwalSuccess === 'function') {
+          showSwalSuccess('Data staf ' + stafNama + ' berhasil dihapus.', 'Terhapus');
+        } else {
+          showToast('Data staf berhasil dihapus.', 'success');
+        }
+        loadStafData();
+      } else {
+        var msg = (resp && resp.message) || 'Gagal menghapus staf.';
+        if (typeof showSwalError === 'function') {
+          showSwalError(msg, 'Gagal');
+        } else {
+          showToast(msg, 'error');
+        }
+      }
+    })
+    .withFailureHandler(function(err) {
+      finishProgressBar();
+      if (typeof hideProcessLoading === 'function') hideProcessLoading();
+      if (typeof showSwalError === 'function') {
+        showSwalError('Error: ' + err.message, 'Gagal');
+      } else {
+        showToast('Error: ' + err.message, 'error');
+      }
+    })
+    .deleteStaf(stafId);
 }
 
 if (typeof init_kelola_staf === 'function') init_kelola_staf();

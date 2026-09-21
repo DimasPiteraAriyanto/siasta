@@ -22,6 +22,14 @@
             <p class="form-hint">Otomatis terisi dari identitas akun yang sedang login (tidak bisa diedit manual)</p>
           </div>
           <div class="form-group">
+            <label class="form-label">Tanggal Alih Media / Input <span class="required">*</span></label>
+            <input type="date" class="form-control" id="tanggalInput" required>
+            <p class="form-hint">Otomatis terisi tanggal hari ini, dapat diubah jika input susulan/mundur</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
             <label class="form-label">Status Keterbukaan <span class="required">*</span></label>
             <select class="form-control" id="statusKeterbukaan" required>
               <option value="Tertutup" selected>Tertutup (Default)</option>
@@ -29,7 +37,6 @@
             </select>
             <p class="form-hint">Keterbukaan akses arsip statis</p>
           </div>
-        </div>
 
         <div class="form-row">
           <div class="form-group">
@@ -315,6 +322,12 @@ function init_input_arsip() {
 
   // 3. Init drag & drop
   initDragDrop('upload-area', 'arsipFile');
+
+  // 4. Default tanggal input otomatis hari ini
+  var tglInputEl = document.getElementById('tanggalInput');
+  if (tglInputEl && !tglInputEl.value) {
+    tglInputEl.value = new Date().toISOString().split('T')[0];
+  }
 }
 
 function syncActiveStaffField() {
@@ -608,6 +621,7 @@ function onAsalBoxChange() {
 
 function submitArsip() {
   var required = [
+    { id: 'tanggalInput', label: 'Tanggal Alih Media / Input' },
     { id: 'statusKeterbukaan', label: 'Status Keterbukaan' },
     { id: 'jenisArsip', label: 'Jenis Arsip' },
     { id: 'kategoriUrusan', label: 'Kategori Urusan' },
@@ -694,6 +708,7 @@ function processSaveArsip(qaChecklist) {
     }
 
     var formData = {
+      tanggalInput: document.getElementById('tanggalInput') ? document.getElementById('tanggalInput').value : '',
       statusKeterbukaan: document.getElementById('statusKeterbukaan').value,
       jenisArsip: document.getElementById('jenisArsip').value,
       kategoriUrusan: document.getElementById('kategoriUrusan').value,
@@ -807,6 +822,11 @@ function resetForm() {
   document.getElementById('form-arsip').reset();
   document.getElementById('kodeUnik').value = '';
   document.getElementById('arsipFile-preview').innerHTML = '';
+  
+  var tglInputEl = document.getElementById('tanggalInput');
+  if (tglInputEl) {
+    tglInputEl.value = new Date().toISOString().split('T')[0];
+  }
   
   var timeBadge = document.getElementById('upload-time-badge-box');
   if (timeBadge) timeBadge.style.display = 'none';

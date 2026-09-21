@@ -32,9 +32,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Staf</label>
-          <select class="form-control" id="lap-staf">
-            <option value="">Semua Staf</option>
+          <label class="form-label">Staf Pelaksana</label>
+          <select class="form-control" id="lap-staf" onchange="onLaporanStafChange()">
+            <option value="">Semua Staf (Seluruh Tim)</option>
           </select>
         </div>
 
@@ -59,27 +59,27 @@
               </div>
               <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label" style="font-size:11px;">Jabatan Pengesah</label>
-                <input type="text" class="form-control" id="lap-title-signer-1" value="Kepala Dinas Kearsipan dan Perpustakaan" oninput="if(_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData)" style="font-size:12px; padding:6px 10px;">
+                <input type="text" class="form-control" id="lap-title-signer-1" value="Kepala Bidang Layanan dan Perlindungan Arsip" oninput="if(_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData)" style="font-size:12px; padding:6px 10px;">
               </div>
             </div>
           </div>
 
-          <!-- Signer 2: Pelaksana -->
+          <!-- Signer 2: Pelaksana / PJ -->
           <div>
             <label style="display:flex; align-items:center; gap:8px; font-weight:700; color:#0f172a; font-size:12.5px; cursor:pointer; margin-bottom:6px;">
               <input type="checkbox" id="lap-toggle-signer-2" checked onchange="updateLaporanSignerInputs()">
-              Gunakan Blok Pengesahan Ini (Signer 2 - Pelaksana Alih Media)
+              <span id="lap-signer-2-label">Gunakan Blok Pengesahan Ini (Signer 2 - Penanggung Jawab Kegiatan)</span>
             </label>
             <div id="lap-signer-2-inputs" style="padding-left:22px;">
               <div class="form-group" style="margin-bottom:6px;">
-                <label class="form-label" style="font-size:11px;">Pilih Petugas / Pelaksana</label>
+                <label class="form-label" style="font-size:11px;">Pilih Petugas / Penanggung Jawab</label>
                 <select class="form-control" id="lap-select-signer-2" onchange="syncSigner2Details()" style="font-size:12px; padding:6px 10px;">
                   <!-- Dinamis -->
                 </select>
               </div>
               <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" style="font-size:11px;">Jabatan Pelaksana</label>
-                <input type="text" class="form-control" id="lap-title-signer-2" value="Pelaksana Alih Media," oninput="if(_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData)" style="font-size:12px; padding:6px 10px;">
+                <label class="form-label" style="font-size:11px;">Jabatan / Peran</label>
+                <input type="text" class="form-control" id="lap-title-signer-2" value="Penanggung Jawab Kegiatan Alih Media Arsip Statis" oninput="if(_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData)" style="font-size:12px; padding:6px 10px;">
               </div>
             </div>
           </div>
@@ -136,6 +136,30 @@ var _activeSigner2Data = null;
 var _lastGeneratedLaporanData = null;
 var _lastGeneratedLaporanParams = null;
 
+// Helper dinamis untuk membaca tanda tangan staf (prioritas: data staf aktif -> default signer -> thumbnail Drive)
+function resolveStaffTtd(signerData, defaultSigner) {
+  var url = '';
+  var id = '';
+  if (signerData) {
+    url = (signerData.tanda_tangan_url || '').trim();
+    id = (signerData.tanda_tangan_id || '').trim();
+  }
+  if (!url && defaultSigner) {
+    url = (defaultSigner.ttdUrl || '').trim();
+    if (!id) id = (defaultSigner.ttdId || '').trim();
+  }
+  if (!url && id) {
+    url = 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w600';
+  }
+  if (url && url.indexOf('drive.google.com') !== -1 && url.indexOf('/file/d/') !== -1) {
+    var match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      url = 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w600';
+    }
+  }
+  return url;
+}
+
 function init_generate_laporan() {
   document.getElementById('lap-tahun').value = new Date().getFullYear();
   
@@ -153,6 +177,34 @@ function init_generate_laporan() {
       if (response && response.success && response.data) {
         _lapStaffList = response.data;
         
+        // Pastikan pejabat resmi dari template revisi_laporan tersedia sebagai opsi
+        var hasKabid = _lapStaffList.some(function(s) { return (s.nama || '').toLowerCase().indexOf('fatima') !== -1; });
+        if (!hasKabid) {
+          _lapStaffList.unshift({
+            id: 'PEJ-KABID',
+            nama: 'Fatima Melani Rambing, SAP',
+            nip: '197305231992122003',
+            jabatan: 'Kepala Bidang Layanan dan Perlindungan Arsip',
+            pangkat: 'Pembina IV/a',
+            status: 'Aktif',
+            tanda_tangan_id: '',
+            tanda_tangan_url: ''
+          });
+        }
+        var hasPJ = _lapStaffList.some(function(s) { return (s.nama || '').toLowerCase().indexOf('angela') !== -1; });
+        if (!hasPJ) {
+          _lapStaffList.push({
+            id: 'PEJ-PJ',
+            nama: 'Angela Ivonita Pareira',
+            nip: '198008162025212006',
+            jabatan: 'Penanggung Jawab Kegiatan Alih Media Arsip Statis',
+            pangkat: 'Golongan V',
+            status: 'Aktif',
+            tanda_tangan_id: '',
+            tanda_tangan_url: ''
+          });
+        }
+
         var select = document.getElementById('lap-staf');
         while (select.options.length > 1) {
           select.remove(1);
@@ -164,11 +216,13 @@ function init_generate_laporan() {
         sel2.innerHTML = '';
 
         _lapStaffList.forEach(function(s) {
-          // Opsi staf filter
-          var opt = document.createElement('option');
-          opt.value = s.id;
-          opt.textContent = s.nama;
-          select.appendChild(opt);
+          // Opsi staf filter (hanya staf operasional/aktif)
+          if (s.id !== 'PEJ-KABID' && s.id !== 'PEJ-PJ') {
+            var opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.nama;
+            select.appendChild(opt);
+          }
 
           // Opsi Signer 1
           var opt1 = document.createElement('option');
@@ -183,19 +237,18 @@ function init_generate_laporan() {
           sel2.appendChild(opt2);
         });
 
-        // Set default selection: Kadis/Kabid for Signer 1, Dzaky/Pelaksana for Signer 2
+        // Set default selection: Fatima / Kabid untuk Signer 1, Angela / PJ untuk Signer 2
         for (var i = 0; i < _lapStaffList.length; i++) {
           var name = (_lapStaffList[i].nama || '').toLowerCase();
           var jab = (_lapStaffList[i].jabatan || '').toLowerCase();
-          if (name.indexOf('augustinus') !== -1 || jab.indexOf('kepala dinas') !== -1 || jab.indexOf('kabid') !== -1) {
+          if (name.indexOf('fatima') !== -1 || jab.indexOf('kabid') !== -1 || jab.indexOf('layanan dan perlindungan') !== -1) {
             sel1.selectedIndex = i;
             break;
           }
         }
         for (var j = 0; j < _lapStaffList.length; j++) {
           var name2 = (_lapStaffList[j].nama || '').toLowerCase();
-          var jab2 = (_lapStaffList[j].jabatan || '').toLowerCase();
-          if (name2.indexOf('dzaky') !== -1 || jab2.indexOf('pelaksana') !== -1 || jab2.indexOf('pengelola') !== -1) {
+          if (name2.indexOf('angela') !== -1) {
             sel2.selectedIndex = j;
             break;
           }
@@ -208,7 +261,35 @@ function init_generate_laporan() {
     .withFailureHandler(function(err) {
       showToast('Gagal memuat staf: ' + err.message, 'error');
     })
-    .getStaffList();
+    .getAllStaf();
+}
+
+function onLaporanStafChange() {
+  var stafId = document.getElementById('lap-staf').value;
+  var sel2 = document.getElementById('lap-select-signer-2');
+  var title2 = document.getElementById('lap-title-signer-2');
+  var label2 = document.getElementById('lap-signer-2-label');
+
+  if (stafId) {
+    // Mode Per Staf
+    if (sel2) sel2.value = stafId;
+    if (title2) title2.value = 'Pelaksana Alih Media Arsip';
+    if (label2) label2.textContent = 'Gunakan Blok Pengesahan Ini (Signer 2 - Pelaksana Alih Media)';
+    syncSigner2Details();
+  } else {
+    // Mode Semua Staf
+    if (title2) title2.value = 'Penanggung Jawab Kegiatan Alih Media Arsip Statis';
+    if (label2) label2.textContent = 'Gunakan Blok Pengesahan Ini (Signer 2 - Penanggung Jawab Kegiatan)';
+    if (sel2) {
+      for (var k = 0; k < sel2.options.length; k++) {
+        if (sel2.options[k].text.toLowerCase().indexOf('angela') !== -1) {
+          sel2.selectedIndex = k;
+          break;
+        }
+      }
+      syncSigner2Details();
+    }
+  }
 }
 
 function updateLaporanSignerInputs() {
@@ -226,7 +307,7 @@ function syncSigner1Details() {
   var id = document.getElementById('lap-select-signer-1').value;
   _activeSigner1Data = _lapStaffList.find(function(s) { return s.id === id; }) || null;
   if (_activeSigner1Data) {
-    document.getElementById('lap-title-signer-1').value = _activeSigner1Data.jabatan || 'Kepala Dinas Kearsipan dan Perpustakaan';
+    document.getElementById('lap-title-signer-1').value = _activeSigner1Data.jabatan || 'Kepala Bidang Layanan dan Perlindungan Arsip';
   }
   if (_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData);
 }
@@ -235,7 +316,8 @@ function syncSigner2Details() {
   var id = document.getElementById('lap-select-signer-2').value;
   _activeSigner2Data = _lapStaffList.find(function(s) { return s.id === id; }) || null;
   if (_activeSigner2Data) {
-    document.getElementById('lap-title-signer-2').value = _activeSigner2Data.jabatan || 'Pelaksana Alih Media,';
+    var isPerStaf = !!document.getElementById('lap-staf').value;
+    document.getElementById('lap-title-signer-2').value = isPerStaf ? 'Pelaksana Alih Media Arsip' : (_activeSigner2Data.jabatan || 'Penanggung Jawab Kegiatan Alih Media Arsip Statis');
   }
   if (_lastGeneratedLaporanData) renderLaporanPreview(_lastGeneratedLaporanData);
 }
@@ -260,6 +342,32 @@ function generateLaporan() {
       
       if (response && response.success && response.data) {
         _lastGeneratedLaporanData = response.data;
+        
+        // Sinkronkan signer aktif dengan data laporan terbaru
+        if (response.data.isPerStaf && response.data.stafId) {
+          var sel2 = document.getElementById('lap-select-signer-2');
+          if (sel2) sel2.value = response.data.stafId;
+          _activeSigner2Data = _lapStaffList.find(function(s) { return s.id === response.data.stafId; }) || response.data.selectedStaf;
+          if (_activeSigner2Data && response.data.defaultSigner2 && response.data.defaultSigner2.ttdUrl) {
+            _activeSigner2Data.tanda_tangan_url = response.data.defaultSigner2.ttdUrl;
+          }
+        } else if (!response.data.isPerStaf) {
+          var sel2All = document.getElementById('lap-select-signer-2');
+          if (sel2All) {
+            for (var k = 0; k < sel2All.options.length; k++) {
+              if (sel2All.options[k].text.toLowerCase().indexOf('angela') !== -1) {
+                sel2All.selectedIndex = k;
+                break;
+              }
+            }
+          }
+          var idSel = sel2All ? sel2All.value : '';
+          _activeSigner2Data = _lapStaffList.find(function(s) { return s.id === idSel; }) || null;
+          if (_activeSigner2Data && response.data.defaultSigner2 && response.data.defaultSigner2.ttdUrl) {
+            _activeSigner2Data.tanda_tangan_url = response.data.defaultSigner2.ttdUrl;
+          }
+        }
+
         renderLaporanPreview(response.data);
         document.getElementById('lap-preview-card').style.display = 'block';
         showToast('Laporan berhasil di-generate!', 'success');
@@ -275,101 +383,160 @@ function generateLaporan() {
     .generateLaporanData(params);
 }
 
-// Render Laporan Preview (Bebas Watermark CSS Palsu & Aman TTD)
+// Render Laporan Preview Sesuai Template Resmi Revisi Laporan
 function renderLaporanPreview(data) {
   var isInternal = data.tipe === 'internal';
   var safeEsc = typeof escapeHtml === 'function' ? escapeHtml : function(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
 
-  var html = '<div class="doc-preview" style="position:relative; overflow:hidden; background:#fff; padding:25px 30px; font-family:\'Times New Roman\', Times, serif; color:#000;">' +
+  var html = '<div class="doc-preview" style="position:relative; overflow:hidden; background:#fff; padding:25px 35px; font-family:\'Times New Roman\', Times, serif; color:#000; line-height:1.35;">' +
     '<div style="position:relative; z-index:1;">' +
-      '<div class="doc-header" style="text-align:center; position:relative; padding-bottom:12px; margin-bottom:18px; border-bottom:none;">' +
+      // 1. Kop Surat Resmi
+      '<div class="doc-header" style="text-align:center; position:relative; padding-bottom:10px; margin-bottom:18px; border-bottom:none;">' +
         '<div style="position:absolute; left:5px; top:0; width:65px; display:flex; align-items:center; justify-content:center;">' +
           '<img src="' + (window._logoMabar || '') + '" alt="Logo Pemkab Manggarai Barat" style="width:60px; height:auto; object-fit:contain;">' +
         '</div>' +
         '<div style="margin-left:70px;">' +
-          '<div style="font-size:12pt; font-weight:bold; letter-spacing:1px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>' +
-          '<div style="font-size:14pt; font-weight:bold; letter-spacing:1px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN</div>' +
-          '<div style="font-size:9.5pt; font-style:italic; margin-top:3px;">Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT</div>' +
+          '<div style="font-size:12pt; font-weight:bold; letter-spacing:0.5px; line-height:1.2;">PEMERINTAH KABUPATEN MANGGARAI BARAT</div>' +
+          '<div style="font-size:13.5pt; font-weight:bold; letter-spacing:0.5px; line-height:1.2; margin-top:2px;">DINAS KEARSIPAN DAN PERPUSTAKAAN DAERAH</div>' +
+          '<div style="font-size:9pt; font-style:italic; margin-top:3px;">Jl. Samping Bank NTT, Kelurahan Wae Kelambu, Labuan Bajo - Flores - NTT</div>' +
         '</div>' +
-        '<div style="border-bottom:3px solid #000; margin-top:12px;"></div>' +
+        '<div style="border-bottom:3px solid #000; margin-top:10px;"></div>' +
         '<div style="border-bottom:1px solid #000; margin-top:2px;"></div>' +
       '</div>' +
-      '<div style="text-align:center; margin-bottom:16px;">' +
-        '<div class="doc-title" style="font-size:13pt; font-weight:bold; text-decoration:underline;">LAPORAN ' + (isInternal ? 'INTERNAL' : 'EKSTERNAL') + '</div>' +
-        '<div style="font-size:11pt; font-weight:600; margin-top:2px;">KEGIATAN ALIH MEDIA ARSIP STATIS</div>' +
-        '<div style="font-size:10.5pt; margin-top:2px;">Periode: ' + safeEsc(data.periode) + '</div>' +
-      '</div>';
-  
-  // Summary
-  html += '<h3 style="margin:16px 0 8px; font-size:12pt; font-weight:bold;">I. Ringkasan Pelaksanaan</h3>' +
-    '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:10.5pt;">' +
-    '<tr><th style="width:220px; border:1px solid #333; padding:5px 8px; text-align:left; background:#f1f5f9;">Uraian</th><th style="border:1px solid #333; padding:5px 8px; text-align:left; background:#f1f5f9;">Keterangan</th></tr>' +
-    '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Arsip Dialihmediakan</td><td style="border:1px solid #333; padding:5px 8px;"><strong>' + data.totalArsip + '</strong> item arsip</td></tr>' +
-    '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Lembar</td><td style="border:1px solid #333; padding:5px 8px;">' + data.totalLembar + ' lembar</td></tr>' +
-    '<tr><td style="border:1px solid #333; padding:5px 8px;">Total Berkas</td><td style="border:1px solid #333; padding:5px 8px;">' + data.totalBerkas + ' berkas</td></tr>' +
-    '<tr><td style="border:1px solid #333; padding:5px 8px;">Tanggal Laporan</td><td style="border:1px solid #333; padding:5px 8px;">' + safeEsc(data.tanggalGenerate) + '</td></tr></table>';
-  
-  // Arsip detail table
-  if (data.arsipDetail && data.arsipDetail.length > 0) {
-    html += '<h3 style="margin:20px 0 8px; font-size:12pt; font-weight:bold;">II. Daftar Arsip Statis</h3>' +
-      '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:9.5pt;"><thead><tr style="background:#f1f5f9;">' +
-      '<th style="border:1px solid #333; padding:5px; width:30px; text-align:center;">No</th>' +
-      '<th style="border:1px solid #333; padding:5px; width:100px;">Kode Unik</th>' +
-      '<th style="border:1px solid #333; padding:5px;">Uraian Informasi Arsip</th>' +
-      '<th style="border:1px solid #333; padding:5px; width:70px;">Jenis</th>';
-    if (isInternal) html += '<th style="border:1px solid #333; padding:5px; width:110px;">Staf Pelaksana</th><th style="border:1px solid #333; padding:5px; width:80px;">Lokasi</th>';
-    html += '<th style="border:1px solid #333; padding:5px; width:70px;">Status</th></tr></thead><tbody>';
-    
-    data.arsipDetail.forEach(function(a) {
-      html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + a.no + '</td>' +
-        '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.kode_unik) + '</td>' +
-        '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.deskripsi || '-') + '</td>' +
-        '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.jenis_arsip || '-') + '</td>';
-      if (isInternal) html += '<td style="border:1px solid #333; padding:4px;">' + safeEsc(a.staf_nama || '-') + '</td><td style="border:1px solid #333; padding:4px;">' + safeEsc(a.lokasi_simpan || '-') + '</td>';
-      html += '<td style="border:1px solid #333; padding:4px; text-align:center;">' + safeEsc(a.status_keterbukaan || '-') + '</td></tr>';
-    });
-    html += '</tbody></table>';
+
+      // 2. Judul Dokumen
+      '<div style="text-align:center; margin-bottom:20px;">' +
+        '<div class="doc-title" style="font-size:12pt; font-weight:bold; text-decoration:underline;">LAPORAN ' + (isInternal ? 'INTERNAL' : 'EKSTERNAL') + ' PELAKSANAAN KEGIATAN ALIH MEDIA ARSIP STATIS</div>' +
+      '</div>' +
+
+      // 3. IDENTITAS KEGIATAN
+      '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:11pt; font-weight:bold; margin-bottom:6px;">IDENTITAS KEGIATAN</div>' +
+        '<table style="width:100%; border-collapse:collapse; font-size:10.5pt;">' +
+          '<tr><td style="width:180px; padding:3px 0; vertical-align:top;">Nama Kegiatan</td><td style="width:15px; padding:3px 0; vertical-align:top;">:</td><td style="padding:3px 0; vertical-align:top;">Alih Media Arsip Statis</td></tr>' +
+          '<tr><td style="padding:3px 0; vertical-align:top;">Unit Kerja</td><td style="padding:3px 0; vertical-align:top;">:</td><td style="padding:3px 0; vertical-align:top;">Bidang Layanan dan Perlindungan Arsip</td></tr>' +
+          '<tr><td style="padding:3px 0; vertical-align:top;">Periode Pelaksanaan</td><td style="padding:3px 0; vertical-align:top;">:</td><td style="padding:3px 0; vertical-align:top;">' + safeEsc(data.periode) + '</td></tr>' +
+          '<tr><td style="padding:3px 0; vertical-align:top;">Petugas Pelaksana</td><td style="padding:3px 0; vertical-align:top;">:</td><td style="padding:3px 0; vertical-align:top;">' + safeEsc(data.petugasPelaksana || 'Petugas Alih Media') + '</td></tr>' +
+        '</table>' +
+      '</div>' +
+
+      // 4. DASAR PELAKSANAAN
+      '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:11pt; font-weight:bold; margin-bottom:4px;">DASAR PELAKSANAAN</div>' +
+        '<p style="font-size:10.5pt; text-align:justify; margin:0; line-height:1.35;">' +
+          'Kegiatan alih media arsip statis dilaksanakan berdasarkan ketentuan peraturan perundang-undangan di bidang kearsipan yang berlaku, ' +
+          'Peraturan Arsip Nasional Republik Indonesia Nomor 2 Tahun 2021 tentang Alih Media Arsip Statis, serta Perjanjian Kinerja Tahun ' + (data.tahun || new Date().getFullYear()) + ' ' +
+          'pada Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat.' +
+        '</p>' +
+      '</div>' +
+
+      // 5. URAIAN PELAKSANAAN
+      '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:11pt; font-weight:bold; margin-bottom:4px;">URAIAN PELAKSANAAN</div>' +
+        '<p style="font-size:10.5pt; text-align:justify; margin:0 0 6px 0; line-height:1.35;">' +
+          'Kegiatan alih media arsip statis dilaksanakan pada periode ' + safeEsc(data.rentangTanggal || data.periode) + ' oleh ' + safeEsc(data.petugasPelaksana || 'Petugas Alih Media') + ' ' +
+          'pada Bidang Layanan dan Perlindungan Arsip, Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat.' +
+        '</p>' +
+        '<p style="font-size:10.5pt; text-align:justify; margin:0; line-height:1.35;">' +
+          'Pelaksanaan kegiatan meliputi persiapan arsip yang akan dialihmediakan, pemeriksaan kondisi dan kelengkapan arsip, ' +
+          'proses pemindaian atau konversi arsip ke dalam bentuk digital, pemberian identitas atau nama berkas digital, ' +
+          'serta penyimpanan hasil alih media sesuai dengan sistem pengelolaan arsip yang digunakan.' +
+        '</p>' +
+      '</div>' +
+
+      // 6. HASIL KEGIATAN
+      '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:11pt; font-weight:bold; margin-bottom:4px;">HASIL KEGIATAN</div>' +
+        '<p style="font-size:10.5pt; text-align:justify; margin:0 0 6px 0; line-height:1.35;">' +
+          'Berdasarkan pelaksanaan kegiatan pada periode ' + safeEsc(data.rentangTanggal || data.periode) + ', telah dilaksanakan kegiatan alih media arsip statis ' +
+          'sebanyak <strong>' + data.totalBerkas + '</strong> berkas, dengan jumlah keseluruhan <strong>' + data.totalLembar + '</strong> lembar.' +
+        '</p>';
+
+  if (!isInternal) {
+    // Eksternal: Paragraf pengantar + Tabel 10 kolom
+    html += '<p style="font-size:10.5pt; text-align:justify; margin:0 0 10px 0;">' +
+      'Rincian arsip yang menjadi hasil kegiatan disajikan berdasarkan informasi arsip yang dapat ditampilkan untuk keperluan eksternal, meliputi:' +
+      '</p>' +
+      '<div style="overflow-x:auto; margin-bottom:14px;">' +
+      '<table style="width:100%; border-collapse:collapse; font-size:8.5pt;">' +
+      '<thead><tr style="background:#f1f5f9;">' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:28px;">No</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:75px;">Kode Unik</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:70px;">Status Keterbukaan</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:65px;">Asal Arsip</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:60px;">Jenis Arsip</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:75px;">Kategori Urusan</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:90px;">Pencipta Arsip</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:60px;">Kurun Waktu</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:48px;">Jumlah Lembar</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:48px;">Jumlah Berkas</th>' +
+      '</tr></thead><tbody>';
+
+    if (data.arsipDetail && data.arsipDetail.length > 0) {
+      data.arsipDetail.forEach(function(a) {
+        html += '<tr>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + a.no + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; font-weight:600;">' + safeEsc(a.kode_unik) + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.status_keterbukaan || 'Terbuka') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.asal_arsip || '-') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.jenis_arsip || '-') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px;">' + safeEsc(a.kategori_urusan || '-') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px;">' + safeEsc(a.unit_pengelola || a.pencipta_arsip || '-') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.kurun_waktu || '-') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + (a.jumlah_lembar || 1) + '</td>' +
+          '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + (a.jumlah_berkas || 1) + '</td>' +
+        '</tr>';
+      });
+    } else {
+      html += '<tr><td colspan="10" style="border:1px solid #333; padding:8px; text-align:center; font-style:italic;">Tidak ada data arsip pada periode ini.</td></tr>';
+    }
+    html += '</tbody></table></div>';
+
+  } else {
+    // Internal: Paragraf pengantar lampiran
+    html += '<p style="font-size:10.5pt; text-align:justify; margin:0 0 10px 0; line-height:1.35;">' +
+      'Rincian arsip yang menjadi hasil kegiatan, meliputi identitas arsip, asal arsip, jenis arsip, klasifikasi, kurun waktu, pencipta arsip, ' +
+      'kondisi fisik, lokasi penyimpanan, serta data pendukung lainnya, disajikan pada Lampiran Daftar Arsip Hasil Alih Media yang merupakan bagian tidak terpisahkan dari laporan ini.' +
+      '</p>';
   }
-  
-  // Staf breakdown (internal only)
-  if (isInternal && data.stafBreakdown && data.stafBreakdown.length > 0) {
-    html += '<h3 style="margin:20px 0 8px; font-size:12pt; font-weight:bold;">III. Rekapitulasi Pelaksana Alih Media</h3>' +
-      '<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10pt;">' +
-      '<tr style="background:#f1f5f9;"><th style="border:1px solid #333; padding:5px; width:35px; text-align:center;">No</th><th style="border:1px solid #333; padding:5px; text-align:left;">Nama Staf / Petugas</th><th style="border:1px solid #333; padding:5px; width:120px; text-align:center;">Jumlah Arsip</th></tr>';
-    data.stafBreakdown.forEach(function(s, idx) {
-      html += '<tr><td style="border:1px solid #333; padding:4px; text-align:center;">' + (idx + 1) + '</td><td style="border:1px solid #333; padding:4px;">' + safeEsc(s.nama) + '</td><td style="border:1px solid #333; padding:4px; text-align:center;">' + s.jumlah + ' item</td></tr>';
-    });
-    html += '</table>';
-  }
-  
-  // Blok Tanda Tangan: Master Checkbox Sembunyi Total
+
+  html += '</div>'; // Tutup HASIL KEGIATAN
+
+  // 7. PENUTUP
+  html += '<div style="margin-bottom:20px;">' +
+    '<div style="font-size:11pt; font-weight:bold; margin-bottom:4px;">PENUTUP</div>' +
+    '<p style="font-size:10.5pt; text-align:justify; margin:0 0 6px 0; line-height:1.35;">' +
+      'Laporan pelaksanaan kegiatan alih media arsip statis ini disusun sebagai dokumentasi pelaksanaan kegiatan pada ' + safeEsc(data.periode) + ' ' +
+      'oleh ' + safeEsc(data.petugasPelaksana || 'Petugas Alih Media') + ' pada Bidang Layanan dan Perlindungan Arsip, Dinas Kearsipan dan Perpustakaan Daerah Kabupaten Manggarai Barat.' +
+    '</p>' +
+    '<p style="font-size:10.5pt; text-align:justify; margin:0; line-height:1.35;">' +
+      'Laporan ini diharapkan dapat menjadi bahan dokumentasi dan pertanggungjawaban pelaksanaan kegiatan serta memberikan informasi mengenai hasil pelaksanaan alih media arsip statis pada periode yang dilaporkan.' +
+    '</p>' +
+  '</div>';
+
+  // 8. PENGESAHAN (Tanda Tangan 2 Kolom)
   var useS1 = document.getElementById('lap-toggle-signer-1') ? document.getElementById('lap-toggle-signer-1').checked : true;
   var useS2 = document.getElementById('lap-toggle-signer-2') ? document.getElementById('lap-toggle-signer-2').checked : true;
 
   if (useS1 || useS2) {
-    html += '<div id="lap-ttd-row" style="display:flex; justify-content:space-between; margin-top:35px; font-size:11pt; page-break-inside:avoid;">';
+    html += '<div id="lap-ttd-row" style="display:flex; justify-content:space-between; margin-top:30px; font-size:10.5pt; page-break-inside:avoid;">';
     
-    // Kolom Signer 1 (Mengetahui)
+    // Kolom Signer 1 (Mengetahui - Kabid / Pejabat 1)
     if (useS1) {
-      var s1Title = document.getElementById('lap-title-signer-1') ? document.getElementById('lap-title-signer-1').value : 'Kepala Dinas Kearsipan dan Perpustakaan';
-      var s1Nama = _activeSigner1Data ? _activeSigner1Data.nama : 'AUGUSTINUS RINUS, S.Pd';
-      var s1Pangkat = _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina Utama Muda') : 'Pembina Utama Muda';
-      var s1Nip = _activeSigner1Data ? (_activeSigner1Data.nip || '-') : '19720219 199903 1 008';
-      var s1Ttd = (_activeSigner1Data && _activeSigner1Data.tanda_tangan_url) ? _activeSigner1Data.tanda_tangan_url : '';
-      
-      var s1TitleHtml = safeEsc(s1Title);
-      if (s1Title.toLowerCase().indexOf('kabupaten') === -1 && s1Title.toLowerCase().indexOf('mabar') === -1) {
-        s1TitleHtml += '<br>Kabupaten Manggarai Barat';
-      }
+      var s1Title = document.getElementById('lap-title-signer-1') ? document.getElementById('lap-title-signer-1').value : 'Kepala Bidang Layanan dan Perlindungan Arsip';
+      var s1Nama = _activeSigner1Data ? _activeSigner1Data.nama : (data.defaultSigner1 ? data.defaultSigner1.nama : 'Fatima Melani Rambing, SAP');
+      var s1Pangkat = _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina IV/a') : (data.defaultSigner1 ? data.defaultSigner1.pangkat : 'Pembina IV/a');
+      var s1Nip = _activeSigner1Data ? (_activeSigner1Data.nip || '-') : (data.defaultSigner1 ? data.defaultSigner1.nip : '197305231992122003');
+      var s1Ttd = resolveStaffTtd(_activeSigner1Data, data.defaultSigner1);
 
       html += '<div id="lap-col-signer-1" style="width:46%; text-align:center;">' +
         '<div>Mengetahui,</div>' +
-        '<div style="font-weight:bold; margin-top:2px;">' + s1TitleHtml + '</div>' +
-        '<div style="height:70px; display:flex; align-items:center; justify-content:center;">' +
-        (s1Ttd ? '<img src="' + s1Ttd + '" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">' : '') +
+        '<div style="font-weight:bold; margin-top:2px;">' + safeEsc(s1Title) + '</div>' +
+        '<div style="height:65px; display:flex; align-items:center; justify-content:center; margin:4px 0;">' +
+        (s1Ttd ? '<img src="' + s1Ttd + '" alt="TTD ' + safeEsc(s1Nama) + '" style="max-height:60px; max-width:140px; object-fit:contain;" onerror="this.style.display=\'none\'">' : '<div style="height:60px;"></div>') +
         '</div>' +
         '<div style="font-weight:bold; text-decoration:underline;">' + safeEsc(s1Nama) + '</div>' +
-        '<div>' + safeEsc(s1Pangkat) + '</div>' +
+        (s1Pangkat ? '<div>' + safeEsc(s1Pangkat) + '</div>' : '') +
         '<div>NIP. ' + safeEsc(s1Nip) + '</div>' +
         '</div>';
     } else {
@@ -378,23 +545,21 @@ function renderLaporanPreview(data) {
 
     // Kolom Signer 2 (Pelaksana / Penanggung Jawab)
     if (useS2) {
-      var s2Title = document.getElementById('lap-title-signer-2') ? document.getElementById('lap-title-signer-2').value : 'Pelaksana Alih Media,';
-      var s2Nama = _activeSigner2Data ? _activeSigner2Data.nama : 'MUHAMMAD DZAKY NATHANEGARA, A.Md';
-      var s2Jabatan = _activeSigner2Data ? (_activeSigner2Data.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan';
-      var s2Nip = _activeSigner2Data ? (_activeSigner2Data.nip || '-') : '19980508 202506 1 004';
-      var s2Ttd = (_activeSigner2Data && _activeSigner2Data.tanda_tangan_url) ? _activeSigner2Data.tanda_tangan_url : '';
-      if (!s2Ttd && (!_activeSigner2Data || (_activeSigner2Data.nama && _activeSigner2Data.nama.toLowerCase().indexOf('dzaky') !== -1))) {
-        s2Ttd = window._dummyTtd || '';
-      }
+      var s2DefaultRole = data.isPerStaf ? 'Pelaksana Alih Media Arsip' : 'Penanggung Jawab Kegiatan Alih Media Arsip Statis';
+      var s2Title = document.getElementById('lap-title-signer-2') ? document.getElementById('lap-title-signer-2').value : s2DefaultRole;
+      var s2Nama = _activeSigner2Data ? _activeSigner2Data.nama : (data.defaultSigner2 ? data.defaultSigner2.nama : (data.isPerStaf ? 'Pelaksana' : 'Angela Ivonita Pareira'));
+      var s2Jabatan = _activeSigner2Data ? (_activeSigner2Data.jabatan || (_activeSigner2Data.pangkat || '')) : (data.defaultSigner2 ? data.defaultSigner2.pangkat : (data.isPerStaf ? 'Pelaksana' : 'Golongan V'));
+      var s2Nip = _activeSigner2Data ? (_activeSigner2Data.nip || '-') : (data.defaultSigner2 ? data.defaultSigner2.nip : (data.isPerStaf ? '-' : '198008162025212006'));
+      var s2Ttd = resolveStaffTtd(_activeSigner2Data, data.defaultSigner2);
 
       html += '<div id="lap-col-signer-2" style="width:46%; text-align:center;">' +
         '<div>Labuan Bajo, ' + safeEsc(data.tanggalGenerate || '') + '</div>' +
         '<div style="font-weight:bold; margin-top:2px;">' + safeEsc(s2Title) + '</div>' +
-        '<div style="height:70px; display:flex; align-items:center; justify-content:center;">' +
-        (s2Ttd ? '<img src="' + s2Ttd + '" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">' : '') +
+        '<div style="height:65px; display:flex; align-items:center; justify-content:center; margin:4px 0;">' +
+        (s2Ttd ? '<img src="' + s2Ttd + '" alt="TTD ' + safeEsc(s2Nama) + '" style="max-height:60px; max-width:140px; object-fit:contain;" onerror="this.style.display=\'none\'">' : '<div style="height:60px;"></div>') +
         '</div>' +
         '<div style="font-weight:bold; text-decoration:underline;">' + safeEsc(s2Nama) + '</div>' +
-        '<div>' + safeEsc(s2Jabatan) + '</div>' +
+        (s2Jabatan ? '<div>' + safeEsc(s2Jabatan) + '</div>' : '') +
         '<div>NIP. ' + safeEsc(s2Nip) + '</div>' +
         '</div>';
     } else {
@@ -402,6 +567,68 @@ function renderLaporanPreview(data) {
     }
 
     html += '</div>';
+  }
+
+  // 9. LAMPIRAN KHUSUS INTERNAL
+  if (isInternal && data.arsipDetail && data.arsipDetail.length > 0) {
+    html += '<div class="page-break" style="page-break-before:always; margin-top:35px; padding-top:25px; border-top:1px dashed #94a3b8;">' +
+      '<div style="text-align:center; margin-bottom:16px;">' +
+        '<div style="font-size:11.5pt; font-weight:bold; text-decoration:underline;">LAMPIRAN: DAFTAR ARSIP HASIL ALIH MEDIA</div>' +
+        '<div style="font-size:10pt; margin-top:3px;">Periode: ' + safeEsc(data.periode) + ' | ' + (data.isPerStaf ? ('Petugas: ' + safeEsc(data.petugasPelaksana)) : 'Seluruh Tim Alih Media') + '</div>' +
+      '</div>' +
+      '<div style="overflow-x:auto; margin-bottom:20px;">' +
+      '<table style="width:100%; border-collapse:collapse; font-size:8.5pt;">' +
+      '<thead><tr style="background:#f1f5f9;">' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:28px;">No</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:80px;">Kode Unik</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px;">Uraian Informasi Arsip</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:65px;">Jenis</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:70px;">Asal Arsip</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:65px;">Kurun Waktu</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:45px;">Lembar</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:85px;">Petugas</th>' +
+        '<th style="border:1px solid #333; padding:5px 4px; text-align:center; width:60px;">Status</th>' +
+      '</tr></thead><tbody>';
+
+    data.arsipDetail.forEach(function(a) {
+      html += '<tr>' +
+        '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + a.no + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px; font-weight:600;">' + safeEsc(a.kode_unik) + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px;">' + safeEsc(a.deskripsi || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.jenis_arsip || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.asal_arsip || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.kurun_waktu || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + (a.jumlah_lembar || 1) + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px;">' + safeEsc(a.staf_nama || '-') + '</td>' +
+        '<td style="border:1px solid #333; padding:4px 3px; text-align:center;">' + safeEsc(a.status_keterbukaan || 'Terbuka') + '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // Rekapitulasi jika Internal Semua Staf
+    if (!data.isPerStaf && data.stafBreakdown && data.stafBreakdown.length > 0) {
+      html += '<div style="margin-top:16px;">' +
+        '<div style="font-size:10.5pt; font-weight:bold; margin-bottom:6px;">REKAPITULASI HASIL ALIH MEDIA PER STAF PELAKSANA:</div>' +
+        '<table style="width:100%; border-collapse:collapse; font-size:9pt;">' +
+        '<thead><tr style="background:#f1f5f9;">' +
+          '<th style="border:1px solid #333; padding:5px; width:35px; text-align:center;">No</th>' +
+          '<th style="border:1px solid #333; padding:5px; text-align:left;">Nama Staf Pelaksana</th>' +
+          '<th style="border:1px solid #333; padding:5px; width:120px; text-align:center;">Jumlah Berkas</th>' +
+          '<th style="border:1px solid #333; padding:5px; width:120px; text-align:center;">Jumlah Lembar</th>' +
+        '</tr></thead><tbody>';
+
+      data.stafBreakdown.forEach(function(sb, sIdx) {
+        html += '<tr>' +
+          '<td style="border:1px solid #333; padding:4px; text-align:center;">' + (sIdx + 1) + '</td>' +
+          '<td style="border:1px solid #333; padding:4px;">' + safeEsc(sb.nama || '-') + '</td>' +
+          '<td style="border:1px solid #333; padding:4px; text-align:center;">' + (sb.totalBerkas || 1) + ' berkas</td>' +
+          '<td style="border:1px solid #333; padding:4px; text-align:center;">' + (sb.totalLembar || 0) + ' lembar</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+
+    html += '</div>'; // Tutup lampiran page-break
   }
 
   html += '</div></div>';
@@ -454,6 +681,7 @@ function printLaporanDoc() {
     '      width: 100%; max-width: 210mm; min-height: 297mm; margin: 20px auto; background: #fff; padding: 15mm 18mm;\n' +
     '      box-shadow: 0 4px 20px rgba(0,0,0,0.12);\n' +
     '    }\n' +
+    '    .page-break { page-break-before: always; break-before: page; }\n' +
     '    @media print {\n' +
     '      html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }\n' +
     '      .no-print-toolbar { display: none !important; }\n' +
@@ -461,6 +689,7 @@ function printLaporanDoc() {
     '      table { page-break-inside: auto; }\n' +
     '      tr { page-break-inside: avoid; }\n' +
     '      thead { display: table-header-group; }\n' +
+    '      .page-break { page-break-before: always !important; break-before: page !important; }\n' +
     '    }\n' +
     '  </style>\n' +
     '</head>\n' +
@@ -496,18 +725,25 @@ function saveLaporanToGoogleDocs() {
   var useS1 = document.getElementById('lap-toggle-signer-1').checked;
   var useS2 = document.getElementById('lap-toggle-signer-2').checked;
 
+  var isPerStaf = _lastGeneratedLaporanData ? _lastGeneratedLaporanData.isPerStaf : !!document.getElementById('lap-staf').value;
+
   var exportParams = Object.assign({}, _lastGeneratedLaporanParams, {
     useSigner1: useS1,
     signer1Title: document.getElementById('lap-title-signer-1').value,
-    signer1Nama: _activeSigner1Data ? _activeSigner1Data.nama : 'AUGUSTINUS RINUS, S.Pd',
-    signer1Pangkat: _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina Utama Muda') : 'Pembina Utama Muda',
-    signer1Nip: _activeSigner1Data ? (_activeSigner1Data.nip || '-') : '19720219 199903 1 008',
+    signer1Nama: _activeSigner1Data ? _activeSigner1Data.nama : 'Fatima Melani Rambing, SAP',
+    signer1Pangkat: _activeSigner1Data ? (_activeSigner1Data.pangkat || 'Pembina IV/a') : 'Pembina IV/a',
+    signer1Nip: _activeSigner1Data ? (_activeSigner1Data.nip || '-') : '197305231992122003',
+    signer1TtdUrl: resolveStaffTtd(_activeSigner1Data, _lastGeneratedLaporanData ? _lastGeneratedLaporanData.defaultSigner1 : null),
+    signer1TtdId: (_activeSigner1Data && _activeSigner1Data.tanda_tangan_id) ? _activeSigner1Data.tanda_tangan_id : (_lastGeneratedLaporanData && _lastGeneratedLaporanData.defaultSigner1 ? (_lastGeneratedLaporanData.defaultSigner1.ttdId || '') : ''),
 
     useSigner2: useS2,
     signer2Title: document.getElementById('lap-title-signer-2').value,
-    signer2Nama: _activeSigner2Data ? _activeSigner2Data.nama : 'MUHAMMAD DZAKY NATHANEGARA, A.Md',
-    signer2Jabatan: _activeSigner2Data ? (_activeSigner2Data.jabatan || 'Pengelola Kearsipan') : 'Pengelola Kearsipan',
-    signer2Nip: _activeSigner2Data ? (_activeSigner2Data.nip || '-') : '19980508 202506 1 004'
+    signer2Nama: _activeSigner2Data ? _activeSigner2Data.nama : (isPerStaf ? 'Pelaksana' : 'Angela Ivonita Pareira'),
+    signer2Jabatan: _activeSigner2Data ? (_activeSigner2Data.jabatan || (isPerStaf ? 'Pelaksana Alih Media' : 'Penanggung Jawab Kegiatan')) : (isPerStaf ? 'Pelaksana Alih Media' : 'Penanggung Jawab Kegiatan'),
+    signer2Pangkat: _activeSigner2Data ? (_activeSigner2Data.pangkat || (isPerStaf ? 'Pelaksana' : 'Golongan V')) : (isPerStaf ? 'Pelaksana' : 'Golongan V'),
+    signer2Nip: _activeSigner2Data ? (_activeSigner2Data.nip || '-') : (isPerStaf ? '-' : '198008162025212006'),
+    signer2TtdUrl: resolveStaffTtd(_activeSigner2Data, _lastGeneratedLaporanData ? _lastGeneratedLaporanData.defaultSigner2 : null),
+    signer2TtdId: (_activeSigner2Data && _activeSigner2Data.tanda_tangan_id) ? _activeSigner2Data.tanda_tangan_id : (_lastGeneratedLaporanData && _lastGeneratedLaporanData.defaultSigner2 ? (_lastGeneratedLaporanData.defaultSigner2.ttdId || '') : '')
   });
 
   if (typeof Swal !== 'undefined') {

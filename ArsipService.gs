@@ -147,7 +147,13 @@ function saveArsip(data) {
       watermark_applied: fileResult ? 'Ya' : 'Tidak',
       staf_id: stafIdFinal,
       staf_nama: stafNamaFinal,
-      tanggal_input: new Date(),
+      tanggal_input: (function() {
+        if (data.tanggalInput) {
+          var dIn = new Date(data.tanggalInput);
+          if (!isNaN(dIn.getTime())) return dIn;
+        }
+        return new Date();
+      })(),
       tanggal_update: new Date(),
       status: 'Aktif'
     };
@@ -335,6 +341,13 @@ function updateArsip(arsipId, data) {
 
     if (data.kurun_waktu || data.kurun_waktu_mulai) {
       updateObj.kurun_waktu = data.kurun_waktu || data.kurun_waktu_mulai;
+    }
+
+    if (data.tanggal_input || data.tanggalInput) {
+      var dEdit = new Date(data.tanggal_input || data.tanggalInput);
+      if (!isNaN(dEdit.getTime())) {
+        updateObj.tanggal_input = dEdit;
+      }
     }
     
     updateObj.tanggal_update = new Date();
@@ -1068,7 +1081,7 @@ function getRekapitulasiArsipExport(params) {
     params = params || {};
     var allArsip = readAllData(CONFIG.SHEETS.MASTER_ARSIP);
     var pejabatRes = getPejabatConfig();
-    var defaultTtd = (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : (CONFIG.PEJABAT ? CONFIG.PEJABAT.DUMMY_TTD : '');
+    var defaultTtd = (CONFIG.PEJABAT && CONFIG.PEJABAT.PELAKSANA && CONFIG.PEJABAT.PELAKSANA.TTD) ? CONFIG.PEJABAT.PELAKSANA.TTD : '';
     var pejabat = pejabatRes && pejabatRes.data ? pejabatRes.data : {
       kadis: (CONFIG.PEJABAT && CONFIG.PEJABAT.KADIS) ? CONFIG.PEJABAT.KADIS : {},
       kabid: (CONFIG.PEJABAT && CONFIG.PEJABAT.KABID) ? CONFIG.PEJABAT.KABID : {},

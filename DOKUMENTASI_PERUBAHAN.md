@@ -6,14 +6,32 @@
 
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
-- **ID Deployment Aktif**: `AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B`
-- **Versi Terakhir**: **Versi 48 (Deployment @69)**
-- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec](https://script.google.com/macros/s/AKfycbxIbcIiJY3FpeBJM9hC40_GYXNz-hIWgIcVZyvIm1NQaSj2TeJ5lxQ4VsG1OxEw077B/exec)
-- **ID Basis Data (Spreadsheet)**: `1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`
+- **ID Deployment Aktif**: `AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q`
+- **Versi Terakhir**: **Versi 49 (Deployment @2 Baru)**
+- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q/exec](https://script.google.com/macros/s/AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q/exec)
+- **ID Proyek GAS Baru**: `1BA5rFvxRcszqyltzolfb8zp0xzC5vWwe1v1UqTI7FE4deBjT-cnSQt9I`
+- **ID Basis Data (Spreadsheet Baru)**: `1c3caYKmVd1nt46lmqxxAEm8wVPQWwMsybqrz4OzBoSM`
+- **Cadangan Konfigurasi Lama**: Tersimpan di file [CONFIG_OLD_BACKUP.md](file:///d:/Antigravity/GAS/CONFIG_OLD_BACKUP.md)
 
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 49 — Migrasi Lingkungan ke Proyek Google Apps Script, Spreadsheet, & Google Drive Baru
+- **Latar Belakang**: Permintaan pengguna untuk memigrasikan sistem SIASTA ke akun Google baru dengan Google Apps Script project dan Google Spreadsheet mandiri baru, serta memastikan Google Drive dan perizinan berjalan di bawah akun pemilik baru (`USER_DEPLOYING`).
+- **Rincian Perubahan yang Diimplementasikan**:
+  1. **Pencadangan Konfigurasi Lama**:
+     - Seluruh ID proyek lama, Spreadsheet lama (`1eERa08ccRqPJp7r_iGddzcnWnI1NnYn4UDl3_60CzK0`), script ID lama (`1S_DgdN2c_bdesSZfSSx_n3OL420shlikdsxEWMTF-_8B06y8PrPLnJD4`), dan URL deployment lama dicadangkan secara permanen ke file `CONFIG_OLD_BACKUP.md`.
+  2. **Penyelarasan Proyek GAS Baru**:
+     - Memperbarui `.clasp.json` ke script ID baru: `1BA5rFvxRcszqyltzolfb8zp0xzC5vWwe1v1UqTI7FE4deBjT-cnSQt9I`.
+     - Mengunggah seluruh 28 file kode SIASTA (termasuk fitur terbaru yang ditarik dari GAS) ke proyek Google Apps Script baru via `clasp push -f`.
+  3. **Penyelarasan Basis Data Spreadsheet Baru**:
+     - Memperbarui `CONFIG.SPREADSHEET_ID` pada `Config.gs` ke Spreadsheet baru: `1c3caYKmVd1nt46lmqxxAEm8wVPQWwMsybqrz4OzBoSM`.
+  4. **Google Drive Otomatis Mengikuti Akun Baru**:
+     - Memastikan `CONFIG.DRIVE_FOLDER_ID` kosong (`''`), sehingga `DriveService.gs` secara otomatis mendeteksi atau membuat folder root `SIASTA` dan seluruh subfolder (`Arsip Digital`, `Berita Acara`, `Laporan`, `Tanda Tangan`) di Google Drive milik akun pemilik baru.
+     - Konfigurasi `appsscript.json` menggunakan `"executeAs": "USER_DEPLOYING"`, menjamin setiap operasi Drive dan Spreadsheet dieksekusi atas nama akun pemilik baru.
+  5. **Deployment Web App Baru**:
+     - Berhasil membuat deployment baru: `AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q` (Versi @2).
 
 ### Versi 48 — Perbaikan Kebocoran Tag HTML TTD pada Generate Laporan & Cetak Tab Baru Standalone (Deployment @69)
 - **Latar Belakang**: Pada menu **Generate Laporan**, ketika laporan dibuat, bagian tanda tangan kanan memunculkan teks mentah `" alt="TTD" style="max-height:65px; max-width:150px; object-fit:contain;">` di sebelah kanan tanggal dan memunculkan gambar rusak (*broken image*). Hal ini disebabkan oleh string SVG `window._dummyTtd` yang mengandung tanda petik ganda (`"`) tanpa encoding sehingga memutus atribut `src` HTML, menutup tag `<img>` sebelum waktunya, dan memuntahkan sisa kode sebagai teks mentah di layar.
