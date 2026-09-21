@@ -292,6 +292,17 @@ function include(filename) {
  * @returns {string} HTML content
  */
 function getPageContent(page, param) {
+  // Verifikasi login: Halaman sistem tidak boleh diakses jika belum login
+  var currentUser = getCurrentUser();
+  if (!currentUser) {
+    return '<div class="empty-state" style="padding:48px 24px; text-align:center;">' +
+           '<div class="empty-icon" style="font-size:48px; margin-bottom:14px;">🔒</div>' +
+           '<div class="empty-title" style="font-size:18px; font-weight:700; color:#1B2A4A; margin-bottom:8px;">Akses Dibatasi — Login Diperlukan</div>' +
+           '<div class="empty-desc" style="color:#64748b; font-size:13px; margin-bottom:20px;">Sesi Anda telah berakhir (inaktif 5 menit) atau Anda belum login ke SIASTA.</div>' +
+           '<button type="button" class="btn btn-primary" onclick="transitionToAuth(true)" style="padding:10px 20px; font-weight:700;">🔑 Ke Halaman Login</button>' +
+           '</div>';
+  }
+
   // Page mapping
   var pageMap = {
     'dashboard': 'Dashboard',

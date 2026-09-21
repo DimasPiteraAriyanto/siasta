@@ -849,6 +849,7 @@
               try {
                 if (res.data) {
                   sessionStorage.setItem('siasta_user', JSON.stringify(res.data));
+                  sessionStorage.setItem('siasta_last_activity', Date.now().toString());
                 }
               } catch (errSession) {}
               setTimeout(function() {

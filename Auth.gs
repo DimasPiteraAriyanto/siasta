@@ -98,12 +98,14 @@ function login(username, password, staffId) {
     }
     
     // Set session
+    var nowIso = new Date().toISOString();
     var userProps = PropertiesService.getUserProperties();
     userProps.setProperties({
       [CONFIG.SESSION.KEY_USER_ID]: staf.id,
       [CONFIG.SESSION.KEY_USER_NAME]: staf.nama,
       [CONFIG.SESSION.KEY_USER_JABATAN]: staf.jabatan,
-      [CONFIG.SESSION.KEY_LOGIN_TIME]: new Date().toISOString()
+      [CONFIG.SESSION.KEY_LOGIN_TIME]: nowIso,
+      [CONFIG.SESSION.KEY_LAST_ACTIVITY]: nowIso
     });
     
     // Log aktivitas
@@ -114,7 +116,8 @@ function login(username, password, staffId) {
     return jsonResponse(true, {
       id: staf.id,
       nama: staf.nama,
-      jabatan: staf.jabatan
+      jabatan: staf.jabatan,
+      loginTime: nowIso
     }, 'Login berhasil! Mengalihkan ke dashboard...');
     
   } catch (e) {
@@ -142,7 +145,7 @@ function logout() {
 }
 
 /**
- * Get current logged-in user
+ * Get current logged-in user (dengan auto-timeout 5 menit jika inaktif)
  * @returns {Object|null} User info atau null
  */
 function getCurrentUser() {
@@ -152,27 +155,53 @@ function getCurrentUser() {
     
     if (!userId) return null;
     
-    // Check timeout
-    var loginTime = userProps.getProperty(CONFIG.SESSION.KEY_LOGIN_TIME);
-    if (loginTime) {
-      var loginDate = new Date(loginTime);
+    // Check timeout 5 menit inaktivitas
+    var timeoutMinutes = (CONFIG.SESSION && CONFIG.SESSION.TIMEOUT_MINUTES) ? CONFIG.SESSION.TIMEOUT_MINUTES : 5;
+    var lastActTime = userProps.getProperty(CONFIG.SESSION.KEY_LAST_ACTIVITY) || userProps.getProperty(CONFIG.SESSION.KEY_LOGIN_TIME);
+    
+    if (lastActTime) {
+      var lastActDate = new Date(lastActTime);
       var now = new Date();
-      var diffHours = (now - loginDate) / (1000 * 60 * 60);
+      var diffMinutes = (now - lastActDate) / (1000 * 60);
       
-      if (diffHours > CONFIG.SESSION.TIMEOUT_HOURS) {
+      if (diffMinutes > timeoutMinutes) {
         userProps.deleteAllProperties();
         return null;
       }
     }
     
+    // Perbarui waktu aktivitas terakhir
+    try {
+      userProps.setProperty(CONFIG.SESSION.KEY_LAST_ACTIVITY, new Date().toISOString());
+    } catch (eProp) {}
+
     return {
       id: userId,
       nama: userProps.getProperty(CONFIG.SESSION.KEY_USER_NAME),
       jabatan: userProps.getProperty(CONFIG.SESSION.KEY_USER_JABATAN),
-      loginTime: loginTime
+      loginTime: userProps.getProperty(CONFIG.SESSION.KEY_LOGIN_TIME)
     };
   } catch (e) {
     return null;
+  }
+}
+
+/**
+ * Perpanjang / refresh aktivitas sesi di server
+ */
+function touchSession() {
+  try {
+    var user = getCurrentUser();
+    if (user) {
+      PropertiesService.getUserProperties().setProperty(
+        CONFIG.SESSION.KEY_LAST_ACTIVITY,
+        new Date().toISOString()
+      );
+      return jsonResponse(true, user, 'Sesi diperbarui.');
+    }
+    return jsonResponse(false, null, 'Sesi kedaluwarsa.');
+  } catch (e) {
+    return jsonResponse(false, null, 'Error touchSession: ' + e.message);
   }
 }
 

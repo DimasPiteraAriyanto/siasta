@@ -115,8 +115,11 @@
             <h1 class="page-title" id="page-title">Dashboard</h1>
           </div>
         </div>
-        <div class="page-breadcrumb">
-          <?= instansi ?> — <?= daerah ?>
+        <div class="page-breadcrumb" style="display:flex; align-items:center; gap:10px;">
+          <span id="session-timer-badge" style="font-size:12px; font-weight:700; padding:4px 11px; border-radius:20px; background:rgba(74,144,217,0.12); color:#1B2A4A; border:1px solid rgba(74,144,217,0.25); display:inline-flex; align-items:center; gap:5px; transition:all 0.3s ease;" title="Sesi login aktif. Otomatis reset setelah 5 menit tidak ada aktivitas.">
+            ⏱️ Sesi: 05:00
+          </span>
+          <span style="opacity:0.85;"><?= instansi ?> — <?= daerah ?></span>
         </div>
       </header>
 
@@ -135,11 +138,21 @@
   <?!= include('ClientScript') ?>
   
   <script>
-    // Auto-load dashboard on init if logged in
+    // Enforce authentication & session lifecycle on startup
     document.addEventListener('DOMContentLoaded', function() {
-      <? if (isLoggedIn) { ?>
-        navigateTo('dashboard');
-      <? } ?>
+      if (typeof initSessionOnPageLoad === 'function') {
+        initSessionOnPageLoad();
+      } else {
+        var user = (typeof getActiveUserFromSession === 'function') ? getActiveUserFromSession() : null;
+        if (user) {
+          navigateTo('dashboard');
+        } else {
+          var appView = document.getElementById('main-app-container');
+          var authView = document.getElementById('auth-view');
+          if (appView) appView.style.display = 'none';
+          if (authView) authView.style.display = 'flex';
+        }
+      }
     });
   </script>
 </body>

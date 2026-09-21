@@ -185,6 +185,27 @@ function setPageContent(html) {
 }
 
 function navigateTo(page, param) {
+  // WAJIB: Pengecekan autentikasi ketat sebelum memuat halaman apapun
+  var activeUser = getActiveUserFromSession();
+  if (!activeUser) {
+    transitionToAuth(true);
+    return;
+  }
+  
+  // Periksa apakah waktu inaktivitas telah mencapai atau melebihi 5 menit
+  var savedLast = null;
+  try {
+    savedLast = parseInt(sessionStorage.getItem('siasta_last_activity'), 10);
+  } catch (e) {}
+  var last = (savedLast && !isNaN(savedLast)) ? Math.max(_lastActivityTimestamp, savedLast) : _lastActivityTimestamp;
+  if (Date.now() - last >= SIASTA_SESSION_TIMEOUT_MS) {
+    handleSessionExpired();
+    return;
+  }
+
+  // Perbarui aktivitas karena user aktif berpindah halaman
+  recordUserActivity();
+
   closeMobileSidebar();
   startProgressBar();
   showLoading();
@@ -507,10 +528,241 @@ function doLogout() {
   }
 }
 
+// ============ SIASTA 5-MENIT SESSION & INACTIVITY MANAGER ============
+var SIASTA_SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 Menit (300.000 ms)
+var _sessionWatcherInterval = null;
+var _lastActivityTimestamp = Date.now();
+var _isActivityEventsBound = false;
+
+/**
+ * Catat aktivitas pengguna dan simpan timestamp ke sessionStorage
+ */
+function recordUserActivity() {
+  _lastActivityTimestamp = Date.now();
+  try {
+    sessionStorage.setItem('siasta_last_activity', _lastActivityTimestamp.toString());
+  } catch (e) {}
+}
+
+/**
+ * Hubungkan event listener aktivitas pengguna (klik, ketik, mouse, sentuh, scroll)
+ */
+function bindUserActivityListeners() {
+  if (_isActivityEventsBound) return;
+  _isActivityEventsBound = true;
+  
+  var events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+  var lastThrottledTime = 0;
+  
+  function onUserActive() {
+    var now = Date.now();
+    // Throttle setiap 3.5 detik agar performa browser tetap maksimal
+    if (now - lastThrottledTime > 3500) {
+      lastThrottledTime = now;
+      recordUserActivity();
+    }
+  }
+
+  events.forEach(function(evt) {
+    window.addEventListener(evt, onUserActive, { passive: true });
+  });
+}
+
+/**
+ * Mulai interval pemantauan sesi 5 menit
+ */
+function startSessionWatcher() {
+  stopSessionWatcher();
+  recordUserActivity();
+  bindUserActivityListeners();
+  
+  // Timer interval setiap 1 detik untuk countdown yang mulus dan deteksi tepat waktu
+  _sessionWatcherInterval = setInterval(function() {
+    checkSessionTimeout();
+  }, 1000);
+  
+  updateSessionIndicator(SIASTA_SESSION_TIMEOUT_MS);
+}
+
+/**
+ * Hentikan pemantauan sesi
+ */
+function stopSessionWatcher() {
+  if (_sessionWatcherInterval) {
+    clearInterval(_sessionWatcherInterval);
+    _sessionWatcherInterval = null;
+  }
+}
+
+/**
+ * Evaluasi apakah waktu inaktivitas sudah melampaui 5 menit
+ */
+function checkSessionTimeout() {
+  var user = getActiveUserFromSession();
+  if (!user) {
+    stopSessionWatcher();
+    return;
+  }
+
+  var savedLast = null;
+  try {
+    savedLast = parseInt(sessionStorage.getItem('siasta_last_activity'), 10);
+  } catch (e) {}
+
+  var last = (savedLast && !isNaN(savedLast)) ? Math.max(_lastActivityTimestamp, savedLast) : _lastActivityTimestamp;
+  var elapsed = Date.now() - last;
+  var remaining = SIASTA_SESSION_TIMEOUT_MS - elapsed;
+
+  updateSessionIndicator(remaining);
+
+  if (elapsed >= SIASTA_SESSION_TIMEOUT_MS) {
+    handleSessionExpired();
+  }
+}
+
+/**
+ * Eksekusi saat sesi kedaluwarsa (inaktif 5 menit)
+ */
+function handleSessionExpired() {
+  stopSessionWatcher();
+  
+  // Bersihkan data sesi client
+  try {
+    sessionStorage.removeItem('siasta_user');
+    sessionStorage.removeItem('siasta_last_activity');
+    sessionStorage.removeItem('siasta_detail_id');
+  } catch (e) {}
+  window._currentUser = null;
+
+  // Logout server di latar belakang
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run.logout();
+  }
+
+  // Alihkan antarmuka ke form login
+  transitionToAuth(true);
+
+  // Munculkan dialog peringatan sesi berakhir
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Sesi Telah Berakhir',
+      html: 'Sesi Anda telah di-reset secara otomatis karena <strong>tidak ada aktivitas selama 5 menit</strong>.<br><br>Silakan login kembali untuk melanjutkan pekerjaan Anda.',
+      confirmButtonColor: '#1B2A4A',
+      confirmButtonText: '🔑 Login Kembali',
+      allowOutsideClick: false,
+      allowEscapeKey: false
+    }).then(function() {
+      var userInput = document.getElementById('input-username');
+      if (userInput) userInput.focus();
+    });
+  } else {
+    showToast('Sesi Anda berakhir karena tidak ada aktivitas selama 5 menit.', 'warning');
+  }
+}
+
+/**
+ * Perbarui teks badge countdown sisa waktu sesi aktif di navbar
+ */
+function updateSessionIndicator(remainingMs) {
+  var timerEl = document.getElementById('session-timer-badge');
+  if (!timerEl) return;
+  
+  if (remainingMs === undefined || remainingMs > SIASTA_SESSION_TIMEOUT_MS) {
+    remainingMs = SIASTA_SESSION_TIMEOUT_MS;
+  }
+  if (remainingMs < 0) remainingMs = 0;
+  
+  var totalSec = Math.floor(remainingMs / 1000);
+  var min = Math.floor(totalSec / 60);
+  var sec = totalSec % 60;
+  var formatted = (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
+  
+  timerEl.textContent = '⏱️ Sesi: ' + formatted;
+  
+  // Indikator visual jika sisa waktu kurang dari 60 detik
+  if (totalSec <= 60) {
+    timerEl.style.background = '#fef2f2';
+    timerEl.style.color = '#dc2626';
+    timerEl.style.borderColor = '#fca5a5';
+  } else {
+    timerEl.style.background = 'rgba(74, 144, 217, 0.12)';
+    timerEl.style.color = '#1B2A4A';
+    timerEl.style.borderColor = 'rgba(74, 144, 217, 0.25)';
+  }
+}
+
+/**
+ * Fungsi inisialisasi sesi saat halaman pertama kali dimuat di browser
+ */
+function initSessionOnPageLoad() {
+  var user = getActiveUserFromSession();
+  var savedLast = null;
+  try {
+    savedLast = parseInt(sessionStorage.getItem('siasta_last_activity'), 10);
+  } catch (e) {}
+
+  var isExpired = false;
+  if (savedLast && !isNaN(savedLast)) {
+    if (Date.now() - savedLast >= SIASTA_SESSION_TIMEOUT_MS) {
+      isExpired = true;
+    }
+  }
+
+  if (user && !isExpired) {
+    // Sesi aktif & valid (< 5 menit)
+    recordUserActivity();
+    startSessionWatcher();
+    
+    var authView = document.getElementById('auth-view');
+    var appView = document.getElementById('main-app-container');
+    if (authView) authView.style.display = 'none';
+    if (appView) {
+      appView.style.display = 'flex';
+      appView.classList.remove('hidden');
+    }
+    
+    var nameEl = document.getElementById('user-name');
+    if (nameEl) nameEl.textContent = user.nama || 'Petugas';
+    var roleEl = document.getElementById('user-role');
+    if (roleEl) roleEl.textContent = user.jabatan || 'Staf';
+    var avatarEl = document.getElementById('user-avatar');
+    if (avatarEl) avatarEl.textContent = (user.nama ? user.nama.charAt(0).toUpperCase() : 'U');
+    
+    navigateTo('dashboard');
+  } else {
+    // Belum login atau sesi telah kedaluwarsa
+    try {
+      sessionStorage.removeItem('siasta_user');
+      sessionStorage.removeItem('siasta_last_activity');
+    } catch (e) {}
+    window._currentUser = null;
+    stopSessionWatcher();
+    
+    var appView = document.getElementById('main-app-container');
+    var authView = document.getElementById('auth-view');
+    if (appView) {
+      appView.style.display = 'none';
+      appView.classList.add('hidden');
+    }
+    if (authView) {
+      authView.style.display = 'flex';
+      authView.classList.remove('hidden');
+    }
+    
+    if (isExpired) {
+      showToast('Sesi login telah berakhir (inaktif 5 menit). Silakan login kembali.', 'warning');
+    }
+  }
+}
+
 // ============ ZERO-RELOAD SPA SHELL TRANSITIONS ============
 function transitionToApp(userData) {
   if (userData) {
-    try { sessionStorage.setItem('siasta_user', JSON.stringify(userData)); } catch (e) {}
+    try { 
+      sessionStorage.setItem('siasta_user', JSON.stringify(userData)); 
+      sessionStorage.setItem('siasta_last_activity', Date.now().toString());
+    } catch (e) {}
     window._currentUser = userData;
     var nameEl = document.getElementById('user-name');
     if (nameEl) nameEl.textContent = userData.nama || 'Petugas';
@@ -531,6 +783,7 @@ function transitionToApp(userData) {
         appView.style.display = 'flex';
         appView.classList.remove('hidden');
       }
+      startSessionWatcher();
       navigateTo('dashboard');
     }, 320);
   } else {
@@ -538,12 +791,17 @@ function transitionToApp(userData) {
       appView.style.display = 'flex';
       appView.classList.remove('hidden');
     }
+    startSessionWatcher();
     navigateTo('dashboard');
   }
 }
 
-function transitionToAuth() {
-  try { sessionStorage.removeItem('siasta_user'); } catch (e) {}
+function transitionToAuth(isTimeout) {
+  stopSessionWatcher();
+  try { 
+    sessionStorage.removeItem('siasta_user'); 
+    sessionStorage.removeItem('siasta_last_activity');
+  } catch (e) {}
   window._currentUser = null;
   
   var appView = document.getElementById('main-app-container');
@@ -552,6 +810,11 @@ function transitionToAuth() {
   if (appView) {
     appView.style.display = 'none';
     appView.classList.add('hidden');
+  }
+  
+  var pageContent = document.getElementById('page-content');
+  if (pageContent) {
+    pageContent.innerHTML = '';
   }
   
   var passInput = document.getElementById('input-password');
@@ -572,17 +835,19 @@ function transitionToAuth() {
     });
   }
   
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      icon: 'info',
-      title: 'Sesi Selesai',
-      text: 'Anda telah berhasil keluar dari sistem SIASTA.',
-      confirmButtonColor: '#1B2A4A',
-      timer: 2000,
-      showConfirmButton: false
-    });
-  } else {
-    showToast('Anda telah berhasil keluar dari sistem.', 'info');
+  if (!isTimeout) {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'info',
+        title: 'Sesi Selesai',
+        text: 'Anda telah berhasil keluar dari sistem SIASTA.',
+        confirmButtonColor: '#1B2A4A',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      showToast('Anda telah berhasil keluar dari sistem.', 'info');
+    }
   }
 }
 
