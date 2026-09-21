@@ -6,9 +6,9 @@
 
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
-- **ID Deployment Aktif**: `AKfycbwKF2k3GnwdB5smxNLj7NI44lPstX7XnsTIskjkxQ-qk9GZKKYlYeAvNy44uasGTEARRw`
-- **Versi Terakhir**: **Versi 51 (Deployment @8 Baru)**
-- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbwKF2k3GnwdB5smxNLj7NI44lPstX7XnsTIskjkxQ-qk9GZKKYlYeAvNy44uasGTEARRw/exec](https://script.google.com/macros/s/AKfycbwKF2k3GnwdB5smxNLj7NI44lPstX7XnsTIskjkxQ-qk9GZKKYlYeAvNy44uasGTEARRw/exec)
+- **ID Deployment Aktif**: `AKfycbxMxpj7Onuule7bxGssVP3ndXmvf0Fd6q3c0gdpVXRSSD8XgseW1qpeIy_wEx22izWvzQ`
+- **Versi Terakhir**: **Versi 52 (Deployment @10 Baru)**
+- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxMxpj7Onuule7bxGssVP3ndXmvf0Fd6q3c0gdpVXRSSD8XgseW1qpeIy_wEx22izWvzQ/exec](https://script.google.com/macros/s/AKfycbxMxpj7Onuule7bxGssVP3ndXmvf0Fd6q3c0gdpVXRSSD8XgseW1qpeIy_wEx22izWvzQ/exec)
 - **ID Proyek GAS Baru**: `1BA5rFvxRcszqyltzolfb8zp0xzC5vWwe1v1UqTI7FE4deBjT-cnSQt9I`
 - **ID Basis Data (Spreadsheet Baru)**: `1c3caYKmVd1nt46lmqxxAEm8wVPQWwMsybqrz4OzBoSM`
 - **Cadangan Konfigurasi Lama**: Tersimpan di file [CONFIG_OLD_BACKUP.md](file:///d:/Antigravity/GAS/CONFIG_OLD_BACKUP.md)
@@ -16,6 +16,20 @@
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 52 — Penyesuaian Batas Waktu Sesi Inaktif Menjadi 1 Jam (60 Menit) (Deployment @10)
+- **Latar Belakang**: Permintaan pengguna untuk menyesuaikan durasi timeout sesi dari 5 menit menjadi **1 jam (60 menit)** agar staf memiliki waktu yang cukup leluasa dalam menginput data arsip panjang atau mengunggah berkas tanpa terputus sesi login secara mendadak.
+- **Rincian Perubahan yang Diimplementasikan**:
+  1. **Konfigurasi Server & Sesi (`Config.gs` & `Auth.gs`)**:
+     - Memperbarui `CONFIG.SESSION.TIMEOUT_MINUTES: 60` dan `CONFIG.SESSION.TIMEOUT_HOURS: 1`.
+     - Logika verifikasi keaktifan sesi di `getCurrentUser()` pada `Auth.gs` kini mengizinkan jeda inaktivitas hingga 60 menit.
+     - Pesan penolakan akses di `Code.gs` (`getPageContent`) diperbarui menjadi: *"Sesi Anda telah berakhir (inaktif 1 jam) atau Anda belum login ke SIASTA."*
+  2. **Pengatur Sesi & Waktu Client (`ClientScript.html`)**:
+     - Konstanta batas sesi browser disesuaikan menjadi `SIASTA_SESSION_TIMEOUT_MS = 60 * 60 * 1000` (3.600.000 ms / 1 jam).
+     - Seluruh pengecekan `navigateTo`, inisialisasi sesi awal `initSessionOnPageLoad`, peringatan SweetAlert, serta toast notifikasi diselaraskan ke batas 1 jam.
+  3. **Tampilan Countdown Badge Header (`Layout.html`)**:
+     - Badge countdown waktu sesi (`#session-timer-badge`) kini mengawali hitungan dari `⏱️ Sesi: 60:00` dan menghitung mundur secara dinamis.
+     - Tooltip disesuaikan: *"Sesi login aktif. Otomatis reset setelah 1 jam tidak ada aktivitas."*
 
 ### Versi 51 — Wajib Autentikasi Login Seluruh Halaman & Timeout Sesi Inaktif 5 Menit (Deployment @8)
 - **Latar Belakang**: Permintaan pengguna agar seluruh halaman aplikasi wajib login (tidak dapat diakses tanpa autentikasi) dan sistem menerapkan manajemen sesi dengan reset / logout otomatis jika tidak ada aktivitas selama 5 menit.

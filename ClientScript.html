@@ -192,7 +192,7 @@ function navigateTo(page, param) {
     return;
   }
   
-  // Periksa apakah waktu inaktivitas telah mencapai atau melebihi 5 menit
+  // Periksa apakah waktu inaktivitas telah mencapai atau melebihi 1 jam (60 menit)
   var savedLast = null;
   try {
     savedLast = parseInt(sessionStorage.getItem('siasta_last_activity'), 10);
@@ -528,8 +528,8 @@ function doLogout() {
   }
 }
 
-// ============ SIASTA 5-MENIT SESSION & INACTIVITY MANAGER ============
-var SIASTA_SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 Menit (300.000 ms)
+// ============ SIASTA 1-JAM SESSION & INACTIVITY MANAGER ============
+var SIASTA_SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 1 Jam (3.600.000 ms)
 var _sessionWatcherInterval = null;
 var _lastActivityTimestamp = Date.now();
 var _isActivityEventsBound = false;
@@ -569,7 +569,7 @@ function bindUserActivityListeners() {
 }
 
 /**
- * Mulai interval pemantauan sesi 5 menit
+ * Mulai interval pemantauan sesi 1 jam
  */
 function startSessionWatcher() {
   stopSessionWatcher();
@@ -595,7 +595,7 @@ function stopSessionWatcher() {
 }
 
 /**
- * Evaluasi apakah waktu inaktivitas sudah melampaui 5 menit
+ * Evaluasi apakah waktu inaktivitas sudah melampaui 1 jam
  */
 function checkSessionTimeout() {
   var user = getActiveUserFromSession();
@@ -621,7 +621,7 @@ function checkSessionTimeout() {
 }
 
 /**
- * Eksekusi saat sesi kedaluwarsa (inaktif 5 menit)
+ * Eksekusi saat sesi kedaluwarsa (inaktif 1 jam)
  */
 function handleSessionExpired() {
   stopSessionWatcher();
@@ -647,7 +647,7 @@ function handleSessionExpired() {
     Swal.fire({
       icon: 'warning',
       title: 'Sesi Telah Berakhir',
-      html: 'Sesi Anda telah di-reset secara otomatis karena <strong>tidak ada aktivitas selama 5 menit</strong>.<br><br>Silakan login kembali untuk melanjutkan pekerjaan Anda.',
+      html: 'Sesi Anda telah di-reset secara otomatis karena <strong>tidak ada aktivitas selama 1 jam</strong>.<br><br>Silakan login kembali untuk melanjutkan pekerjaan Anda.',
       confirmButtonColor: '#1B2A4A',
       confirmButtonText: '🔑 Login Kembali',
       allowOutsideClick: false,
@@ -657,7 +657,7 @@ function handleSessionExpired() {
       if (userInput) userInput.focus();
     });
   } else {
-    showToast('Sesi Anda berakhir karena tidak ada aktivitas selama 5 menit.', 'warning');
+    showToast('Sesi Anda berakhir karena tidak ada aktivitas selama 1 jam.', 'warning');
   }
 }
 
@@ -710,7 +710,7 @@ function initSessionOnPageLoad() {
   }
 
   if (user && !isExpired) {
-    // Sesi aktif & valid (< 5 menit)
+    // Sesi aktif & valid (< 1 jam)
     recordUserActivity();
     startSessionWatcher();
     
@@ -751,7 +751,7 @@ function initSessionOnPageLoad() {
     }
     
     if (isExpired) {
-      showToast('Sesi login telah berakhir (inaktif 5 menit). Silakan login kembali.', 'warning');
+      showToast('Sesi login telah berakhir (inaktif 1 jam). Silakan login kembali.', 'warning');
     }
   }
 }

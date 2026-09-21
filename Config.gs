@@ -101,15 +101,15 @@ const CONFIG = {
     PAGE_SIZES: [25, 50, 100]
   },
 
-  // Session (Reset otomatis jika inaktif 5 menit)
+  // Session (Reset otomatis jika inaktif 1 jam)
   SESSION: {
     KEY_USER_ID: 'SIASTA_USER_ID',
     KEY_USER_NAME: 'SIASTA_USER_NAME',
     KEY_USER_JABATAN: 'SIASTA_USER_JABATAN',
     KEY_LOGIN_TIME: 'SIASTA_LOGIN_TIME',
     KEY_LAST_ACTIVITY: 'SIASTA_LAST_ACTIVITY',
-    TIMEOUT_MINUTES: 5,
-    TIMEOUT_HOURS: 5 / 60
+    TIMEOUT_MINUTES: 60,
+    TIMEOUT_HOURS: 1
   },
 
   // Watermark

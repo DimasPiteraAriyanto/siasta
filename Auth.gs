@@ -145,7 +145,7 @@ function logout() {
 }
 
 /**
- * Get current logged-in user (dengan auto-timeout 5 menit jika inaktif)
+ * Get current logged-in user (dengan auto-timeout 1 jam jika inaktif)
  * @returns {Object|null} User info atau null
  */
 function getCurrentUser() {
@@ -155,8 +155,8 @@ function getCurrentUser() {
     
     if (!userId) return null;
     
-    // Check timeout 5 menit inaktivitas
-    var timeoutMinutes = (CONFIG.SESSION && CONFIG.SESSION.TIMEOUT_MINUTES) ? CONFIG.SESSION.TIMEOUT_MINUTES : 5;
+    // Check timeout 1 jam (60 menit) inaktivitas
+    var timeoutMinutes = (CONFIG.SESSION && CONFIG.SESSION.TIMEOUT_MINUTES) ? CONFIG.SESSION.TIMEOUT_MINUTES : 60;
     var lastActTime = userProps.getProperty(CONFIG.SESSION.KEY_LAST_ACTIVITY) || userProps.getProperty(CONFIG.SESSION.KEY_LOGIN_TIME);
     
     if (lastActTime) {
