@@ -427,7 +427,7 @@ function executeCleanDatabaseStructure() {
 
   // 1. Hapus 13 sheet tak terpakai / duplikat / kosong
   var unusedSheetNames = [
-    'Sheet1', 'DataArsip', 'data_arsip', 'arsip',
+    'Sheet1', 'Sheet 1', 'DataArsip', 'data_arsip', 'arsip',
     'BeritaAcara', 'LogAktivitas', 'LogAkses', 'log_akses',
     'MasterSumberArsip', 'MasterStaff', 'Target', 'target_realisasi', 'Login'
   ];
@@ -435,7 +435,7 @@ function executeCleanDatabaseStructure() {
   unusedSheetNames.forEach(function(sName) {
     try {
       var sh = ss.getSheetByName(sName);
-      if (sh) {
+      if (sh && ss.getSheets().length > 1) {
         ss.deleteSheet(sh);
         results.deletedSheets.push(sName);
       }

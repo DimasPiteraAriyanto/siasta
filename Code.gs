@@ -13,6 +13,40 @@
  */
 
 /**
+ * Simple Trigger: Dipanggil otomatis setiap kali Spreadsheet dibuka di browser.
+ * Menambahkan custom menu '⚡ SIASTA Setup' dan menginisialisasi sheet & header jika masih kosong.
+ */
+function onOpen(e) {
+  try {
+    if (typeof SpreadsheetApp !== 'undefined') {
+      var ui = SpreadsheetApp.getUi();
+      ui.createMenu('⚡ SIASTA Setup')
+        .addItem('🚀 Setup Otomatis Lengkap (Database & Drive)', 'JALANKAN_SETUP_SEKALI_SAJA')
+        .addSeparator()
+        .addItem('📋 Inisialisasi Sheet & Header', 'initializeAllSheets')
+        .addItem('🌱 Isi Data Awal (Seed Staf & Referensi)', 'seedInitialData')
+        .addItem('🧹 Bersihkan Sheet Tak Terpakai', 'executeCleanDatabaseStructure')
+        .addItem('📁 Buat Struktur Folder Google Drive', 'createFolderStructure')
+        .addToUi();
+    }
+  } catch (uiErr) {
+    Logger.log('onOpen menu error: ' + uiErr.message);
+  }
+
+  // Auto-inisialisasi sheet & header jika master_arsip belum ada
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss && !ss.getSheetByName(CONFIG.SHEETS.MASTER_ARSIP)) {
+      initializeAllSheets();
+      seedInitialData();
+      executeCleanDatabaseStructure();
+    }
+  } catch (initErr) {
+    Logger.log('onOpen auto-init error: ' + initErr.message);
+  }
+}
+
+/**
  * Main entry point — GET handler
  * Ini dipanggil saat user mengakses URL Web App
  */
@@ -20,11 +54,13 @@ function doGet(e) {
   // Support direct init/setup trigger via URL parameter ?action=init
   if (e && e.parameter && (e.parameter.action === 'init' || e.parameter.action === 'init_database')) {
     var initSheetsRes = initializeAllSheets();
+    var cleanRes = executeCleanDatabaseStructure();
     var seedRes = seedInitialData();
     var driveRes = createFolderStructure();
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
       initSheets: initSheetsRes,
+      cleanSheets: cleanRes,
       seedData: seedRes,
       driveFolder: driveRes,
       spreadsheetId: (CONFIG && CONFIG.SPREADSHEET_ID) ? CONFIG.SPREADSHEET_ID : ''
@@ -208,7 +244,14 @@ function doGet(e) {
 
   // Sinkronkan seluruh header database agar kolom selalu siap
   try {
-    syncAllDatabaseHeaders();
+    var ss = getSpreadsheet();
+    if (ss && !ss.getSheetByName(CONFIG.SHEETS.MASTER_ARSIP)) {
+      initializeAllSheets();
+      seedInitialData();
+      executeCleanDatabaseStructure();
+    } else {
+      syncAllDatabaseHeaders();
+    }
     clearCache('CACHE_KODE_ASAL');
   } catch (syncErr) {
     Logger.log('Sync headers error: ' + syncErr.message);
@@ -388,12 +431,16 @@ function JALANKAN_SETUP_SEKALI_SAJA() {
     
     var sheetsRes = initializeAllSheets();
     statusReport.push('✅ ' + sheetsRes);
-    Logger.log('2. Inisialisasi 8 Sheets & Kolom Header: SELESAI');
+    Logger.log('2. Inisialisasi 6 Sheets & Kolom Header: SELESAI');
+    
+    var cleanRes = executeCleanDatabaseStructure();
+    statusReport.push('✅ Pembersihan Sheet Tak Terpakai: SELESAI');
+    Logger.log('3. Pembersihan Sheet Tak Terpakai: SELESAI');
     
     // 2. Seeding Data Awal (Akun Staf, Kode Asal, Pengaturan Dinas, Target)
     var seedRes = seedInitialData();
     statusReport.push('✅ ' + seedRes);
-    Logger.log('3. Seeding Data Awal (Staf, Kode Asal, Pengaturan, Target): SELESAI');
+    Logger.log('4. Seeding Data Awal (Staf, Kode Asal, Pengaturan, Target): SELESAI');
     
     // 3. Hierarki Google Drive Folder
     var folderRes = createFolderStructure();

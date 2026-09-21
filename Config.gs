@@ -173,7 +173,13 @@ var _cachedSheets = {};
 function getSpreadsheet() {
   if (!_cachedSpreadsheet) {
     var ss = null;
-    if (CONFIG.SPREADSHEET_ID) {
+    // 1. Coba getActiveSpreadsheet terlebih dahulu (terutama untuk container-bound script & simple trigger onOpen)
+    try {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (eActive) {}
+
+    // 2. Jika belum dapat, buka menggunakan SPREADSHEET_ID dari Config
+    if (!ss && CONFIG.SPREADSHEET_ID) {
       try {
         ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
       } catch (e) {
