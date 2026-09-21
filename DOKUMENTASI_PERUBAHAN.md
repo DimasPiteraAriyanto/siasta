@@ -6,9 +6,9 @@
 
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
-- **ID Deployment Aktif**: `AKfycbx7FDzHvLvIjldAgG36fLDc9V2-cbyEAKCue7LGIH-LI3L3qGvX5RDi0er-tXoGzYFy5g`
-- **Versi Terakhir**: **Versi 50 (Deployment @5 Baru)**
-- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbx7FDzHvLvIjldAgG36fLDc9V2-cbyEAKCue7LGIH-LI3L3qGvX5RDi0er-tXoGzYFy5g/exec](https://script.google.com/macros/s/AKfycbx7FDzHvLvIjldAgG36fLDc9V2-cbyEAKCue7LGIH-LI3L3qGvX5RDi0er-tXoGzYFy5g/exec)
+- **ID Deployment Aktif**: `AKfycbwKF2k3GnwdB5smxNLj7NI44lPstX7XnsTIskjkxQ-qk9GZKKYlYeAvNy44uasGTEARRw`
+- **Versi Terakhir**: **Versi 51 (Deployment @8 Baru)**
+- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbwKF2k3GnwdB5smxNLj7NI44lPstX7XnsTIskjkxQ-qk9GZKKYlYeAvNy44uasGTEARRw/exec](https://script.google.com/macros/s/AKfycbwKF2k3GnwdB5smxNLj7NI44lPstX7XnsTIskjkxQ-qk9GZKKYlYeAvNy44uasGTEARRw/exec)
 - **ID Proyek GAS Baru**: `1BA5rFvxRcszqyltzolfb8zp0xzC5vWwe1v1UqTI7FE4deBjT-cnSQt9I`
 - **ID Basis Data (Spreadsheet Baru)**: `1c3caYKmVd1nt46lmqxxAEm8wVPQWwMsybqrz4OzBoSM`
 - **Cadangan Konfigurasi Lama**: Tersimpan di file [CONFIG_OLD_BACKUP.md](file:///d:/Antigravity/GAS/CONFIG_OLD_BACKUP.md)
@@ -16,6 +16,25 @@
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 51 — Wajib Autentikasi Login Seluruh Halaman & Timeout Sesi Inaktif 5 Menit (Deployment @8)
+- **Latar Belakang**: Permintaan pengguna agar seluruh halaman aplikasi wajib login (tidak dapat diakses tanpa autentikasi) dan sistem menerapkan manajemen sesi dengan reset / logout otomatis jika tidak ada aktivitas selama 5 menit.
+- **Rincian Perubahan yang Diimplementasikan**:
+  1. **Pembatasan Akses Wajib Login (Zero-Bypass Security)**:
+     - **Inisialisasi Awal**: Saat halaman pertama kali dibuka, sistem langsung memeriksa status sesi client-side (`sessionStorage`) dan server-side. Jika pengguna belum login, antarmuka aplikasi utama (`#main-app-container`) disembunyikan total (`display: none`), dan hanya layar login (`#auth-view`) yang ditampilkan.
+     - **Proteksi Navigasi (`navigateTo`)**: Setiap permintaan perpindahan halaman (Dashboard, Input Arsip, Daftar Arsip, BA, Laporan, dll.) wajib memverifikasi sesi login aktif. Jika belum login atau sesi telah kedaluwarsa, navigasi dibatalkan seketika dan dialihkan ke login.
+     - **Proteksi Server (`getPageContent`)**: Di sisi backend Google Apps Script, fungsi `getPageContent` kini memverifikasi `getCurrentUser()`. Jika belum terautentikasi, backend menolak pengiriman konten halaman dan mengembalikan pesan akses dibatasi.
+  2. **Implementasi Manajemen Sesi Inaktif 5 Menit (300.000 ms)**:
+     - Mengubah konfigurasi batas waktu sesi pada `Config.gs` (`CONFIG.SESSION.TIMEOUT_MINUTES: 5`) dan `Auth.gs`.
+     - Memasang pemantau aktivitas global di browser (`startSessionWatcher()`): mendeteksi klik, ketikan keyboard, pergerakan mouse (dithrottle), sentuhan layar ponsel, dan scroll halaman untuk terus memperbarui `siasta_last_activity`.
+     - Jika pengguna tidak melakukan aktivitas apapun selama **5 menit penuh**:
+       - Seluruh data sesi dibersihkan dari browser (`sessionStorage`).
+       - Sesi server dihapus via `google.script.run.logout()`.
+       - Tampilan antarmuka langsung dikunci dan dialihkan ke layar login (`transitionToAuth(true)`).
+       - Menampilkan dialog peringatan SweetAlert: *"Sesi Anda telah berakhir secara otomatis karena tidak ada aktivitas selama 5 menit. Silakan login kembali untuk melanjutkan."*
+  3. **Badge Indikator Sisa Waktu Sesi Interaktif**:
+     - Menambahkan badge countdown interaktif di bagian header atas (`#session-timer-badge`: `⏱️ Sesi: 05:00`) yang terus menghitung mundur sisa waktu inaktivitas secara *real-time* dan otomatis ter-reset kembali ke `05:00` saat pengguna berinteraksi.
+     - Badge berubah warna menjadi merah peringatan jika sisa waktu tinggal kurang dari 60 detik.
 
 ### Versi 50 — Pembersihan & Perapian Layout Formulir Input Data Arsip (Deployment @5)
 - **Latar Belakang**: Permintaan pengguna untuk merapikan layout visual formulir input data arsip (`InputArsip.html`) tanpa mengubah logic yang ada (seluruh ID elemen, nama field, validasi, dan alur JavaScript dipertahankan 100%).
