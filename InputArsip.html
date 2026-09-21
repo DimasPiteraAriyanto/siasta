@@ -1,254 +1,607 @@
 <!-- Input Arsip Baru Page -->
 <div id="input-arsip-page">
-  <div class="card" style="max-width:960px;">
-    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-      <span class="card-title">📝 Formulir Input Alih Media Arsip Baru</span>
-      <div style="display:flex; align-items:center; gap:8px;">
+  <style>
+    /* === Scoped Layout & Polish for Input Arsip === */
+    #input-arsip-page {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding-bottom: 36px;
+    }
+    .ia-card-container {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px -2px rgba(27, 42, 74, 0.07), 0 2px 6px -1px rgba(27, 42, 74, 0.04);
+      overflow: hidden;
+    }
+    .ia-banner-header {
+      background: linear-gradient(135deg, #1B2A4A 0%, #243B68 100%);
+      color: #ffffff;
+      padding: 22px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      border-bottom: 3px solid #D4A843;
+    }
+    .ia-banner-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: #ffffff;
+    }
+    .ia-banner-sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.78);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+    .ia-form-body {
+      padding: 26px 28px;
+      background: #f8fafc;
+    }
+    .ia-step-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s ease;
+    }
+    .ia-step-card:hover {
+      border-color: #cbd5e1;
+    }
+    .ia-step-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .ia-step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1B2A4A;
+      margin: 0;
+    }
+    .ia-step-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(27, 42, 74, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .ia-step-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    .ia-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .ia-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .ia-grid-2:last-child, .ia-grid-3:last-child {
+      margin-bottom: 0;
+    }
+    @media (max-width: 820px) {
+      .ia-grid-2, .ia-grid-3 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .ia-form-body {
+        padding: 16px;
+      }
+      .ia-step-card {
+        padding: 16px;
+      }
+    }
+    .ia-field-group {
+      margin-bottom: 0;
+    }
+    .ia-field-group.full-width {
+      margin-bottom: 14px;
+    }
+    .ia-field-group.full-width:last-child {
+      margin-bottom: 0;
+    }
+    .ia-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .ia-label .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+    .ia-hint {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+    /* Input Styling Enhancements */
+    #input-arsip-page .form-control {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #1e293b;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    #input-arsip-page .form-control:focus {
+      outline: none;
+      border-color: #4A90D9;
+      box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.14);
+    }
+    #input-arsip-page textarea.form-control {
+      resize: vertical;
+      line-height: 1.5;
+    }
+    #stafNama {
+      background: #f8fafc !important;
+      font-weight: 600 !important;
+      color: #1B2A4A !important;
+      cursor: default;
+    }
+    #kodeUnik {
+      background: #fffdf5 !important;
+      font-weight: 700 !important;
+      color: #b45309 !important;
+      border-color: #fcd34d !important;
+      font-size: 14.5px !important;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      letter-spacing: 0.5px;
+    }
+    /* Upload Zone */
+    .ia-upload-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .ia-upload-zone:hover, .ia-upload-zone.dragover {
+      border-color: #4A90D9;
+      background: #f0f7ff;
+      box-shadow: 0 4px 12px rgba(74, 144, 217, 0.08);
+    }
+    .ia-upload-icon-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #eef4ff;
+      color: #4A90D9;
+      font-size: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .ia-upload-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1B2A4A;
+      margin-bottom: 4px;
+    }
+    .ia-upload-sub {
+      font-size: 12px;
+      color: #64748b;
+    }
+    .ia-pill-list {
+      display: inline-flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .ia-pill {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 5px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    /* QA Checklist Cards */
+    .ia-qa-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+    }
+    .ia-qa-item:last-child {
+      margin-bottom: 0;
+    }
+    .ia-qa-item:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .ia-qa-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #1B2A4A;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .ia-qa-item label {
+      margin: 0;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #1e293b;
+      line-height: 1.4;
+      flex: 1;
+    }
+    /* Action Bar */
+    .ia-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .ia-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+  </style>
+
+  <div class="ia-card-container">
+    <!-- Header Banner -->
+    <div class="ia-banner-header">
+      <div>
+        <h1 class="ia-banner-title">📝 Formulir Input Alih Media Arsip Baru</h1>
+        <div class="ia-banner-sub">Standar Digitalisasi Arsip Statis — Dinas Kearsipan dan Perpustakaan Kab. Manggarai Barat</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <button type="button" class="btn btn-gold btn-sm" onclick="autoFillSampleInput()" style="font-size:12px;">🧪 Isi Contoh Data Riil</button>
         <span class="badge badge-info" style="font-size:12px;">☁️ Sinkron Google Drive & ANRI 2021</span>
       </div>
     </div>
-    <div class="card-body">
+
+    <div class="ia-form-body">
       <form id="form-arsip" onsubmit="return false;">
         
-        <!-- Section 1: Identifikasi & Petugas -->
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--primary);">📌 1. Identifikasi & Petugas</h3>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nama Petugas Alih Media <span class="required">*</span></label>
-            <input type="text" class="form-control" id="stafNama" readonly style="background:var(--border-light, #f8fafc); font-weight:600; color:var(--primary);" placeholder="Otomatis dari profil akun masuk">
-            <input type="hidden" id="stafId">
-            <p class="form-hint">Otomatis terisi dari identitas akun yang sedang login (tidak bisa diedit manual)</p>
+        <!-- ==================== SEKSI 1: IDENTIFIKASI PETUGAS & KLASIFIKASI ==================== -->
+        <div class="ia-step-card">
+          <div class="ia-step-card-header">
+            <h3 class="ia-step-title">
+              <span class="ia-step-icon">📌</span>
+              <span>1. Identifikasi Petugas & Klasifikasi Pokok</span>
+            </h3>
+            <span class="ia-step-badge">Langkah 1 dari 5</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">Tanggal Alih Media / Input <span class="required">*</span></label>
-            <input type="date" class="form-control" id="tanggalInput" required>
-            <p class="form-hint">Otomatis terisi tanggal hari ini, dapat diubah jika input susulan/mundur</p>
+
+          <!-- Petugas & Tanggal Input -->
+          <div class="ia-grid-2">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Nama Petugas Alih Media <span class="required">*</span></label>
+              <input type="text" class="form-control" id="stafNama" readonly placeholder="Otomatis dari profil akun masuk">
+              <input type="hidden" id="stafId">
+              <p class="ia-hint form-hint">Otomatis terisi dari akun login aktif (tidak bisa diedit manual)</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Tanggal Alih Media / Input <span class="required">*</span></label>
+              <input type="date" class="form-control" id="tanggalInput" required>
+              <p class="ia-hint form-hint">Otomatis hari ini, dapat disesuaikan jika input susulan</p>
+            </div>
+          </div>
+
+          <!-- Keterbukaan, Jenis, Kategori Urusan -->
+          <div class="ia-grid-3">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Status Keterbukaan <span class="required">*</span></label>
+              <select class="form-control" id="statusKeterbukaan" required>
+                <option value="Tertutup" selected>Tertutup (Default)</option>
+                <option value="Terbuka">Terbuka</option>
+              </select>
+              <p class="ia-hint form-hint">Akses keterbukaan publik</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Jenis Arsip <span class="required">*</span></label>
+              <select class="form-control" id="jenisArsip" required>
+                <option value="Tekstual" selected>Tekstual</option>
+                <option value="Foto">Foto</option>
+                <option value="Kartografi/Gambar Teknik">Kartografi / Gambar Teknik</option>
+                <option value="Kearsitekturan">Kearsitekturan</option>
+                <option value="Film/Video">Film / Video</option>
+                <option value="Rekaman Suara">Rekaman Suara</option>
+                <option value="Bentuk Lain">Bentuk Lain</option>
+              </select>
+              <p class="ia-hint form-hint">Bentuk fisik media arsip</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Kategori Urusan <span class="required">*</span></label>
+              <select class="form-control" id="kategoriUrusan" required>
+                <option value="Pemerintahan" selected>Pemerintahan</option>
+                <option value="Pembangunan">Pembangunan</option>
+                <option value="Kesra">Kesejahteraan Rakyat (Kesra)</option>
+                <option value="Keuangan">Keuangan</option>
+                <option value="Kepegawaian">Kepegawaian</option>
+              </select>
+              <p class="ia-hint form-hint">Bidang substansi naskah</p>
+            </div>
+          </div>
+
+          <!-- Kode Klasifikasi Asli & Nomor Asli -->
+          <div class="ia-grid-2">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Kode Klasifikasi Asli <span class="required">*</span></label>
+              <input type="text" class="form-control" id="kodeKlasifikasiAsli" required placeholder="Contoh: 045.2, HK.01, UM.02">
+              <p class="ia-hint form-hint">Salin persis kode klasifikasi dari dokumen arsip aslinya</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Nomor Asli / Referensi Asli</label>
+              <input type="text" class="form-control" id="nomorAsli" placeholder="Contoh: 180/HK/2004 (opsional)">
+              <p class="ia-hint form-hint">Nomor surat/naskah resmi dari dokumen asli jika ada</p>
+            </div>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Status Keterbukaan <span class="required">*</span></label>
-            <select class="form-control" id="statusKeterbukaan" required>
-              <option value="Tertutup" selected>Tertutup (Default)</option>
-              <option value="Terbuka">Terbuka</option>
-            </select>
-            <p class="form-hint">Keterbukaan akses arsip statis</p>
+        <!-- ==================== SEKSI 2: PENOMORAN, SUMBER & FISIK ARSIP ==================== -->
+        <div class="ia-step-card">
+          <div class="ia-step-card-header">
+            <h3 class="ia-step-title">
+              <span class="ia-step-icon">🏷️</span>
+              <span>2. Penomoran, Sumber & Kondisi Fisik</span>
+            </h3>
+            <span class="ia-step-badge">Langkah 2 dari 5</span>
           </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Jenis Arsip <span class="required">*</span></label>
-            <select class="form-control" id="jenisArsip" required>
-              <option value="Tekstual" selected>Tekstual</option>
-              <option value="Foto">Foto</option>
-              <option value="Kartografi/Gambar Teknik">Kartografi / Gambar Teknik</option>
-              <option value="Kearsitekturan">Kearsitekturan</option>
-              <option value="Film/Video">Film / Video</option>
-              <option value="Rekaman Suara">Rekaman Suara</option>
-              <option value="Bentuk Lain">Bentuk Lain</option>
-            </select>
-            <p class="form-hint">Pilih sesuai bentuk fisik media arsip</p>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Kategori Urusan <span class="required">*</span></label>
-            <select class="form-control" id="kategoriUrusan" required>
-              <option value="Pemerintahan" selected>Pemerintahan</option>
-              <option value="Pembangunan">Pembangunan</option>
-              <option value="Kesra">Kesejahteraan Rakyat (Kesra)</option>
-              <option value="Keuangan">Keuangan</option>
-              <option value="Kepegawaian">Kepegawaian</option>
-            </select>
-            <p class="form-hint">Sesuai bidang urusan/substansi isi arsip</p>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Kode Klasifikasi Asli <span class="required">*</span></label>
-            <input type="text" class="form-control" id="kodeKlasifikasiAsli" required placeholder="Contoh: 045.2, HK.01, UM.02">
-            <p class="form-hint">Salin PERSIS dari kode klasifikasi arsip aslinya</p>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Nomor Asli / Referensi Asli</label>
-            <input type="text" class="form-control" id="nomorAsli" placeholder="Contoh: 180/HK/2004 (opsional)">
-            <p class="form-hint">Salin nomor surat/naskah lengkap dari arsip jika ada</p>
-          </div>
-        </div>
-
-        <!-- Section 2: Penomoran & Sumber Fisik -->
-        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">🏷️ 2. Penomoran & Lokasi Simpan</h3>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Asal / Sumber Arsip <span class="required">*</span></label>
-            <select class="form-control select2" id="kodeAsal" data-placeholder="— Cari / Pilih Asal Arsip —" required onchange="onAsalBoxChange()">
-              <option value="">— Cari / Pilih Asal Arsip —</option>
-              <? if (typeof kodeAsalList !== 'undefined' && kodeAsalList && kodeAsalList.length) { ?>
-                <? for (var i = 0; i < kodeAsalList.length; i++) { ?>
-                  <option value="<?= kodeAsalList[i].kode ?>" data-nama="<?= kodeAsalList[i].nama ?>"><?= kodeAsalList[i].kode ?> — <?= kodeAsalList[i].nama ?></option>
+          <!-- Asal Arsip & Nomor Box -->
+          <div class="ia-grid-2">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Asal / Sumber Arsip <span class="required">*</span></label>
+              <select class="form-control select2" id="kodeAsal" data-placeholder="— Cari / Pilih Asal Arsip —" required onchange="onAsalBoxChange()">
+                <option value="">— Cari / Pilih Asal Arsip —</option>
+                <? if (typeof kodeAsalList !== 'undefined' && kodeAsalList && kodeAsalList.length) { ?>
+                  <? for (var i = 0; i < kodeAsalList.length; i++) { ?>
+                    <option value="<?= kodeAsalList[i].kode ?>" data-nama="<?= kodeAsalList[i].nama ?>"><?= kodeAsalList[i].kode ?> — <?= kodeAsalList[i].nama ?></option>
+                  <? } ?>
                 <? } ?>
-              <? } ?>
-            </select>
-            <p class="form-hint">Menentukan awalan Kode Unik sistem</p>
+              </select>
+              <p class="ia-hint form-hint">Menentukan awalan Kode Unik sistem alih media</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Nomor Box Fisik <span class="required">*</span></label>
+              <input type="number" class="form-control" id="nomorBox" min="1" max="999" placeholder="Contoh: 5" required onchange="onAsalBoxChange()">
+              <p class="ia-hint form-hint">Nomor urut box penyimpanan fisik di depot</p>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Nomor Box Fisik <span class="required">*</span></label>
-            <input type="number" class="form-control" id="nomorBox" min="1" max="999" placeholder="Contoh: 5" required onchange="onAsalBoxChange()">
-            <p class="form-hint">Angka nomor box penyimpanan fisik</p>
+
+          <!-- Kode Unik & Unit Pengelola -->
+          <div class="ia-grid-2">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">
+                <span>Kode Unik Arsip (Otomatis)</span>
+                <span class="badge badge-warning" style="font-size:10px; padding:2px 6px;">Auto Preview</span>
+              </label>
+              <input type="text" class="form-control" id="kodeUnik" placeholder="Contoh: KOM-B05-001">
+              <p class="ia-hint form-hint">Format: KODE-BBox-NomorUrut (terisi otomatis saat asal & box dipilih)</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Unit Pengelola / Pencipta Asal <span class="required">*</span></label>
+              <input type="text" class="form-control" id="unitPengelola" required placeholder="Contoh: Kantor Camat Komodo">
+              <p class="ia-hint form-hint">Nama instansi/unit saat arsip diciptakan</p>
+            </div>
+          </div>
+
+          <!-- Kurun Waktu, Kondisi Fisik, Lokasi Simpan -->
+          <div class="ia-grid-3">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Kurun Waktu (Tahun) <span class="required">*</span></label>
+              <input type="text" class="form-control" id="kurunWaktu" required placeholder="Contoh: 2004">
+              <p class="ia-hint form-hint">Tahun arsip dibuat</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Kondisi Fisik <span class="required">*</span></label>
+              <select class="form-control" id="kondisiFisik" required>
+                <option value="Baik" selected>Baik</option>
+                <option value="Cukup">Cukup</option>
+                <option value="Rusak Ringan">Rusak Ringan</option>
+                <option value="Rusak Berat">Rusak Berat</option>
+              </select>
+              <p class="ia-hint form-hint">Keutuhan fisik kertas</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Lokasi Simpan Fisik <span class="required">*</span></label>
+              <input type="text" class="form-control" id="lokasiSimpan" required placeholder="Contoh: Depot Lt.1 - Rak A - Box 5">
+              <p class="ia-hint form-hint">Detail rak/lemari simpan</p>
+            </div>
+          </div>
+
+          <!-- Jumlah Lembar, Jumlah Berkas, Rangkap Ke -->
+          <div class="ia-grid-3">
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Jumlah Lembar Fisik <span class="required">*</span></label>
+              <input type="number" class="form-control" id="jumlahLembar" min="1" value="1" required placeholder="Jumlah lembar">
+              <p class="ia-hint form-hint">Total lembar dalam 1 berkas</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Jumlah Berkas <span class="required">*</span></label>
+              <input type="number" class="form-control" id="jumlahBerkas" min="1" value="1" required>
+              <p class="ia-hint form-hint">Default: 1 berkas</p>
+            </div>
+            <div class="ia-field-group form-group">
+              <label class="ia-label form-label">Rangkap Ke <span class="required">*</span></label>
+              <input type="number" class="form-control" id="rangkapKe" min="1" value="1" required>
+              <p class="ia-hint form-hint">Urutan rangkap berkas</p>
+            </div>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Kode Unik Arsip (Otomatis / Bisa Diedit)</label>
-            <input type="text" class="form-control" id="kodeUnik" placeholder="Contoh: KOM-B05-001" style="background:var(--border-light, #f8fafc);font-weight:700;color:var(--accent, #d97706);font-size:16px;">
-            <p class="form-hint">Format: KODE-BBox-NomorUrut (terisi otomatis saat asal & box dipilih)</p>
+        <!-- ==================== SEKSI 3: URAIAN & DESKRIPSI ISI ==================== -->
+        <div class="ia-step-card">
+          <div class="ia-step-card-header">
+            <h3 class="ia-step-title">
+              <span class="ia-step-icon">📄</span>
+              <span>3. Uraian & Deskripsi Isi Arsip</span>
+            </h3>
+            <span class="ia-step-badge">Langkah 3 dari 5</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">Unit Pengelola / Pencipta Asal <span class="required">*</span></label>
-            <input type="text" class="form-control" id="unitPengelola" required placeholder="Contoh: Kantor Camat Komodo">
-            <p class="form-hint">Nama instansi/unit SAAT arsip dibuat, bukan nama sekarang</p>
+
+          <div class="ia-field-group full-width form-group">
+            <label class="ia-label form-label">Uraian / Deskripsi Arsip <span class="required">*</span></label>
+            <textarea class="form-control" id="deskripsi" rows="3" required placeholder="Uraikan isi, subjek, perihal pokok, serta informasi penting dari dokumen arsip secara jelas dan lengkap..."></textarea>
+            <p class="ia-hint form-hint">Deskripsi ini menjadi indeks utama pencarian pada katalog arsip statis</p>
+          </div>
+
+          <div class="ia-field-group full-width form-group">
+            <label class="ia-label form-label">Keterangan Tambahan (Opsional)</label>
+            <textarea class="form-control" id="keterangan" rows="2" placeholder="Catatan kondisi khusus, lampiran, stempel, atau informasi pelengkap jika diperlukan"></textarea>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Kurun Waktu (Tahun Pembuatan) <span class="required">*</span></label>
-            <input type="text" class="form-control" id="kurunWaktu" required placeholder="Contoh: 2004">
-            <p class="form-hint">Tahun arsip diciptakan/diterbitkan</p>
+        <!-- ==================== SEKSI 4: UNGGAH BERKAS HASIL ALIH MEDIA ==================== -->
+        <div class="ia-step-card">
+          <div class="ia-step-card-header">
+            <h3 class="ia-step-title">
+              <span class="ia-step-icon">📤</span>
+              <span>4. Unggah Berkas & Watermark Digital Otomatis</span>
+            </h3>
+            <span class="ia-step-badge">Langkah 4 dari 5</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">Rangkap Ke <span class="required">*</span></label>
-            <input type="number" class="form-control" id="rangkapKe" min="1" value="1" required>
-            <p class="form-hint">Membedakan salinan sah dari duplikat (default: 1)</p>
+
+          <!-- Dropzone Area -->
+          <div class="ia-upload-zone file-upload-area" id="upload-area">
+            <div class="ia-upload-icon-circle upload-icon">☁️</div>
+            <div class="ia-upload-title upload-text">Klik atau seret berkas scan alih media ke area ini</div>
+            <div class="ia-upload-sub upload-hint">Berkas otomatis disinkronkan ke Google Drive (Master Pelestarian & Master Akses)</div>
+            <div class="ia-pill-list">
+              <span class="ia-pill">📄 PDF</span>
+              <span class="ia-pill">🖼️ TIFF</span>
+              <span class="ia-pill">🖼️ JPG</span>
+              <span class="ia-pill">🖼️ PNG</span>
+            </div>
+            <input type="file" id="arsipFile" accept=".tiff,.tif,.jpg,.jpeg,.png,.pdf" style="display:none" onchange="onFileScanSelected('arsipFile','arsipFile-preview')">
           </div>
+          <div id="arsipFile-preview" style="margin-top:12px;"></div>
+
+          <!-- Waktu Unggah & Watermark Status Badges -->
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+            <div id="upload-time-badge-box" style="display:none;">
+              <span class="badge badge-success" style="font-size:12px; padding:7px 14px; display:inline-flex; align-items:center; gap:6px;">
+                🕒 Waktu Unggah: <strong id="waktuUnggahLabel">-</strong>
+              </span>
+              <input type="hidden" id="waktuUnggah">
+            </div>
+            
+            <div id="upload-watermark-badge-box" style="display:none;">
+              <span class="badge badge-primary" style="font-size:12px; padding:7px 14px; display:inline-flex; align-items:center; gap:8px;">
+                🛡️ Watermark Digital: <strong style="color:#93c5fd;">Terpasang Otomatis</strong>
+                <button type="button" class="btn btn-gold btn-sm" onclick="openModalWatermarkPreview()" style="padding:2px 8px; font-size:11px; margin-left:4px;">
+                  👁️ Pratinjau Watermark
+                </button>
+              </span>
+            </div>
+          </div>
+          <p class="ia-hint form-hint" style="margin-top:8px;">
+            🔒 Berkas salinan akses secara otomatis disematkan cap watermark otentisitas digital Pemerintah Kabupaten Manggarai Barat.
+          </p>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Jumlah Lembar Fisik <span class="required">*</span></label>
-            <input type="number" class="form-control" id="jumlahLembar" min="1" value="1" required placeholder="Jumlah lembar kertas">
-            <p class="form-hint">Isi jumlah lembar dalam 1 berkas ini (dihitung pada dashboard)</p>
+        <!-- ==================== SEKSI 5: CHECKLIST STANDAR ANRI ==================== -->
+        <div class="ia-step-card">
+          <div class="ia-step-card-header">
+            <h3 class="ia-step-title">
+              <span class="ia-step-icon">✅</span>
+              <span>5. Verifikasi Kualitas Mutu (Perka ANRI No. 2 Tahun 2021)</span>
+            </h3>
+            <span class="ia-step-badge">Langkah 5 dari 5</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">Jumlah Berkas <span class="required">*</span></label>
-            <input type="number" class="form-control" id="jumlahBerkas" min="1" value="1" required>
-            <p class="form-hint">Default 1 berkas per entri formulir</p>
-          </div>
-        </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Kondisi Fisik <span class="required">*</span></label>
-            <select class="form-control" id="kondisiFisik" required>
-              <option value="Baik" selected>Baik</option>
-              <option value="Cukup">Cukup</option>
-              <option value="Rusak Ringan">Rusak Ringan</option>
-              <option value="Rusak Berat">Rusak Berat</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Lokasi Simpan Fisik <span class="required">*</span></label>
-            <input type="text" class="form-control" id="lokasiSimpan" required placeholder="Contoh: Depot Lt.1 - Rak A - Box 5">
-          </div>
-        </div>
-
-        <!-- Section 3: Uraian Isi -->
-        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">📄 3. Uraian & Deskripsi Isi</h3>
-        
-        <div class="form-group">
-          <label class="form-label">Uraian / Deskripsi Arsip <span class="required">*</span></label>
-          <textarea class="form-control" id="deskripsi" rows="3" required placeholder="Uraikan isi/perihal pokok arsip secara jelas dan lengkap"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Keterangan Tambahan</label>
-          <textarea class="form-control" id="keterangan" rows="2" placeholder="Catatan kondisi spesifik atau informasi pelengkap jika diperlukan"></textarea>
-        </div>
-
-        <!-- Section 4: Upload File & Waktu Unggah Otomatis -->
-        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">📤 4. Upload File Hasil Alih Media</h3>
-        
-        <div class="file-upload-area" id="upload-area">
-          <div class="upload-icon">☁️</div>
-          <div class="upload-text">Klik atau seret file hasil alih media ke sini</div>
-          <div class="upload-hint">Format: PDF, TIFF, JPG, PNG — File otomatis diunggah ke Google Drive (Pelestarian & Akses)</div>
-          <input type="file" id="arsipFile" accept=".tiff,.tif,.jpg,.jpeg,.png,.pdf" style="display:none" onchange="onFileScanSelected('arsipFile','arsipFile-preview')">
-        </div>
-        <div id="arsipFile-preview"></div>
-
-        <!-- Waktu Unggah Otomatis & Watermark Status -->
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-          <div id="upload-time-badge-box" style="display:none;">
-            <span class="badge badge-success" style="font-size:12px; padding:6px 12px;">
-              🕒 Waktu Unggah: <strong id="waktuUnggahLabel">-</strong>
-            </span>
-            <input type="hidden" id="waktuUnggah">
-          </div>
-          
-          <div id="upload-watermark-badge-box" style="display:none;">
-            <span class="badge badge-primary" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:8px;">
-              🛡️ Watermark Digital Otomatis: <strong style="color:#60a5fa;">Terpasang</strong>
-              <button type="button" class="btn btn-gold btn-sm" onclick="openModalWatermarkPreview()" style="padding:2px 8px; font-size:11px; margin-left:4px;">
-                👁️ Pratinjau Watermark
-              </button>
-            </span>
-          </div>
-        </div>
-        <p class="form-hint mt-1">🔒 Cap watermark dinas Pemkab Manggarai Barat disematkan otomatis pada berkas akses alih media.</p>
-
-        <!-- Section 5: QA Checklist Standar ANRI 2021 -->
-        <h3 style="font-size:14px;font-weight:700;margin:24px 0 14px;color:var(--primary);">✅ 5. Checklist Kualitas (Standar Perka ANRI No. 2/2021)</h3>
-        <div class="card" style="background:var(--border-light, #f8fafc);border:1px solid var(--border, #e2e8f0);">
-          <div class="card-body" style="padding:14px 18px;">
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
             <div id="qa-checklist">
-              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+              <div class="ia-qa-item checklist-item">
                 <input type="checkbox" id="qa-0" name="qa-checklist" checked>
-                <label for="qa-0" style="margin-bottom:0; cursor:pointer;">Kualitas Scan Baik (min. 300dpi untuk master pelestarian)</label>
+                <label for="qa-0"><strong>Kualitas Scan Baik</strong> — Resolusi min. 300 DPI untuk arsip tekstual / foto pelestarian.</label>
               </div>
-              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+              <div class="ia-qa-item checklist-item">
                 <input type="checkbox" id="qa-1" name="qa-checklist" checked>
-                <label for="qa-1" style="margin-bottom:0; cursor:pointer;">Data Sesuai (informasi fisik cocok persis dengan lembar scan digital)</label>
+                <label for="qa-1"><strong>Kesesuaian Data</strong> — Informasi fisik naskah cocok persis dengan lembar scan digital.</label>
               </div>
-              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+              <div class="ia-qa-item checklist-item">
                 <input type="checkbox" id="qa-2" name="qa-checklist" checked>
-                <label for="qa-2" style="margin-bottom:0; cursor:pointer;">Watermark Terpasang (tanda pengaman digital resmi dinas alih media)</label>
+                <label for="qa-2"><strong>Watermark Pengaman</strong> — Tanda pengaman digital dinas disematkan pada berkas akses.</label>
               </div>
-              <div class="checklist-item" style="padding:6px 0; display:flex; align-items:center; gap:8px;">
+              <div class="ia-qa-item checklist-item">
                 <input type="checkbox" id="qa-3" name="qa-checklist" checked>
-                <label for="qa-3" style="margin-bottom:0; cursor:pointer;">Sudah Sesuai Standar (Peraturan Kepala ANRI Nomor 2 Tahun 2021)</label>
+                <label for="qa-3"><strong>Standar ANRI 2021</strong> — Format alih media telah mematuhi SOP Kearsipan Nasional.</label>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Submit Buttons -->
-        <div style="margin-top:28px; display:flex; gap:12px; justify-content:flex-end;">
-          <button type="button" class="btn btn-outline" onclick="resetForm()">🔄 Reset Form</button>
-          <button type="button" class="btn btn-primary btn-lg" id="btn-submit" onclick="submitArsip()">
-            💾 Simpan Arsip Alih Media
+        <!-- ==================== ACTION BAR ==================== -->
+        <div class="ia-action-bar">
+          <button type="button" class="btn btn-gold btn-sm" onclick="autoFillSampleInput()" style="font-size:12px;">
+            🧪 Isi Contoh Data Riil
           </button>
+          <div class="ia-action-buttons">
+            <button type="button" class="btn btn-outline" onclick="resetForm()">
+              🔄 Reset Form
+            </button>
+            <button type="button" class="btn btn-primary btn-lg" id="btn-submit" onclick="submitArsip()" style="box-shadow:0 4px 14px rgba(27,42,74,0.25);">
+              💾 Simpan Arsip Alih Media
+            </button>
+          </div>
         </div>
+
       </form>
     </div>
   </div>
 
   <!-- MODAL: PRATINJAU WATERMARK CANVAS -->
   <div class="modal-overlay" id="modal-watermark-preview" style="display:none; align-items:flex-start; padding:20px 10px; overflow-y:auto;">
-    <div class="modal" style="max-width:760px; width:100%; margin:20px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
-      <div class="modal-header" style="background:#1B2A4A; color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+    <div class="modal" style="max-width:760px; width:100%; margin:20px auto; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,0.25);">
+      <div class="modal-header" style="background:#1B2A4A; color:#fff; padding:16px 22px; display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:18px;">🛡️</span>
+          <span style="font-size:20px;">🛡️</span>
           <span class="modal-title" style="color:#fff; font-weight:700;">Pratinjau Watermark Visual Alih Media</span>
         </div>
         <button class="modal-close" onclick="closeModal('modal-watermark-preview')" style="color:#fff;">✕</button>
       </div>
-      <div class="modal-body" style="padding:20px; background:#f8fafc; text-align:center;">
-        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:16px; display:inline-block; max-width:100%; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-          <canvas id="canvas-watermark-preview" style="max-width:100%; height:auto; border:1px solid #cbd5e1; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.1);"></canvas>
+      <div class="modal-body" style="padding:22px; background:#f8fafc; text-align:center;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; display:inline-block; max-width:100%; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <canvas id="canvas-watermark-preview" style="max-width:100%; height:auto; border:1px solid #cbd5e1; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);"></canvas>
         </div>
         <div style="margin-top:16px; font-size:12px; color:var(--text-secondary); line-height:1.5;">
           <strong>Teks Cap Watermark:</strong><br>
@@ -262,7 +615,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer" style="background:#fff; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
+      <div class="modal-footer" style="background:#fff; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; padding:14px 20px;">
         <button type="button" class="btn btn-primary" onclick="closeModal('modal-watermark-preview')">Tutup Pratinjau</button>
       </div>
     </div>
