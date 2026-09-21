@@ -6,9 +6,9 @@
 
 ## 📌 Ringkasan Proyek & Status Terakhir
 - **Platform**: Google Apps Script (GAS) Web Application terintegrasi Google Sheets & Google Drive
-- **ID Deployment Aktif**: `AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q`
-- **Versi Terakhir**: **Versi 49 (Deployment @2 Baru)**
-- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q/exec](https://script.google.com/macros/s/AKfycbxbtorKFRZJwGc9ON3SpC1ezzBXKTqdVbH7XK4mX61UHXscReMgVyOYjogGgrZAwF0U5Q/exec)
+- **ID Deployment Aktif**: `AKfycbx7FDzHvLvIjldAgG36fLDc9V2-cbyEAKCue7LGIH-LI3L3qGvX5RDi0er-tXoGzYFy5g`
+- **Versi Terakhir**: **Versi 50 (Deployment @5 Baru)**
+- **URL Aplikasi**: [https://script.google.com/macros/s/AKfycbx7FDzHvLvIjldAgG36fLDc9V2-cbyEAKCue7LGIH-LI3L3qGvX5RDi0er-tXoGzYFy5g/exec](https://script.google.com/macros/s/AKfycbx7FDzHvLvIjldAgG36fLDc9V2-cbyEAKCue7LGIH-LI3L3qGvX5RDi0er-tXoGzYFy5g/exec)
 - **ID Proyek GAS Baru**: `1BA5rFvxRcszqyltzolfb8zp0xzC5vWwe1v1UqTI7FE4deBjT-cnSQt9I`
 - **ID Basis Data (Spreadsheet Baru)**: `1c3caYKmVd1nt46lmqxxAEm8wVPQWwMsybqrz4OzBoSM`
 - **Cadangan Konfigurasi Lama**: Tersimpan di file [CONFIG_OLD_BACKUP.md](file:///d:/Antigravity/GAS/CONFIG_OLD_BACKUP.md)
@@ -16,6 +16,23 @@
 ---
 
 ## 📜 Kronologi Riwayat Perubahan (Changelog)
+
+### Versi 50 — Pembersihan & Perapian Layout Formulir Input Data Arsip (Deployment @5)
+- **Latar Belakang**: Permintaan pengguna untuk merapikan layout visual formulir input data arsip (`InputArsip.html`) tanpa mengubah logic yang ada (seluruh ID elemen, nama field, validasi, dan alur JavaScript dipertahankan 100%).
+- **Rincian Perubahan yang Diimplementasikan**:
+  1. **Perbaikan Syntax Tag HTML & Struktur Grid**:
+     - Memperbaiki tag pembuka `<div class="form-row">` yang sebelumnya tidak tertutup pada baris 31 sehingga menyebabkan struktur grid CSS bertumpuk dan rusak secara vertikal.
+  2. **Modernisasi Desain Antarmuka Berbasis Kartu Terpadu (Modular Step Cards)**:
+     - Mengubah formulir panjang monolitik menjadi 5 seksi kartu visual bertahap dengan header bergradien biru navy khas Pemkab Manggarai Barat, badge langkah, ikon khusus, dan pembagi bidang yang rapi:
+       - **Langkah 1**: Identifikasi Petugas & Klasifikasi Pokok (Petugas, Tanggal Input, Status Keterbukaan, Jenis Arsip, Kategori Urusan, Kode Klasifikasi Asli, Nomor Asli).
+       - **Langkah 2**: Penomoran, Sumber & Kondisi Fisik (Asal Arsip Select2, Nomor Box, Kode Unik Otomatis beraksen emas, Unit Pengelola, Kurun Waktu, Kondisi Fisik, Lokasi Simpan, Jumlah Lembar, Jumlah Berkas, Rangkap Ke).
+       - **Langkah 3**: Uraian & Deskripsi Isi Arsip (Uraian teks lengkap & Keterangan tambahan).
+       - **Langkah 4**: Unggah Berkas & Watermark Digital (Area *drag & drop* modern dengan tag berkas `PDF`, `TIFF`, `JPG`, `PNG`, notifikasi waktu unggah otomatis, dan tombol pratinjau cap watermark).
+       - **Langkah 5**: Verifikasi Kualitas Mutu (Kartu checklist interaktif Standar Perka ANRI No. 2 Tahun 2021).
+  3. **Penyempurnaan Responsivitas Layar (Mobile & Desktop)**:
+     - Menggunakan sistem grid dinamis (`ia-grid-2` dan `ia-grid-3`) yang otomatis runtuh (*collapse*) secara rapi menjadi 1 kolom saat dibuka di layar tablet maupun ponsel.
+  4. **Integritas Logic & ID 100% Terjaga**:
+     - Seluruh 37 ID elemen, pemanggilan fungsi (`submitArsip`, `autoFillSampleInput`, `resetForm`, `onAsalBoxChange`, `onFileScanSelected`, dll.), serta pembacaan sesi petugas login dan proses watermark tetap bekerja persis sebagaimana mestinya.
 
 ### Versi 49 — Migrasi Lingkungan ke Proyek Google Apps Script, Spreadsheet, & Google Drive Baru
 - **Latar Belakang**: Permintaan pengguna untuk memigrasikan sistem SIASTA ke akun Google baru dengan Google Apps Script project dan Google Spreadsheet mandiri baru, serta memastikan Google Drive dan perizinan berjalan di bawah akun pemilik baru (`USER_DEPLOYING`).
